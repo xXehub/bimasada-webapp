@@ -15,6 +15,11 @@
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
+    <!-- jQuery for DataTables -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
+    @stack('styles')
+    
     <script>
         // Check for dark mode preference on page load (before render to avoid flash)
         if (localStorage.getItem('darkMode') === 'true' || 

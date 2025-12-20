@@ -1,5 +1,301 @@
 <x-layout.app title="Invoice Management">
-    <div class="space-y-6">
+    @push('styles')
+    <!-- DataTables CSS - Using minimal CSS, custom styling below -->
+    <style>
+        /* ============================================
+           BIMASADA DataTables Custom Styling
+           Matching global design system
+        ============================================ */
+        
+        /* Hide default DataTables elements we're replacing */
+        .dataTables_filter,
+        .dataTables_length {
+            display: none !important;
+        }
+        
+        /* Table Container */
+        #invoices-table_wrapper {
+            width: 100%;
+        }
+        
+        /* Table Base Styling */
+        table.dataTable {
+            width: 100% !important;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        
+        /* Table Header */
+        table.dataTable thead th {
+            padding: 0.875rem 1rem;
+            text-align: left;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            white-space: nowrap;
+            border-bottom: 1px solid;
+        }
+        
+        .light table.dataTable thead th,
+        :root:not(.dark) table.dataTable thead th {
+            background-color: rgb(249 250 251);
+            color: rgb(75 85 99);
+            border-color: rgb(229 231 235);
+        }
+        
+        .dark table.dataTable thead th {
+            background-color: rgb(30 32 38);
+            color: rgb(209 213 219);
+            border-color: rgb(55 65 81);
+        }
+        
+        /* Table Body */
+        table.dataTable tbody td {
+            padding: 1rem;
+            vertical-align: middle;
+            border-bottom: 1px solid;
+        }
+        
+        .light table.dataTable tbody td,
+        :root:not(.dark) table.dataTable tbody td {
+            border-color: rgb(243 244 246);
+        }
+        
+        .dark table.dataTable tbody td {
+            border-color: rgb(55 65 81);
+        }
+        
+        /* Table Rows */
+        table.dataTable tbody tr {
+            transition: background-color 0.15s ease;
+        }
+        
+        .light table.dataTable tbody tr,
+        :root:not(.dark) table.dataTable tbody tr {
+            background-color: white;
+        }
+        
+        .light table.dataTable tbody tr:hover,
+        :root:not(.dark) table.dataTable tbody tr:hover {
+            background-color: rgb(249 250 251);
+        }
+        
+        .dark table.dataTable tbody tr {
+            background-color: rgb(24 26 32);
+        }
+        
+        .dark table.dataTable tbody tr:hover {
+            background-color: rgb(30 32 38);
+        }
+        
+        /* Sorting Icons */
+        table.dataTable thead th.sorting,
+        table.dataTable thead th.sorting_asc,
+        table.dataTable thead th.sorting_desc {
+            cursor: pointer;
+            position: relative;
+            padding-right: 1.75rem;
+        }
+        
+        table.dataTable thead th.sorting::after,
+        table.dataTable thead th.sorting_asc::after,
+        table.dataTable thead th.sorting_desc::after {
+            position: absolute;
+            right: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.75rem;
+            opacity: 0.5;
+        }
+        
+        table.dataTable thead th.sorting::after {
+            content: "⇅";
+        }
+        
+        table.dataTable thead th.sorting_asc::after {
+            content: "↑";
+            opacity: 1;
+        }
+        
+        .light table.dataTable thead th.sorting_asc::after,
+        :root:not(.dark) table.dataTable thead th.sorting_asc::after {
+            color: rgb(79 70 229);
+        }
+        
+        .dark table.dataTable thead th.sorting_asc::after {
+            color: rgb(129 140 248);
+        }
+        
+        table.dataTable thead th.sorting_desc::after {
+            content: "↓";
+            opacity: 1;
+        }
+        
+        .light table.dataTable thead th.sorting_desc::after,
+        :root:not(.dark) table.dataTable thead th.sorting_desc::after {
+            color: rgb(79 70 229);
+        }
+        
+        .dark table.dataTable thead th.sorting_desc::after {
+            color: rgb(129 140 248);
+        }
+        
+        /* Info Text */
+        .dataTables_info {
+            padding: 1rem 1.5rem;
+            font-size: 0.875rem;
+        }
+        
+        .light .dataTables_info,
+        :root:not(.dark) .dataTables_info {
+            color: rgb(107 114 128);
+        }
+        
+        .dark .dataTables_info {
+            color: rgb(156 163 175);
+        }
+        
+        /* Pagination Container */
+        .dataTables_paginate {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 1rem 1.5rem;
+        }
+        
+        /* Pagination Buttons */
+        .dataTables_paginate .paginate_button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 2.25rem;
+            height: 2.25rem;
+            padding: 0 0.75rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            border: none !important;
+            background: transparent !important;
+        }
+        
+        .light .dataTables_paginate .paginate_button,
+        :root:not(.dark) .dataTables_paginate .paginate_button {
+            color: rgb(75 85 99);
+        }
+        
+        .light .dataTables_paginate .paginate_button:hover:not(.disabled):not(.current),
+        :root:not(.dark) .dataTables_paginate .paginate_button:hover:not(.disabled):not(.current) {
+            background-color: rgb(243 244 246) !important;
+            color: rgb(17 24 39);
+        }
+        
+        .dark .dataTables_paginate .paginate_button {
+            color: rgb(156 163 175);
+        }
+        
+        .dark .dataTables_paginate .paginate_button:hover:not(.disabled):not(.current) {
+            background-color: rgb(55 65 81) !important;
+            color: white;
+        }
+        
+        /* Current Page Button */
+        .dataTables_paginate .paginate_button.current {
+            background: linear-gradient(135deg, rgb(79 70 229) 0%, rgb(99 102 241) 100%) !important;
+            color: white !important;
+            box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.25);
+        }
+        
+        /* Disabled Pagination */
+        .dataTables_paginate .paginate_button.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        
+        /* Footer Area */
+        .dt-footer {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            border-top: 1px solid;
+        }
+        
+        @media (min-width: 640px) {
+            .dt-footer {
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+            }
+        }
+        
+        .light .dt-footer,
+        :root:not(.dark) .dt-footer {
+            border-color: rgb(229 231 235);
+            background-color: rgb(249 250 251);
+        }
+        
+        .dark .dt-footer {
+            border-color: rgb(55 65 81);
+            background-color: rgb(24 26 32);
+        }
+        
+        /* Processing Indicator */
+        .dataTables_processing {
+            position: absolute !important;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 1.5rem 2rem;
+            border-radius: 1rem;
+            z-index: 10;
+        }
+        
+        .light .dataTables_processing,
+        :root:not(.dark) .dataTables_processing {
+            background-color: white;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .dark .dataTables_processing {
+            background-color: rgb(30 32 38);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Empty Table State */
+        .dataTables_empty {
+            padding: 3rem !important;
+            text-align: center;
+        }
+        
+        /* Remove default DataTables borders */
+        table.dataTable.no-footer {
+            border-bottom: none;
+        }
+        
+        table.dataTable.stripe tbody tr.odd,
+        table.dataTable.display tbody tr.odd {
+            background-color: transparent;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            table.dataTable thead th,
+            table.dataTable tbody td {
+                padding: 0.75rem 0.5rem;
+            }
+            
+            .dataTables_paginate {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+    @endpush
+
+    <div x-data="invoiceManagement()" class="space-y-6">
         
         <!-- Page Header -->
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
@@ -43,7 +339,7 @@
                     </div>
                     <div>
                         <p class="text-sm text-gray-500 dark:text-gray-400">Total Invoices</p>
-                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $invoices->total() }}</p>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['total'] }}</p>
                     </div>
                 </div>
             </x-ui.card>
@@ -57,7 +353,7 @@
                     </div>
                     <div>
                         <p class="text-sm text-gray-500 dark:text-gray-400">Paid</p>
-                        <p class="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{{ $invoices->where('status_pembayaran', 'Lunas')->count() }}</p>
+                        <p class="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{{ $stats['paid'] }}</p>
                     </div>
                 </div>
             </x-ui.card>
@@ -71,7 +367,7 @@
                     </div>
                     <div>
                         <p class="text-sm text-gray-500 dark:text-gray-400">Pending</p>
-                        <p class="text-2xl font-bold text-amber-600 dark:text-amber-400">{{ $invoices->where('status_pembayaran', 'Belum Lunas')->count() }}</p>
+                        <p class="text-2xl font-bold text-amber-600 dark:text-amber-400">{{ $stats['pending'] }}</p>
                     </div>
                 </div>
             </x-ui.card>
@@ -85,7 +381,7 @@
                     </div>
                     <div>
                         <p class="text-sm text-gray-500 dark:text-gray-400">Installment</p>
-                        <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ $invoices->where('status_pembayaran', 'Cicilan')->count() }}</p>
+                        <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ $stats['installment'] }}</p>
                     </div>
                 </div>
             </x-ui.card>
@@ -93,234 +389,413 @@
 
         <!-- Filters & Search -->
         <x-ui.card>
-            <form method="GET" action="{{ route('invoices.index') }}">
-                <div class="flex flex-col lg:flex-row gap-4">
-                    <!-- Search -->
-                    <div class="flex-1">
-                        <x-ui.input 
-                            type="text" 
-                            name="search" 
-                            placeholder="Search by customer name, email, phone..."
-                            :value="request('search')"
-                        >
-                            <x-slot name="icon">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                                </svg>
-                            </x-slot>
-                        </x-ui.input>
-                    </div>
-
-                    <!-- Status Filter -->
-                    <div class="w-full lg:w-48">
-                        <select 
-                            name="status"
-                            class="w-full px-4 py-2.5 bg-white dark:bg-dark-hover border border-gray-300 dark:border-dark-border rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
-                        >
-                            <option value="">All Status</option>
-                            <option value="Lunas" {{ request('status') == 'Lunas' ? 'selected' : '' }}>Lunas</option>
-                            <option value="Belum Lunas" {{ request('status') == 'Belum Lunas' ? 'selected' : '' }}>Belum Lunas</option>
-                            <option value="Cicilan" {{ request('status') == 'Cicilan' ? 'selected' : '' }}>Cicilan</option>
-                        </select>
-                    </div>
-
-                    <!-- Buttons -->
-                    <div class="flex gap-2">
-                        <x-ui.button variant="primary" type="submit">
-                            <x-slot name="icon">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
-                                </svg>
-                            </x-slot>
-                            Filter
-                        </x-ui.button>
-                        <x-ui.button variant="ghost" href="{{ route('invoices.index') }}">
-                            Reset
-                        </x-ui.button>
-                    </div>
+            <div class="flex flex-col lg:flex-row gap-4">
+                <!-- Search -->
+                <div class="flex-1">
+                    <x-ui.input 
+                        type="text" 
+                        x-model="searchQuery"
+                        x-on:input.debounce.300ms="applySearch()"
+                        placeholder="Search by customer name, email, phone..."
+                    >
+                        <x-slot name="icon">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                            </svg>
+                        </x-slot>
+                    </x-ui.input>
                 </div>
-            </form>
+
+                <!-- Status Filter -->
+                <div class="w-full lg:w-48">
+                    <select 
+                        x-model="statusFilter"
+                        x-on:change="applyFilter()"
+                        class="w-full px-4 py-2.5 bg-white dark:bg-dark-hover border border-gray-300 dark:border-dark-border rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                    >
+                        <option value="">All Status</option>
+                        <option value="Lunas">Lunas</option>
+                        <option value="Belum Lunas">Belum Lunas</option>
+                        <option value="Cicilan">Cicilan</option>
+                    </select>
+                </div>
+
+                <!-- Per Page -->
+                <div class="w-full lg:w-36">
+                    <select 
+                        x-model="perPage"
+                        x-on:change="changePageLength()"
+                        class="w-full px-4 py-2.5 bg-white dark:bg-dark-hover border border-gray-300 dark:border-dark-border rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                    >
+                        <option value="10">10 per page</option>
+                        <option value="25">25 per page</option>
+                        <option value="50">50 per page</option>
+                        <option value="100">100 per page</option>
+                    </select>
+                </div>
+
+                <!-- Buttons -->
+                <div class="flex gap-2">
+                    <x-ui.button variant="ghost" x-on:click="resetFilters()">
+                        <x-slot name="icon">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                            </svg>
+                        </x-slot>
+                        Reset
+                    </x-ui.button>
+                </div>
+            </div>
         </x-ui.card>
 
-        <!-- Invoice Table -->
-        <x-ui.card class="!p-0">
+        <!-- Invoice Table with DataTables -->
+        <div class="bg-white dark:bg-dark-card rounded-2xl border border-gray-200 dark:border-dark-border shadow-soft overflow-hidden">
+            <!-- Table Header Info -->
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-dark-border flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-900 dark:text-white">Invoice List</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">View and manage all invoices</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-sm text-gray-500 dark:text-gray-400" x-text="tableInfo"></span>
+                </div>
+            </div>
+            
+            <!-- Table Container -->
             <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead class="bg-gray-50 dark:bg-dark-sidebar border-b border-gray-200 dark:border-dark-border">
+                <table id="invoices-table" class="w-full">
+                    <thead>
                         <tr>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Invoice #</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-                                <a href="?sort_by=tanggal_invoice&sort_order={{ request('sort_order') == 'asc' ? 'desc' : 'asc' }}&search={{ request('search') }}&status={{ request('status') }}" class="flex items-center gap-1 hover:text-primary-600">
-                                    Date
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
-                                    </svg>
-                                </a>
-                            </th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Customer</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-                                <a href="?sort_by=total_harga&sort_order={{ request('sort_order') == 'asc' ? 'desc' : 'asc' }}&search={{ request('search') }}&status={{ request('status') }}" class="flex items-center gap-1 hover:text-primary-600">
-                                    Amount
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
-                                    </svg>
-                                </a>
-                            </th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Status</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Due Date</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Sales</th>
-                            <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+                            <th>Invoice #</th>
+                            <th>Date</th>
+                            <th>Customer</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Due Date</th>
+                            <th>Sales</th>
+                            <th class="text-center">Actions</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200 dark:divide-dark-border">
-                        @forelse($invoices as $invoice)
-                            <tr class="hover:bg-gray-50 dark:hover:bg-dark-hover transition-colors">
-                                <td class="px-4 py-4">
-                                    <span class="font-mono text-sm font-semibold text-primary-600 dark:text-primary-400">
-                                        {{ $invoice->invoice_number ?? 'INV-' . str_pad($invoice->id, 4, '0', STR_PAD_LEFT) }}
-                                    </span>
-                                </td>
-                                <td class="px-4 py-4">
-                                    <span class="text-gray-900 dark:text-white">
-                                        {{ $invoice->tanggal_invoice->format('d M Y') }}
-                                    </span>
-                                </td>
-                                <td class="px-4 py-4">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 rounded-full bg-gray-100 dark:bg-dark-hover flex items-center justify-center">
-                                            <span class="text-sm font-semibold text-gray-600 dark:text-gray-300">
-                                                {{ strtoupper(substr($invoice->nama_pelanggan, 0, 2)) }}
-                                            </span>
-                                        </div>
-                                        <div>
-                                            <p class="font-medium text-gray-900 dark:text-white">{{ $invoice->nama_pelanggan }}</p>
-                                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ $invoice->email ?? $invoice->no_telp }}</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-4">
-                                    <span class="font-semibold text-gray-900 dark:text-white">
-                                        Rp {{ number_format($invoice->total_harga, 0, ',', '.') }}
-                                    </span>
-                                </td>
-                                <td class="px-4 py-4">
-                                    @php
-                                        $badgeVariants = [
-                                            'Lunas' => 'success',
-                                            'Belum Lunas' => 'warning',
-                                            'Cicilan' => 'info'
-                                        ];
-                                    @endphp
-                                    <x-ui.badge :variant="$badgeVariants[$invoice->status_pembayaran] ?? 'secondary'" :dot="true">
-                                        {{ $invoice->status_pembayaran }}
-                                    </x-ui.badge>
-                                </td>
-                                <td class="px-4 py-4">
-                                    <div>
-                                        <span class="text-gray-900 dark:text-white">{{ $invoice->jatuh_tempo->format('d M Y') }}</span>
-                                        @if($invoice->jatuh_tempo->isPast() && $invoice->status_pembayaran != 'Lunas')
-                                            <x-ui.badge variant="danger" size="sm" class="ml-1">Overdue</x-ui.badge>
-                                        @endif
-                                    </div>
-                                </td>
-                                <td class="px-4 py-4 text-gray-700 dark:text-gray-300">
-                                    {{ $invoice->sales->nama_sales ?? '-' }}
-                                </td>
-                                <td class="px-4 py-4">
-                                    <div class="flex items-center justify-center gap-1">
-                                        <a 
-                                            href="{{ route('invoices.show', $invoice) }}"
-                                            class="p-2 rounded-lg text-gray-500 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors"
-                                            title="View"
-                                        >
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                            </svg>
-                                        </a>
-                                        <a 
-                                            href="{{ route('invoices.edit', $invoice) }}"
-                                            class="p-2 rounded-lg text-gray-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
-                                            title="Edit"
-                                        >
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                            </svg>
-                                        </a>
-                                        @can('delete-invoices')
-                                            <button 
-                                                type="button"
-                                                x-data
-                                                x-on:click="$dispatch('open-modal', 'delete-invoice-{{ $invoice->id }}')"
-                                                class="p-2 rounded-lg text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                                                title="Delete"
-                                            >
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                                </svg>
-                                            </button>
-                                        @endcan
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="8" class="px-4 py-12 text-center">
-                                    <div class="flex flex-col items-center justify-center">
-                                        <div class="w-16 h-16 rounded-full bg-gray-100 dark:bg-dark-hover flex items-center justify-center mb-4">
-                                            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                            </svg>
-                                        </div>
-                                        <p class="text-gray-500 dark:text-gray-400 mb-4">No invoices found</p>
-                                        <x-ui.button variant="primary" href="{{ route('invoices.input') }}" size="sm">
-                                            Create your first invoice
-                                        </x-ui.button>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforelse
+                    <tbody>
+                        <!-- DataTables will populate this -->
                     </tbody>
                 </table>
             </div>
-            
-            @if($invoices->hasPages())
-                <div class="px-4 py-3 border-t border-gray-200 dark:border-dark-border">
-                    {{ $invoices->withQueryString()->links() }}
-                </div>
-            @endif
-        </x-ui.card>
+        </div>
 
+        <!-- Delete Confirmation Modal (Single reusable modal) -->
+        <div 
+            x-show="showDeleteModal" 
+            x-cloak
+            class="fixed inset-0 z-50 overflow-y-auto"
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+        >
+            <div class="flex min-h-screen items-center justify-center p-4">
+                <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" @click="showDeleteModal = false"></div>
+                
+                <div 
+                    class="relative bg-white dark:bg-dark-card rounded-2xl shadow-xl max-w-sm w-full p-6 border border-gray-200 dark:border-dark-border"
+                    x-transition:enter="transition ease-out duration-300"
+                    x-transition:enter-start="opacity-0 scale-95"
+                    x-transition:enter-end="opacity-100 scale-100"
+                >
+                    <div class="text-center">
+                        <div class="mx-auto w-14 h-14 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mb-4">
+                            <svg class="w-7 h-7 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Delete Invoice?</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                            Are you sure you want to delete invoice <strong x-text="deleteInvoiceNumber" class="text-gray-700 dark:text-gray-300"></strong>?
+                            This action cannot be undone.
+                        </p>
+                        <div class="flex items-center justify-center gap-3">
+                            <button 
+                                @click="showDeleteModal = false"
+                                class="px-5 py-2.5 rounded-xl bg-gray-100 dark:bg-dark-hover text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <form :action="deleteUrl" method="POST" class="inline">
+                                @csrf
+                                @method('DELETE')
+                                <button 
+                                    type="submit"
+                                    class="px-5 py-2.5 rounded-xl bg-red-600 text-white font-medium hover:bg-red-700 transition-colors shadow-lg shadow-red-600/25"
+                                >
+                                    Delete
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Add Invoice Modal -->
     @include('invoices.partials.add-invoice-modal', ['salesList' => $salesList ?? []])
+
+    @push('scripts')
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
     
-    <!-- Delete Confirmation Modals -->
-    @foreach($invoices as $invoice)
-        @can('delete-invoices')
-            <x-ui.modal name="delete-invoice-{{ $invoice->id }}" maxWidth="sm">
-                <div class="p-6 text-center">
-                    <div class="mx-auto w-14 h-14 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mb-4">
-                        <svg class="w-7 h-7 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Delete Invoice?</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
-                        Are you sure you want to delete invoice <strong>{{ $invoice->invoice_number ?? 'INV-' . str_pad($invoice->id, 4, '0', STR_PAD_LEFT) }}</strong>?
-                        This action cannot be undone.
-                    </p>
-                    <div class="flex items-center justify-center gap-3">
-                        <x-ui.button variant="secondary" x-on:click="close()">Cancel</x-ui.button>
-                        <form action="{{ route('invoices.destroy', $invoice) }}" method="POST" class="inline">
-                            @csrf
-                            @method('DELETE')
-                            <x-ui.button type="submit" variant="danger">Delete</x-ui.button>
-                        </form>
-                    </div>
-                </div>
-            </x-ui.modal>
-        @endcan
-    @endforeach
+    <script>
+        function invoiceManagement() {
+            return {
+                searchQuery: '',
+                statusFilter: '',
+                perPage: '10',
+                tableInfo: '',
+                showDeleteModal: false,
+                deleteInvoiceId: null,
+                deleteInvoiceNumber: '',
+                deleteUrl: '',
+                dataTable: null,
+
+                init() {
+                    this.initDataTable();
+                },
+
+                initDataTable() {
+                    const self = this;
+                    
+                    this.dataTable = $('#invoices-table').DataTable({
+                        processing: true,
+                        serverSide: true,
+                        ajax: {
+                            url: '{{ route("invoices.data") }}',
+                            data: function(d) {
+                                d.status = self.statusFilter;
+                            }
+                        },
+                        columns: [
+                            { 
+                                data: 'invoice_number_display',
+                                render: function(data, type, row) {
+                                    return `<span class="font-mono text-sm font-semibold text-primary-600 dark:text-primary-400">${data}</span>`;
+                                }
+                            },
+                            { 
+                                data: 'date_display',
+                                render: function(data) {
+                                    return `<span class="text-gray-900 dark:text-white">${data}</span>`;
+                                }
+                            },
+                            { 
+                                data: 'customer_display',
+                                render: function(data) {
+                                    return `
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 rounded-full bg-gray-100 dark:bg-dark-hover flex items-center justify-center flex-shrink-0">
+                                                <span class="text-sm font-semibold text-gray-600 dark:text-gray-300">${data.initials}</span>
+                                            </div>
+                                            <div class="min-w-0">
+                                                <p class="font-medium text-gray-900 dark:text-white truncate">${data.name}</p>
+                                                <p class="text-sm text-gray-500 dark:text-gray-400 truncate">${data.sub || '-'}</p>
+                                            </div>
+                                        </div>
+                                    `;
+                                }
+                            },
+                            { 
+                                data: 'amount_display',
+                                render: function(data) {
+                                    return `<span class="font-semibold text-gray-900 dark:text-white">${data}</span>`;
+                                }
+                            },
+                            { 
+                                data: 'status_badge',
+                                render: function(data) {
+                                    const variants = {
+                                        'success': 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400',
+                                        'warning': 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400',
+                                        'info': 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400',
+                                        'secondary': 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+                                    };
+                                    const variantClass = variants[data.variant] || variants.secondary;
+                                    return `
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${variantClass}">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
+                                            ${data.status}
+                                        </span>
+                                    `;
+                                }
+                            },
+                            { 
+                                data: 'due_date_display',
+                                render: function(data) {
+                                    let html = `<span class="text-gray-900 dark:text-white">${data.date}</span>`;
+                                    if (data.is_overdue) {
+                                        html += ` <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400">Overdue</span>`;
+                                    }
+                                    return html;
+                                }
+                            },
+                            { 
+                                data: 'sales_name',
+                                render: function(data) {
+                                    return `<span class="text-gray-700 dark:text-gray-300">${data}</span>`;
+                                }
+                            },
+                            { 
+                                data: 'actions',
+                                orderable: false,
+                                searchable: false,
+                                render: function(data, type, row) {
+                                    const invoiceNumber = row.invoice_number_display;
+                                    const canDelete = @can('delete-invoices') true @else false @endcan;
+                                    
+                                    let html = `
+                                        <div class="flex items-center justify-center gap-1">
+                                            <a href="/invoices/${data}" class="p-2 rounded-lg text-gray-500 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors" title="View">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                                </svg>
+                                            </a>
+                                            <a href="/invoices/${data}/edit" class="p-2 rounded-lg text-gray-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors" title="Edit">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                </svg>
+                                            </a>
+                                    `;
+                                    
+                                    if (canDelete) {
+                                        html += `
+                                            <button type="button" onclick="window.dispatchEvent(new CustomEvent('delete-invoice', { detail: { id: ${data}, number: '${invoiceNumber}' } }))" class="p-2 rounded-lg text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors" title="Delete">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                </svg>
+                                            </button>
+                                        `;
+                                    }
+                                    
+                                    html += '</div>';
+                                    return html;
+                                }
+                            }
+                        ],
+                        order: [[1, 'desc']],
+                        pageLength: 10,
+                        lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+                        language: {
+                            processing: `
+                                <div class="flex items-center justify-center gap-3 py-8">
+                                    <div class="relative">
+                                        <div class="w-10 h-10 rounded-full border-4 border-primary-200 dark:border-primary-900"></div>
+                                        <div class="absolute top-0 left-0 w-10 h-10 rounded-full border-4 border-transparent border-t-primary-600 animate-spin"></div>
+                                    </div>
+                                    <span class="text-gray-600 dark:text-gray-400 font-medium">Loading...</span>
+                                </div>
+                            `,
+                            emptyTable: `
+                                <div class="flex flex-col items-center justify-center py-16">
+                                    <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-50 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center mb-5 shadow-inner">
+                                        <svg class="w-10 h-10 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                        </svg>
+                                    </div>
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">No invoices yet</h3>
+                                    <p class="text-gray-500 dark:text-gray-400 mb-6 text-center max-w-sm">Get started by creating your first invoice to manage your business transactions.</p>
+                                    <a href="{{ route('invoices.input') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-xl hover:from-primary-700 hover:to-primary-600 transition-all shadow-lg shadow-primary-600/25 font-medium">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                        </svg>
+                                        Create Invoice
+                                    </a>
+                                </div>
+                            `,
+                            zeroRecords: `
+                                <div class="flex flex-col items-center justify-center py-16">
+                                    <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-100 to-amber-50 dark:from-amber-900/30 dark:to-amber-900/10 flex items-center justify-center mb-5">
+                                        <svg class="w-10 h-10 text-amber-500 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                        </svg>
+                                    </div>
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">No results found</h3>
+                                    <p class="text-gray-500 dark:text-gray-400 text-center max-w-sm">Try adjusting your search or filter to find what you're looking for.</p>
+                                </div>
+                            `,
+                            info: "Showing _START_ to _END_ of _TOTAL_ invoices",
+                            infoEmpty: "No invoices available",
+                            infoFiltered: "(filtered from _MAX_ total)",
+                            lengthMenu: "Show _MENU_ entries",
+                            paginate: {
+                                first: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/></svg>`,
+                                last: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>`,
+                                next: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>`,
+                                previous: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>`
+                            }
+                        },
+                        dom: 'rt<"dt-footer"ip>',
+                        drawCallback: function(settings) {
+                            // Update table info
+                            const info = self.dataTable.page.info();
+                            if (info.recordsTotal > 0) {
+                                self.tableInfo = `${info.start + 1}-${info.end} of ${info.recordsTotal}`;
+                            } else {
+                                self.tableInfo = '';
+                            }
+                        }
+                    });
+
+                    // Listen for delete invoice event
+                    window.addEventListener('delete-invoice', (e) => {
+                        this.openDeleteModal(e.detail.id, e.detail.number);
+                    });
+                },
+
+                applySearch() {
+                    if (this.dataTable) {
+                        this.dataTable.search(this.searchQuery).draw();
+                    }
+                },
+
+                applyFilter() {
+                    if (this.dataTable) {
+                        this.dataTable.ajax.reload();
+                    }
+                },
+
+                changePageLength() {
+                    if (this.dataTable) {
+                        this.dataTable.page.len(parseInt(this.perPage)).draw();
+                    }
+                },
+
+                resetFilters() {
+                    this.searchQuery = '';
+                    this.statusFilter = '';
+                    this.perPage = '10';
+                    if (this.dataTable) {
+                        this.dataTable.search('').page.len(10).draw();
+                        this.dataTable.ajax.reload();
+                    }
+                },
+
+                openDeleteModal(id, invoiceNumber) {
+                    this.deleteInvoiceId = id;
+                    this.deleteInvoiceNumber = invoiceNumber;
+                    this.deleteUrl = `/invoices/${id}`;
+                    this.showDeleteModal = true;
+                }
+            }
+        }
+    </script>
+    @endpush
 </x-layout.app>

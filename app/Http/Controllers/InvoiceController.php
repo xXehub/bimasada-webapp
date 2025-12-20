@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Invoice;
 use App\Models\Sales;
 use Illuminate\Http\Request;
+use Yajra\DataTables\Facades\DataTables;
 
 class InvoiceController extends Controller
 {
@@ -13,35 +14,85 @@ class InvoiceController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Invoice::with('sales');
-
-        // Search functionality
-        if ($request->has('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('nama_pelanggan', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('no_telp', 'like', "%{$search}%");
-            });
-        }
-
-        // Filter by status
-        if ($request->has('status') && $request->status != '') {
-            $query->where('status_pembayaran', $request->status);
-        }
-
-        // Sort
-        $sortBy = $request->get('sort_by', 'tanggal_invoice');
-        $sortOrder = $request->get('sort_order', 'desc');
-        $query->orderBy($sortBy, $sortOrder);
-
-        // Pagination
-        $invoices = $query->paginate(10);
-
         // Get sales list for modal
         $salesList = Sales::all();
+        
+        // Get stats for cards (all time or filtered)
+        $statsQuery = Invoice::query();
+        
+        $stats = [
+            'total' => $statsQuery->count(),
+            'paid' => (clone $statsQuery)->where('status_pembayaran', 'Lunas')->count(),
+            'pending' => (clone $statsQuery)->where('status_pembayaran', 'Belum Lunas')->count(),
+            'installment' => (clone $statsQuery)->where('status_pembayaran', 'Cicilan')->count(),
+        ];
 
-        return view('invoices.index', compact('invoices', 'salesList'));
+        return view('invoices.index', compact('salesList', 'stats'));
+    }
+
+    /**
+     * Get invoice data for DataTables server-side processing.
+     */
+    public function getData(Request $request)
+    {
+        $query = Invoice::with('sales');
+
+        return DataTables::of($query)
+            ->addColumn('invoice_number_display', function ($invoice) {
+                return $invoice->no_invoice ?? 'INV-' . str_pad($invoice->id, 4, '0', STR_PAD_LEFT);
+            })
+            ->addColumn('customer_display', function ($invoice) {
+                $initials = strtoupper(substr($invoice->nama_pelanggan, 0, 2));
+                $subText = $invoice->email ?? $invoice->no_telp ?? '';
+                return [
+                    'name' => $invoice->nama_pelanggan,
+                    'initials' => $initials,
+                    'sub' => $subText
+                ];
+            })
+            ->addColumn('amount_display', function ($invoice) {
+                return 'Rp ' . number_format($invoice->total_harga, 0, ',', '.');
+            })
+            ->addColumn('date_display', function ($invoice) {
+                return $invoice->tanggal_invoice->format('d M Y');
+            })
+            ->addColumn('due_date_display', function ($invoice) {
+                return [
+                    'date' => $invoice->jatuh_tempo->format('d M Y'),
+                    'is_overdue' => $invoice->jatuh_tempo->isPast() && $invoice->status_pembayaran != 'Lunas'
+                ];
+            })
+            ->addColumn('sales_name', function ($invoice) {
+                return $invoice->sales->nama_sales ?? '-';
+            })
+            ->addColumn('status_badge', function ($invoice) {
+                $variants = [
+                    'Lunas' => 'success',
+                    'Belum Lunas' => 'warning',
+                    'Cicilan' => 'info'
+                ];
+                return [
+                    'status' => $invoice->status_pembayaran,
+                    'variant' => $variants[$invoice->status_pembayaran] ?? 'secondary'
+                ];
+            })
+            ->addColumn('actions', function ($invoice) {
+                return $invoice->id;
+            })
+            ->filterColumn('customer_display', function($query, $keyword) {
+                $query->where(function($q) use ($keyword) {
+                    $q->where('nama_pelanggan', 'like', "%{$keyword}%")
+                      ->orWhere('email', 'like', "%{$keyword}%")
+                      ->orWhere('no_telp', 'like', "%{$keyword}%");
+                });
+            })
+            ->filterColumn('sales_name', function($query, $keyword) {
+                $query->whereHas('sales', function($q) use ($keyword) {
+                    $q->where('nama_sales', 'like', "%{$keyword}%");
+                });
+            })
+            ->rawColumns(['actions'])
+            ->make(true);
     }
 
     /**

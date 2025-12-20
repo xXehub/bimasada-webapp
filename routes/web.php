@@ -34,6 +34,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/invoices/generate-number', [InvoiceController::class, 'generateInvoiceNumber'])->middleware('permission:create-invoices')->name('invoices.generateNumber');
     Route::post('/invoices/store-quick', [InvoiceController::class, 'storeQuick'])->middleware('permission:create-invoices')->name('invoices.storeQuick');
     
+    // DataTables server-side endpoint
+    Route::get('/invoices/data', [InvoiceController::class, 'getData'])->middleware('permission:view-invoices')->name('invoices.data');
+    
     Route::get('/invoices', [InvoiceController::class, 'index'])->middleware('permission:view-invoices')->name('invoices.index');
     Route::get('/invoices/create', [InvoiceController::class, 'create'])->middleware('permission:create-invoices')->name('invoices.create');
     Route::post('/invoices', [InvoiceController::class, 'store'])->middleware('permission:create-invoices')->name('invoices.store');

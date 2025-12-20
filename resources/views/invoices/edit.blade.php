@@ -79,7 +79,7 @@
             <div class="h-4 w-px bg-gray-300 dark:bg-dark-border"></div>
             <div class="flex items-center gap-2">
                 <span class="text-sm text-gray-500 dark:text-gray-400">Items:</span>
-                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $invoice->items->count() }} item(s)</span>
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $invoice->items ? $invoice->items->count() : 0 }} item(s)</span>
             </div>
         </div>
 
@@ -172,7 +172,7 @@
                             class="w-full px-4 py-2.5 bg-white dark:bg-dark-hover border border-gray-300 dark:border-dark-border rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
                         >
                             <option value="">Select Sales Person</option>
-                            @foreach($sales as $s)
+                            @foreach($salesList as $s)
                                 <option value="{{ $s->id }}" {{ old('id_sales', $invoice->id_sales) == $s->id ? 'selected' : '' }}>
                                     {{ $s->id_sales }} - {{ $s->nama_sales }}
                                 </option>
@@ -282,7 +282,7 @@
                             </div>
                             <div>
                                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Invoice Items</h3>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ $invoice->items->count() }} item(s) in this invoice</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ $invoice->items ? $invoice->items->count() : 0 }} item(s) in this invoice</p>
                             </div>
                         </div>
                         <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-dark-hover text-xs font-medium text-gray-600 dark:text-gray-400">
@@ -306,7 +306,7 @@
                             </tr>
                         </thead>
                         <tbody class="bg-white dark:bg-dark-card divide-y divide-gray-200 dark:divide-dark-border">
-                            @forelse($invoice->items as $index => $item)
+                            @forelse($invoice->items ?? [] as $index => $item)
                                 <tr class="hover:bg-gray-50 dark:hover:bg-dark-hover transition-colors">
                                     <td class="px-4 py-3">
                                         <span class="w-6 h-6 inline-flex items-center justify-center rounded-full bg-gray-100 dark:bg-dark-hover text-xs font-medium text-gray-600 dark:text-gray-400">
@@ -404,7 +404,7 @@
                         <div class="p-4 rounded-xl bg-gray-50 dark:bg-dark-hover w-full">
                             <div class="text-sm text-gray-500 dark:text-gray-400 mb-1">Calculated from items:</div>
                             <div class="text-lg font-bold text-gray-900 dark:text-white">
-                                Rp {{ number_format($invoice->items->sum(function($item) { return $item->jumlah * $item->harga_satuan; }), 0, ',', '.') }}
+                                Rp {{ number_format($invoice->items ? $invoice->items->sum(function($item) { return $item->jumlah * $item->harga_satuan; }) : 0, 0, ',', '.') }}
                             </div>
                         </div>
                     </div>
