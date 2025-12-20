@@ -7,6 +7,20 @@
            Matching global design system
         ============================================ */
         
+        /* Keyframe Animations */
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+        
         /* Hide default DataTables elements we're replacing */
         .dataTables_filter,
         .dataTables_length {
@@ -254,25 +268,20 @@
             transform: translate(-50%, -50%) !important;
             margin: 0 !important;
             padding: 2rem 3rem !important;
-            border-radius: 1rem !important;
+            border-radius: 0.75rem !important;
             z-index: 1000 !important;
-            display: none !important; /* Hidden by default */
-            align-items: center !important;
-            justify-content: center !important;
-        }
-        
-        .dataTables_processing[style*="display: block"] {
-            display: flex !important; /* Show as flex when active */
         }
         
         .light .dataTables_processing,
         :root:not(.dark) .dataTables_processing {
             background-color: white;
+            color: rgb(75 85 99);
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
         
         .dark .dataTables_processing {
             background-color: rgb(30 32 38);
+            color: rgb(156 163 175);
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
         }
         
@@ -280,10 +289,6 @@
         #invoices-table_wrapper {
             position: relative;
             min-height: 400px;
-        }
-        
-        #invoices-table {
-            transition: opacity 0.2s ease-in-out;
         }
         
         /* Empty Table State */
@@ -354,7 +359,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <x-ui.card class="!p-4">
                 <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+                    <div class="w-12 h-12 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
                         <svg class="w-6 h-6 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                         </svg>
@@ -368,7 +373,7 @@
             
             <x-ui.card class="!p-4">
                 <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+                    <div class="w-12 h-12 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
                         <svg class="w-6 h-6 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
@@ -382,7 +387,7 @@
             
             <x-ui.card class="!p-4">
                 <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                    <div class="w-12 h-12 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
                         <svg class="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
@@ -396,7 +401,7 @@
             
             <x-ui.card class="!p-4">
                 <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                    <div class="w-12 h-12 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
                         <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
                         </svg>
@@ -425,7 +430,7 @@
                         min="1"
                         max="1000"
                         placeholder="10"
-                        class="w-full px-4 py-2.5 bg-white dark:bg-dark-hover border border-gray-300 dark:border-dark-border rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                        class="w-full px-4 py-2.5 bg-white dark:bg-dark-hover border border-gray-300 dark:border-dark-border rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
                     >
                 </div>
 
@@ -437,7 +442,7 @@
                     <select 
                         x-model="statusFilter"
                         x-on:change="applyFilter()"
-                        class="w-full px-4 py-2.5 bg-white dark:bg-dark-hover border border-gray-300 dark:border-dark-border rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                        class="w-full px-4 py-2.5 bg-white dark:bg-dark-hover border border-gray-300 dark:border-dark-border rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
                     >
                         <option value="">All Status</option>
                         <option value="Lunas">Lunas</option>
@@ -480,11 +485,11 @@
         </x-ui.card>
 
         <!-- Invoice Table with DataTables -->
-        <div class="bg-white dark:bg-dark-card rounded-2xl border border-gray-200 dark:border-dark-border shadow-soft overflow-hidden">
+        <div class="bg-white dark:bg-dark-card rounded-xl border border-gray-200 dark:border-dark-border shadow-soft overflow-hidden">
             <!-- Table Header Info -->
             <div class="px-6 py-4 border-b border-gray-200 dark:border-dark-border flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+                    <div class="w-10 h-10 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
                         <svg class="w-5 h-5 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                         </svg>
@@ -537,7 +542,7 @@
                 <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" @click="showDeleteModal = false"></div>
                 
                 <div 
-                    class="relative bg-white dark:bg-dark-card rounded-2xl shadow-xl max-w-sm w-full p-6 border border-gray-200 dark:border-dark-border"
+                    class="relative bg-white dark:bg-dark-card rounded-xl shadow-xl max-w-sm w-full p-6 border border-gray-200 dark:border-dark-border"
                     x-transition:enter="transition ease-out duration-300"
                     x-transition:enter-start="opacity-0 scale-95"
                     x-transition:enter-end="opacity-100 scale-100"
@@ -556,7 +561,7 @@
                         <div class="flex items-center justify-center gap-3">
                             <button 
                                 @click="showDeleteModal = false"
-                                class="px-5 py-2.5 rounded-xl bg-gray-100 dark:bg-dark-hover text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                                class="px-5 py-2.5 rounded-lg bg-gray-100 dark:bg-dark-hover text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                             >
                                 Cancel
                             </button>
@@ -565,7 +570,7 @@
                                 @method('DELETE')
                                 <button 
                                     type="submit"
-                                    class="px-5 py-2.5 rounded-xl bg-red-600 text-white font-medium hover:bg-red-700 transition-colors shadow-lg shadow-red-600/25"
+                                    class="px-5 py-2.5 rounded-lg bg-red-600 text-white font-medium hover:bg-red-700 transition-colors shadow-lg shadow-red-600/25"
                                 >
                                     Delete
                                 </button>
@@ -611,7 +616,11 @@
                         ajax: {
                             url: '{{ route("invoices.data") }}',
                             data: function(d) {
+                                // Send custom filters to server
                                 d.status = self.statusFilter;
+                                d.search = {
+                                    value: self.searchQuery
+                                };
                             }
                         },
                         columns: [
@@ -736,14 +745,14 @@
                             `,
                             emptyTable: `
                                 <div class="flex flex-col items-center justify-center py-16">
-                                    <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-50 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center mb-5 shadow-inner">
+                                    <div class="w-20 h-20 rounded-xl bg-gradient-to-br from-gray-100 to-gray-50 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center mb-5 shadow-inner">
                                         <svg class="w-10 h-10 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                         </svg>
                                     </div>
                                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">No invoices yet</h3>
                                     <p class="text-gray-500 dark:text-gray-400 mb-6 text-center max-w-sm">Get started by creating your first invoice to manage your business transactions.</p>
-                                    <a href="{{ route('invoices.input') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-xl hover:from-primary-700 hover:to-primary-600 transition-all shadow-lg shadow-primary-600/25 font-medium">
+                                    <a href="{{ route('invoices.input') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-lg hover:from-primary-700 hover:to-primary-600 transition-all shadow-lg shadow-primary-600/25 font-medium">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                         </svg>
@@ -753,7 +762,7 @@
                             `,
                             zeroRecords: `
                                 <div class="flex flex-col items-center justify-center py-16">
-                                    <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-100 to-amber-50 dark:from-amber-900/30 dark:to-amber-900/10 flex items-center justify-center mb-5">
+                                    <div class="w-20 h-20 rounded-xl bg-gradient-to-br from-amber-100 to-amber-50 dark:from-amber-900/30 dark:to-amber-900/10 flex items-center justify-center mb-5">
                                         <svg class="w-10 h-10 text-amber-500 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                                         </svg>
@@ -782,26 +791,6 @@
                             } else {
                                 self.tableInfo = '';
                             }
-                        },
-                        preDrawCallback: function(settings) {
-                            // Show loading
-                            $('#invoices-table').css('opacity', '0.5');
-                        },
-                        initComplete: function(settings, json) {
-                            // Hide loading after initial load
-                            $('#invoices-table').css('opacity', '1');
-                            $('.dataTables_processing').hide();
-                        }
-                    });
-
-                    // Handle AJAX loading states
-                    this.dataTable.on('processing.dt', function(e, settings, processing) {
-                        if (processing) {
-                            $('.dataTables_processing').show();
-                            $('#invoices-table').css('opacity', '0.5');
-                        } else {
-                            $('.dataTables_processing').hide();
-                            $('#invoices-table').css('opacity', '1');
                         }
                     });
 
@@ -813,19 +802,22 @@
 
                 applySearch() {
                     if (this.dataTable) {
-                        this.dataTable.search(this.searchQuery).draw();
+                        // Trigger AJAX reload with new search value
+                        this.dataTable.ajax.reload();
                     }
                 },
 
                 applyFilter() {
                     if (this.dataTable) {
+                        // Trigger AJAX reload with new filter value
                         this.dataTable.ajax.reload();
                     }
                 },
 
                 changePageLength() {
                     if (this.dataTable) {
-                        this.dataTable.page.len(parseInt(this.perPage)).draw();
+                        const length = parseInt(this.perPage) || 10;
+                        this.dataTable.page.len(length).draw();
                     }
                 },
 
@@ -834,8 +826,7 @@
                     this.statusFilter = '';
                     this.perPage = '10';
                     if (this.dataTable) {
-                        this.dataTable.search('').page.len(10).draw();
-                        this.dataTable.ajax.reload();
+                        this.dataTable.page.len(10).ajax.reload();
                     }
                 },
 
