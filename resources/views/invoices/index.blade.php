@@ -322,14 +322,16 @@
     </style>
     @endpush
 
-    <div x-data="invoiceManagement()" class="space-y-6">
-        
-        <!-- Page Header -->
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Invoice Management</h1>
-                <p class="text-gray-500 dark:text-gray-400 mt-1">Manage and track all your invoices</p>
-            </div>
+    <!-- Max-width Container for 80% layout -->
+    <div class="mb-8">
+        <div x-data="invoiceManagement()" class="space-y-8">
+            
+            <!-- Page Header -->
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Invoice Management</h1>
+                    <p class="text-gray-500 dark:text-gray-400 mt-1">Manage and track all your invoices</p>
+                </div>
             <div class="flex flex-wrap gap-3">
                 <!-- Quick Modal Button -->
                 <x-ui.button 
@@ -356,10 +358,10 @@
         </div>
 
         <!-- Stats Cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <x-ui.card class="!p-4">
                 <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+                    <div class="w-12 h-12 rounded-md bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
                         <svg class="w-6 h-6 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                         </svg>
@@ -373,7 +375,7 @@
             
             <x-ui.card class="!p-4">
                 <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+                    <div class="w-12 h-12 rounded-md bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
                         <svg class="w-6 h-6 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
@@ -387,7 +389,7 @@
             
             <x-ui.card class="!p-4">
                 <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                    <div class="w-12 h-12 rounded-md bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
                         <svg class="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
@@ -401,7 +403,7 @@
             
             <x-ui.card class="!p-4">
                 <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                    <div class="w-12 h-12 rounded-md bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
                         <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
                         </svg>
@@ -485,11 +487,11 @@
         </x-ui.card>
 
         <!-- Invoice Table with DataTables -->
-        <div class="bg-white dark:bg-dark-card rounded-xl border border-gray-200 dark:border-dark-border shadow-soft overflow-hidden">
+        <div class="bg-white dark:bg-dark-card rounded-md border border-gray-200 dark:border-dark-border shadow-soft overflow-hidden">
             <!-- Table Header Info -->
             <div class="px-6 py-4 border-b border-gray-200 dark:border-dark-border flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+                    <div class="w-10 h-10 rounded-md bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
                         <svg class="w-5 h-5 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                         </svg>
@@ -581,6 +583,7 @@
             </div>
         </div>
     </div>
+    <!-- End Max-width Container -->
 
     <!-- Add Invoice Modal -->
     @include('invoices.partials.add-invoice-modal', ['salesList' => $salesList ?? []])
@@ -669,7 +672,7 @@
                                     };
                                     const variantClass = variants[data.variant] || variants.secondary;
                                     return `
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${variantClass}">
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold ${variantClass}">
                                             <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
                                             ${data.status}
                                         </span>
@@ -681,7 +684,7 @@
                                 render: function(data) {
                                     let html = `<span class="text-gray-900 dark:text-white">${data.date}</span>`;
                                     if (data.is_overdue) {
-                                        html += ` <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400">Overdue</span>`;
+                                        html += ` <span class="inline-flex items-center px-1.5 py-0.5 rounded-md text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400">Overdue</span>`;
                                     }
                                     return html;
                                 }

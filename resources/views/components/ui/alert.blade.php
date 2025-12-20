@@ -47,7 +47,7 @@
     @if($autoDismiss)
     x-init="setTimeout(() => show = false, {{ $duration }})"
     @endif
-    {{ $attributes->merge(['class' => "flex items-start gap-3 p-4 rounded-lg border {$styles['bg']} {$styles['border']}"]) }}
+    {{ $attributes->merge(['class' => "flex items-start gap-3 p-4 rounded-md border {$styles['bg']} {$styles['border']}"]) }}
 >
     <!-- Icon -->
     <div class="flex-shrink-0 {{ $styles['icon'] }}">

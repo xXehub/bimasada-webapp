@@ -4,7 +4,7 @@
 ])
 
 @php
-    $classes = 'bg-white rounded-2xl shadow-card border border-secondary-100 dark:bg-dark-card dark:border-dark-border';
+    $classes = 'bg-white rounded-md shadow-card border border-secondary-100 dark:bg-dark-card dark:border-dark-border';
     
     if ($hover) {
         $classes .= ' hover:shadow-lg hover:border-primary/20 transition-all duration-300 cursor-pointer';

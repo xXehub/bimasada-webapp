@@ -30,6 +30,18 @@
     
     <style>
         [x-cloak] { display: none !important; }
+        
+        /* Scale down layout to 80% for better content density */
+        html {
+            font-size: 80%; /* 16px * 0.8 = 12.8px base */
+        }
+        
+        /* Adjust for different screen sizes */
+        @media (max-width: 768px) {
+            html {
+                font-size: 85%; /* Slightly larger on mobile for readability */
+            }
+        }
     </style>
 </head>
 <body class="h-full font-poppins bg-secondary-50 dark:bg-dark transition-colors duration-300">
