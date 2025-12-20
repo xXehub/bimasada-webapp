@@ -11,7 +11,8 @@
 
 @php
     $inputId = $id ?? $name;
-    $baseClasses = 'w-full h-[61px] px-5 py-[23px] border-2 border-[#02245B] rounded-[20px] font-poppins text-[#02245B] text-base focus:outline-none focus:ring-2 focus:ring-[#2387C0] focus:border-[#2387C0] transition-all duration-200 placeholder:text-[#02245B] placeholder:opacity-70';
+    // Placeholder HITAM TEBAL seperti di contoh Figma yang benar
+    $baseClasses = 'w-full px-5 py-3 border-2 border-primary rounded-[20px] font-poppins text-black text-base font-medium focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 placeholder:text-black placeholder:font-semibold';
     
     if($disabled) {
         $baseClasses .= ' bg-gray-100 cursor-not-allowed opacity-60';
@@ -20,10 +21,10 @@
 
 <div class="w-full">
     @if($label)
-        <label for="{{ $inputId }}" class="block text-[#02245B] font-poppins font-medium text-base mb-2">
+        <label for="{{ $inputId }}" class="block text-primary-dark font-poppins font-medium text-base mb-2">
             {{ $label }}
             @if($required)
-                <span class="text-[#DC3545]">*</span>
+                <span class="text-danger">*</span>
             @endif
         </label>
     @endif

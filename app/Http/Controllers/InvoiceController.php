@@ -38,7 +38,10 @@ class InvoiceController extends Controller
         // Pagination
         $invoices = $query->paginate(10);
 
-        return view('invoices.index', compact('invoices'));
+        // Get sales list for modal
+        $salesList = Sales::all();
+
+        return view('invoices.index', compact('invoices', 'salesList'));
     }
 
     /**
@@ -125,5 +128,145 @@ class InvoiceController extends Controller
 
         return redirect()->route('invoices.index')
             ->with('success', 'Invoice berhasil dihapus!');
+    }
+
+    /**
+     * Show the invoice input page with item management.
+     */
+    public function input()
+    {
+        $salesList = Sales::all();
+        return view('invoices.input', compact('salesList'));
+    }
+
+    /**
+     * Store invoice with items.
+     */
+    public function storeWithItems(Request $request)
+    {
+        $validated = $request->validate([
+            'tanggal_invoice' => 'required|date',
+            'nama_pelanggan' => 'required|string|max:255',
+            'alamat' => 'nullable|string',
+            'no_telp' => 'nullable|string|max:50',
+            'email' => 'nullable|email|max:255',
+            'status_pembayaran' => 'required|in:Lunas,Belum Lunas,Cicilan',
+            'jatuh_tempo' => 'required|date',
+            'keterangan' => 'nullable|string',
+            'id_sales' => 'required|exists:sales,id',
+            'items' => 'required|array|min:1',
+            'items.*.id_kuitansi' => 'required|string',
+            'items.*.jumlah' => 'required|numeric|min:1',
+            'items.*.harga_satuan' => 'required|numeric|min:0',
+        ]);
+
+        // Calculate total
+        $total = 0;
+        foreach ($validated['items'] as $item) {
+            $total += $item['jumlah'] * $item['harga_satuan'];
+        }
+
+        // Create invoice
+        $invoice = Invoice::create([
+            'tanggal_invoice' => $validated['tanggal_invoice'],
+            'nama_pelanggan' => $validated['nama_pelanggan'],
+            'alamat' => $validated['alamat'],
+            'no_telp' => $validated['no_telp'],
+            'email' => $validated['email'],
+            'total_harga' => $total,
+            'status_pembayaran' => $validated['status_pembayaran'],
+            'jatuh_tempo' => $validated['jatuh_tempo'],
+            'keterangan' => $validated['keterangan'],
+            'id_sales' => $validated['id_sales'],
+        ]);
+
+        // Create detail items
+        foreach ($validated['items'] as $item) {
+            $invoice->detailInvoices()->create([
+                'id_kuitansi' => $item['id_kuitansi'],
+                'jumlah' => $item['jumlah'],
+                'harga_satuan' => $item['harga_satuan'],
+                'subtotal' => $item['jumlah'] * $item['harga_satuan'],
+            ]);
+        }
+
+        return redirect()->route('invoices.show', $invoice->id)
+            ->with('success', 'Invoice dengan items berhasil dibuat!');
+    }
+
+    /**
+     * Generate next invoice number.
+     */
+    public function generateInvoiceNumber()
+    {
+        $year = date('Y');
+        $month = date('m');
+        
+        // Get last invoice number for current month
+        $lastInvoice = Invoice::whereYear('tanggal_invoice', $year)
+            ->whereMonth('tanggal_invoice', $month)
+            ->orderBy('id', 'desc')
+            ->first();
+        
+        if ($lastInvoice) {
+            // Try to extract number from existing invoice_number if it exists
+            if ($lastInvoice->invoice_number && preg_match('/INV-\d{4}-\d{2}-(\d{4})/', $lastInvoice->invoice_number, $matches)) {
+                $lastNumber = (int) $matches[1];
+                $nextNumber = $lastNumber + 1;
+            } else {
+                // Fallback to ID-based numbering
+                $nextNumber = $lastInvoice->id + 1;
+            }
+        } else {
+            $nextNumber = 1;
+        }
+        
+        // Format: INV-2025-12-0001
+        $invoiceNumber = sprintf('INV-%s-%s-%04d', $year, $month, $nextNumber);
+        
+        return response()->json(['invoice_number' => $invoiceNumber]);
+    }
+
+    /**
+     * Store quick invoice from modal.
+     */
+    public function storeQuick(Request $request)
+    {
+        $validated = $request->validate([
+            'invoice_number' => 'required|string|max:50|unique:invoices,invoice_number',
+            'no_kontrak' => 'nullable|string|max:50',
+            'nama_pelanggan' => 'required|string|max:255',
+            'status_pembayaran' => 'required|in:Lunas,Belum Lunas,Cicilan',
+            'tanggal_invoice' => 'required|date',
+            'id_sales' => 'required|exists:sales,id',
+        ]);
+
+        // Create invoice with basic info
+        $invoice = Invoice::create([
+            'invoice_number' => $validated['invoice_number'],
+            'no_kontrak' => $validated['no_kontrak'],
+            'tanggal_invoice' => $validated['tanggal_invoice'],
+            'nama_pelanggan' => $validated['nama_pelanggan'],
+            'alamat' => null,
+            'no_telp' => null,
+            'email' => null,
+            'total_harga' => 0, // Default 0, can be updated later
+            'status_pembayaran' => $validated['status_pembayaran'],
+            'jatuh_tempo' => now()->addDays(30), // Default 30 days
+            'keterangan' => null,
+            'id_sales' => $validated['id_sales'],
+        ]);
+
+        // Return JSON response for AJAX
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Invoice berhasil dibuat!',
+                'redirect' => route('invoices.edit', $invoice->id)
+            ]);
+        }
+
+        return redirect()->route('invoices.edit', $invoice->id)
+            ->with('success', 'Invoice berhasil dibuat! Silakan lengkapi detail invoice.');
     }
 }

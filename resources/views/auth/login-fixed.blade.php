@@ -10,32 +10,29 @@
 <body class="h-full bg-white font-poppins">
     <div class="relative min-h-screen bg-white overflow-hidden">
         
+        <!-- Logo Fixed Top Left -->
+        <div class="fixed top-12 left-12 z-50">
+            <img src="{{ asset('assets/bimasadalogo.png') }}" alt="Bimasada Logo" class="h-12 w-auto">
+        </div>
+
         <!-- Main Container: Two Column Layout -->
-        <div class="min-h-screen flex items-center justify-center px-4 py-12 lg:px-12 lg:py-24">
+        <div class="min-h-screen flex items-center justify-center px-4 py-24 lg:px-12">
             <div class="w-full max-w-7xl mx-auto">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
                     
-                    <!-- LEFT SIDE: Form Login Card -->
+                    <!-- LEFT SIDE: Form Login -->
                     <div class="w-full max-w-[582px] mx-auto lg:mx-0">
                         
-                        <!-- Logo - Sekarang di dalam card, bukan fixed -->
-                        <div class="mb-8 lg:mb-10">
-                            <img src="{{ asset('assets/bimasadalogo.png') }}" alt="Bimasada Logo" class="h-10 lg:h-12 w-auto">
-                        </div>
-                        
-                        <!-- Header Text - BOLD & LARGER -->
-                        <div class="mb-6">
-                            <h1 class="text-4xl font-bold text-black leading-tight">
-                                Selamat Datang di Sistem Informasi
-                            </h1>
-                            <h1 class="text-4xl font-bold text-black leading-tight">
-                                Invoice Management
+                        <!-- Header Text -->
+                        <div class="mb-8">
+                            <h1 class="text-5xl font-semibold text-black leading-tight mb-0">
+                                Selamat Datang di Sistem<br/>Informasi<br/>Invoice Management
                             </h1>
                         </div>
                         
                         <!-- Subtitle -->
                         <div class="mb-10">
-                            <p class="text-sm font-normal text-gray-600 leading-relaxed">
+                            <p class="text-lg font-medium text-secondary leading-relaxed">
                                 Silahkan masukkan nama, kode karyawan, dan password untuk masuk ke dalam akun Anda.
                             </p>
                         </div>
@@ -48,31 +45,28 @@
                         @endif
 
                         <!-- Login Form -->
-                        <form method="POST" action="{{ route('login') }}" class="space-y-5">
+                        <form method="POST" action="{{ route('login') }}" class="space-y-6">
                             @csrf
 
-                            <!-- Input Email - Placeholder HITAM TEBAL -->
+                            <!-- Input Email menggunakan komponen x-input -->
                             <div>
                                 <x-input 
                                     id="email" 
                                     type="email" 
                                     name="email" 
-                                    placeholder="Masukkan Nama Anda"
+                                    placeholder="Masukkan Email Anda"
                                     :value="old('email')"
                                     required 
                                     autofocus
                                     autocomplete="username"
-                                    class="h-[60px] text-base"
+                                    class="h-[61px] text-primary placeholder-primary border-2 border-primary rounded-[20px] focus:border-primary focus:ring-primary"
                                 />
                                 @error('email')
                                     <p class="mt-2 text-sm text-danger">{{ $message }}</p>
                                 @enderror
                             </div>
 
-                            <!-- Input Kode (sebenarnya email tapi label berbeda) -->
-                            <!-- Untuk demo, kita bisa hapus atau ubah jadi field lain -->
-
-                            <!-- Input Password - Placeholder HITAM TEBAL -->
+                            <!-- Input Password menggunakan komponen x-input -->
                             <div>
                                 <x-input 
                                     id="password" 
@@ -81,7 +75,7 @@
                                     placeholder="Masukkan Password"
                                     required
                                     autocomplete="current-password"
-                                    class="h-[60px] text-base"
+                                    class="h-[61px] text-primary placeholder-primary border-2 border-primary rounded-[20px] focus:border-primary focus:ring-primary"
                                 />
                                 @error('password')
                                     <p class="mt-2 text-sm text-danger">{{ $message }}</p>
@@ -91,12 +85,12 @@
                             <!-- Remember Me (hidden untuk clean UI) -->
                             <input type="hidden" name="remember" value="1">
 
-                            <!-- Login Button - Navy Dark Blue -->
-                            <div class="pt-4">
+                            <!-- Login Button menggunakan komponen x-button -->
+                            <div class="pt-6">
                                 <x-button 
                                     type="submit" 
                                     variant="primary"
-                                    class="w-full h-[60px] text-base font-bold rounded-[20px] bg-[#02245B] hover:bg-[#011530] text-white"
+                                    class="w-full h-[69px] text-lg font-bold rounded-[20px] bg-primary hover:bg-primary-dark"
                                 >
                                     Log In
                                 </x-button>

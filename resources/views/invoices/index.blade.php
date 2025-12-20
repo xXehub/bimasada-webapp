@@ -4,9 +4,27 @@
             <h2 class="font-semibold text-2xl text-[#02245B] leading-tight font-poppins">
                 {{ __('Invoice Management') }}
             </h2>
-            <x-button variant="success" href="{{ route('invoices.create') }}">
-                + Add Invoice
-            </x-button>
+            <div class="flex space-x-3">
+                <!-- Quick Modal Button -->
+                <button 
+                    @click="$dispatch('open-modal', 'add-invoice')"
+                    class="inline-flex items-center px-4 py-2 bg-[#28A745] border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 focus:bg-green-700 active:bg-green-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150"
+                >
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    Quick Add (Modal)
+                </button>
+                
+                <a href="{{ route('invoices.input') }}">
+                    <x-button variant="primary">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        Input Invoice (with Items)
+                    </x-button>
+                </a>
+            </div>
         </div>
     </x-slot>
 
@@ -67,6 +85,7 @@
             <x-card>
                 <x-table>
                     <x-slot name="header">
+                        <th>Invoice #</th>
                         <th class="sortable">
                             <a href="?sort_by=tanggal_invoice&sort_order={{ request('sort_order') == 'asc' ? 'desc' : 'asc' }}">
                                 Invoice Date
@@ -92,6 +111,9 @@
                     <x-slot name="body">
                         @forelse($invoices as $invoice)
                             <tr>
+                                <td class="font-mono text-sm text-primary font-medium">
+                                    {{ $invoice->invoice_number ?? 'INV-' . str_pad($invoice->id, 4, '0', STR_PAD_LEFT) }}
+                                </td>
                                 <td class="font-medium">
                                     {{ $invoice->tanggal_invoice->format('d M Y') }}
                                 </td>
@@ -144,18 +166,20 @@
                                         >
                                             Edit
                                         </x-button>
-                                        <form 
-                                            method="POST" 
-                                            action="{{ route('invoices.destroy', $invoice) }}"
-                                            onsubmit="return confirm('Are you sure you want to delete this invoice?')"
-                                            class="inline"
-                                        >
-                                            @csrf
-                                            @method('DELETE')
-                                            <x-button variant="danger" size="sm" type="submit">
-                                                Delete
-                                            </x-button>
-                                        </form>
+                                        @can('delete-invoices')
+                                            <form 
+                                                method="POST" 
+                                                action="{{ route('invoices.destroy', $invoice) }}"
+                                                onsubmit="return confirm('Are you sure you want to delete this invoice?')"
+                                                class="inline"
+                                            >
+                                                @csrf
+                                                @method('DELETE')
+                                                <x-button variant="danger" size="sm" type="submit">
+                                                    Delete
+                                                </x-button>
+                                            </form>
+                                        @endcan
                                     </div>
                                 </td>
                             </tr>
@@ -179,4 +203,7 @@
 
         </div>
     </div>
+
+    <!-- Add Invoice Modal -->
+    @include('invoices.partials.add-invoice-modal', ['salesList' => $salesList ?? []])
 </x-app-layout>

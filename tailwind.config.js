@@ -12,7 +12,22 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+                sans: ['Poppins', ...defaultTheme.fontFamily.sans],
+                poppins: ['Poppins', 'sans-serif'],
+            },
+            colors: {
+                // Bimasada Brand Colors
+                primary: {
+                    DEFAULT: '#2387C0', // Bimasada Blue
+                    dark: '#02245B',    // Bimasada Navy
+                    light: '#5BA3D0',
+                },
+                secondary: {
+                    DEFAULT: '#858788', // Gray
+                },
+                success: '#28A745',     // Green
+                danger: '#DC3545',      // Red
+                warning: '#FFA500',     // Orange
             },
         },
     },
