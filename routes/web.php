@@ -49,4 +49,19 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/invoices/{invoice}', [InvoiceController::class, 'destroy'])->middleware('permission:delete-invoices')->name('invoices.destroy');
 });
 
+// User Management Routes
+Route::middleware(['auth'])->group(function () {
+    // Users
+    Route::get('/users/data', [App\Http\Controllers\UserController::class, 'getData'])->name('users.data');
+    Route::resource('users', App\Http\Controllers\UserController::class);
+    
+    // Roles
+    Route::get('/roles/data', [App\Http\Controllers\RoleController::class, 'getData'])->name('roles.data');
+    Route::resource('roles', App\Http\Controllers\RoleController::class);
+    
+    // Permissions
+    Route::get('/permissions/data', [App\Http\Controllers\PermissionController::class, 'getData'])->name('permissions.data');
+    Route::resource('permissions', App\Http\Controllers\PermissionController::class);
+});
+
 require __DIR__.'/auth.php';
