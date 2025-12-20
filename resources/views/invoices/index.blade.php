@@ -242,26 +242,48 @@
             background-color: rgb(24 26 32);
         }
         
-        /* Processing Indicator */
+        /* Processing Indicator - Loading State */
+        .dataTables_wrapper {
+            position: relative;
+        }
+        
         .dataTables_processing {
             position: absolute !important;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            padding: 1.5rem 2rem;
-            border-radius: 1rem;
-            z-index: 10;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            margin: 0 !important;
+            padding: 2rem 3rem !important;
+            border-radius: 1rem !important;
+            z-index: 1000 !important;
+            display: none !important; /* Hidden by default */
+            align-items: center !important;
+            justify-content: center !important;
+        }
+        
+        .dataTables_processing[style*="display: block"] {
+            display: flex !important; /* Show as flex when active */
         }
         
         .light .dataTables_processing,
         :root:not(.dark) .dataTables_processing {
             background-color: white;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
         
         .dark .dataTables_processing {
             background-color: rgb(30 32 38);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Table wrapper relative positioning for loading */
+        #invoices-table_wrapper {
+            position: relative;
+            min-height: 400px;
+        }
+        
+        #invoices-table {
+            transition: opacity 0.2s ease-in-out;
         }
         
         /* Empty Table State */
@@ -390,8 +412,45 @@
         <!-- Filters & Search -->
         <x-ui.card>
             <div class="flex flex-col lg:flex-row gap-4">
-                <!-- Search -->
+                <!-- Per Page (Kiri) -->
+                <div class="w-full lg:w-48">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                        Show entries
+                    </label>
+                    <input 
+                        type="number"
+                        x-model="perPage"
+                        x-on:blur="changePageLength()"
+                        x-on:keyup.enter="changePageLength()"
+                        min="1"
+                        max="1000"
+                        placeholder="10"
+                        class="w-full px-4 py-2.5 bg-white dark:bg-dark-hover border border-gray-300 dark:border-dark-border rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                    >
+                </div>
+
+                <!-- Status Filter -->
+                <div class="w-full lg:w-48">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                        Status
+                    </label>
+                    <select 
+                        x-model="statusFilter"
+                        x-on:change="applyFilter()"
+                        class="w-full px-4 py-2.5 bg-white dark:bg-dark-hover border border-gray-300 dark:border-dark-border rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                    >
+                        <option value="">All Status</option>
+                        <option value="Lunas">Lunas</option>
+                        <option value="Belum Lunas">Belum Lunas</option>
+                        <option value="Cicilan">Cicilan</option>
+                    </select>
+                </div>
+
+                <!-- Search (Kanan, flex-1) -->
                 <div class="flex-1">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                        Search
+                    </label>
                     <x-ui.input 
                         type="text" 
                         x-model="searchQuery"
@@ -406,36 +465,8 @@
                     </x-ui.input>
                 </div>
 
-                <!-- Status Filter -->
-                <div class="w-full lg:w-48">
-                    <select 
-                        x-model="statusFilter"
-                        x-on:change="applyFilter()"
-                        class="w-full px-4 py-2.5 bg-white dark:bg-dark-hover border border-gray-300 dark:border-dark-border rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
-                    >
-                        <option value="">All Status</option>
-                        <option value="Lunas">Lunas</option>
-                        <option value="Belum Lunas">Belum Lunas</option>
-                        <option value="Cicilan">Cicilan</option>
-                    </select>
-                </div>
-
-                <!-- Per Page -->
-                <div class="w-full lg:w-36">
-                    <select 
-                        x-model="perPage"
-                        x-on:change="changePageLength()"
-                        class="w-full px-4 py-2.5 bg-white dark:bg-dark-hover border border-gray-300 dark:border-dark-border rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
-                    >
-                        <option value="10">10 per page</option>
-                        <option value="25">25 per page</option>
-                        <option value="50">50 per page</option>
-                        <option value="100">100 per page</option>
-                    </select>
-                </div>
-
                 <!-- Buttons -->
-                <div class="flex gap-2">
+                <div class="flex items-end gap-2">
                     <x-ui.button variant="ghost" x-on:click="resetFilters()">
                         <x-slot name="icon">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -751,6 +782,26 @@
                             } else {
                                 self.tableInfo = '';
                             }
+                        },
+                        preDrawCallback: function(settings) {
+                            // Show loading
+                            $('#invoices-table').css('opacity', '0.5');
+                        },
+                        initComplete: function(settings, json) {
+                            // Hide loading after initial load
+                            $('#invoices-table').css('opacity', '1');
+                            $('.dataTables_processing').hide();
+                        }
+                    });
+
+                    // Handle AJAX loading states
+                    this.dataTable.on('processing.dt', function(e, settings, processing) {
+                        if (processing) {
+                            $('.dataTables_processing').show();
+                            $('#invoices-table').css('opacity', '0.5');
+                        } else {
+                            $('.dataTables_processing').hide();
+                            $('#invoices-table').css('opacity', '1');
                         }
                     });
 

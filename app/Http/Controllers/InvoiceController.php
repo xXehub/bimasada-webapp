@@ -37,6 +37,11 @@ class InvoiceController extends Controller
     {
         $query = Invoice::with('sales');
 
+        // Apply status filter if provided
+        if ($request->has('status') && !empty($request->status)) {
+            $query->where('status_pembayaran', $request->status);
+        }
+
         return DataTables::of($query)
             ->addColumn('invoice_number_display', function ($invoice) {
                 return $invoice->no_invoice ?? 'INV-' . str_pad($invoice->id, 4, '0', STR_PAD_LEFT);
