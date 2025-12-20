@@ -1,37 +1,20 @@
-<x-layout.app title="Dashboard"><x-app-layout>
-
-        <x-slot name="header">
-
-    @section('page-title', 'Dashboard')        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-
-    @section('breadcrumb')            {{ __('Dashboard') }}
-
-        <span class="text-primary">Dashboard</span>        </h2>
-
-    @endsection    </x-slot>
-
+<x-layout.app title="Dashboard">
     
-
-    <!-- Welcome Section -->    <div class="py-12">
-
-    <div class="mb-8">        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-
-        <h2 class="text-2xl font-bold text-secondary-900 dark:text-white mb-2">            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-
-            Selamat Datang, {{ Auth::user()->name ?? 'User' }}! 👋                <div class="p-6 text-gray-900">
-
-        </h2>                    {{ __("You're logged in!") }}
-
-        <p class="text-secondary-500 dark:text-secondary-400">                </div>
-
-            Berikut adalah ringkasan aktivitas sistem invoice hari ini.            </div>
-
-        </p>        </div>
-
-    </div>    </div>
-
-    </x-app-layout>
-
+    @section('page-title', 'Dashboard')
+    @section('breadcrumb')
+        <span class="text-primary">Dashboard</span>
+    @endsection
+    
+    <!-- Welcome Section -->
+    <div class="mb-8">
+        <h2 class="text-2xl font-bold text-secondary-900 dark:text-white mb-2">
+            Selamat Datang, {{ Auth::user()->name ?? 'User' }}! 👋
+        </h2>
+        <p class="text-secondary-500 dark:text-secondary-400">
+            Berikut adalah ringkasan aktivitas sistem invoice hari ini.
+        </p>
+    </div>
+    
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         
@@ -54,7 +37,6 @@
                     </svg>
                 </div>
             </div>
-            <!-- Decorative gradient -->
             <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-primary/5 dark:bg-primary/10 rounded-full blur-xl"></div>
         </x-ui.card>
         
