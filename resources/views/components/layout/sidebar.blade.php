@@ -295,6 +295,72 @@
                     </div>
                 </li>
                 
+                <!-- Document Archive -->
+                <li class="relative" x-data="{ open: {{ request()->routeIs('archive.*') ? 'true' : 'false' }} }">
+                    <button 
+                        @click="sidebarOpen ? open = !open : (sidebarOpen = true, open = true)"
+                        class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-secondary-600 font-medium hover:bg-primary-50 hover:text-primary dark:text-secondary-300 dark:hover:bg-dark-hover dark:hover:text-primary-400 transition-all duration-200 w-full {{ request()->routeIs('archive.*') ? 'bg-primary-50 text-primary font-semibold dark:bg-primary-900/30 dark:text-primary-400' : '' }}"
+                        :class="{ 'justify-center': !sidebarOpen }"
+                    >
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                        </svg>
+                        <span x-show="sidebarOpen" x-transition.opacity class="flex-1 text-left truncate">Arsip Dokumen</span>
+                        <svg 
+                            x-show="sidebarOpen" 
+                            x-transition.opacity
+                            class="w-4 h-4 transition-transform duration-200 flex-shrink-0"
+                            :class="{ 'rotate-180': open }"
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                        >
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    
+                    <!-- Tooltip -->
+                    <div 
+                        x-show="!sidebarOpen" 
+                        x-transition.opacity
+                        class="absolute left-full top-1/2 -translate-y-1/2 ml-3 px-2 py-1 bg-secondary-900 dark:bg-secondary-700 text-white text-sm rounded-lg opacity-0 hover:opacity-100 pointer-events-none whitespace-nowrap z-[60] hidden lg:block"
+                    >
+                        Arsip Dokumen
+                    </div>
+                    
+                    <!-- Submenu -->
+                    <div 
+                        x-show="open && sidebarOpen" 
+                        x-collapse
+                        x-cloak
+                    >
+                        <ul class="mt-1 ml-4 pl-3 border-l-2 border-secondary-200 dark:border-dark-border space-y-1">
+                            <li>
+                                <a 
+                                    href="{{ route('archive.index') }}" 
+                                    class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-secondary-600 hover:bg-primary-50 hover:text-primary dark:text-secondary-400 dark:hover:bg-dark-hover dark:hover:text-primary-400 transition-all duration-200 {{ request()->routeIs('archive.index') ? 'bg-primary-50 text-primary font-semibold dark:bg-primary-900/30 dark:text-primary-400' : '' }}"
+                                >
+                                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                                    </svg>
+                                    <span>Semua Dokumen</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a 
+                                    href="{{ route('archive.relations') }}" 
+                                    class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-secondary-600 hover:bg-primary-50 hover:text-primary dark:text-secondary-400 dark:hover:bg-dark-hover dark:hover:text-primary-400 transition-all duration-200 {{ request()->routeIs('archive.relations') ? 'bg-primary-50 text-primary font-semibold dark:bg-primary-900/30 dark:text-primary-400' : '' }}"
+                                >
+                                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                                    </svg>
+                                    <span>Relasi Dokumen</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+                
                 <!-- Customers -->
                 <li class="relative">
                     <a 

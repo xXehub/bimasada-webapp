@@ -5,6 +5,7 @@ use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\SuratPerjanjianController;
 use App\Http\Controllers\KuitansiController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DocumentArchiveController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -144,6 +145,15 @@ Route::middleware(['auth'])->group(function () {
     
     // Only Marketing Manager can delete Kuitansi
     Route::delete('/kuitansis/{kuitansi}', [KuitansiController::class, 'destroy'])->middleware('permission:delete-kuitansi')->name('kuitansis.destroy');
+});
+
+// Document Archive Routes
+Route::middleware(['auth'])->group(function () {
+    Route::get('/archive', [DocumentArchiveController::class, 'index'])->name('archive.index');
+    Route::get('/archive/data', [DocumentArchiveController::class, 'getData'])->name('archive.data');
+    Route::get('/archive/relations', [DocumentArchiveController::class, 'showRelations'])->name('archive.relations');
+    Route::get('/archive/relations/{pks}', [DocumentArchiveController::class, 'showRelations'])->name('archive.relations.show');
+    Route::get('/archive/export', [DocumentArchiveController::class, 'export'])->name('archive.export');
 });
 
 require __DIR__.'/auth.php';
