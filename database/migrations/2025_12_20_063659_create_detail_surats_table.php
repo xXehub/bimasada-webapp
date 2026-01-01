@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('detail_surats', function (Blueprint $table) {
-            $table->integer('id_detail_surat')->primary(); // PK
+            $table->id(); // Auto-increment PK
             $table->foreignId('id_surat')->constrained('surat_perjanjians')->onDelete('cascade');
             $table->string('id_txtKtl'); // referensi ke Google Drive
             $table->integer('jumlah');

@@ -100,7 +100,6 @@ class InvoiceSeeder extends Seeder
             // Create detail invoice items
             for ($i = 1; $i <= 3; $i++) {
                 DetailInvoice::create([
-                    'id_detail' => (int)($invoice->id . $i),
                     'id_invoice' => $invoice->id,
                     'id_kuitansi' => 'GDRIVE-' . uniqid(),
                     'jumlah' => rand(1, 5),

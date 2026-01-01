@@ -107,9 +107,6 @@
         
     </div>
     
-    <!-- Toast Notifications -->
-    <x-ui.toast />
-    
     <!-- Notification Component -->
     <x-notification />
     

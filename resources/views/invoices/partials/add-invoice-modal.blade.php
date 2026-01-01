@@ -207,10 +207,8 @@
 
                     const data = await response.json();
                     
-                    // Show success toast
-                    window.dispatchEvent(new CustomEvent('toast', { 
-                        detail: { type: 'success', title: 'Berhasil!', message: 'Invoice berhasil dibuat' }
-                    }));
+                    // Show success notification
+                    Notification.success('Berhasil!', data.message || 'Invoice berhasil dibuat');
                     
                     if (data.redirect) {
                         window.location.href = data.redirect;

@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('detail_kuitansis', function (Blueprint $table) {
-            $table->integer('id_detail_kuitansi')->primary(); // PK
+            $table->id(); // Auto-increment PK
             $table->foreignId('id_kuitansi')->constrained('kuitansis')->onDelete('cascade');
             $table->string('id_txtKtl'); // referensi ke Google Drive
             $table->integer('jumlah');

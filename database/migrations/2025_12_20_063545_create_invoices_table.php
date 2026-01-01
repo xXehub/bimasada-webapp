@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id(); // auto-generated PK
             $table->date('tanggal_invoice');
             $table->string('nama_pelanggan');
-            $table->string('alamat');
-            $table->string('no_telp');
-            $table->string('email');
+            $table->string('alamat')->nullable();
+            $table->string('no_telp')->nullable();
+            $table->string('email')->nullable();
             $table->decimal('total_harga', 15, 2);
             $table->string('status_pembayaran'); // Lunas/Belum Lunas/Cicilan
             $table->date('jatuh_tempo');

@@ -136,7 +136,7 @@
                             class="w-full px-4 py-2.5 bg-white dark:bg-dark-hover border border-gray-300 dark:border-dark-border rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
                         >
                             <option value="">Select Sales Person</option>
-                            @foreach($sales as $s)
+                            @foreach($salesList as $s)
                                 <option value="{{ $s->id }}" {{ old('id_sales') == $s->id ? 'selected' : '' }}>
                                     {{ $s->id_sales }} - {{ $s->nama_sales }}
                                 </option>
