@@ -46,4 +46,28 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * Get all PKS/Surat Perjanjian created by this user (as Sales)
+     */
+    public function suratPerjanjians()
+    {
+        return $this->hasMany(SuratPerjanjian::class, 'id_sales');
+    }
+
+    /**
+     * Get all invoices created by this user (as Sales)
+     */
+    public function invoices()
+    {
+        return $this->hasMany(Invoice::class, 'id_sales');
+    }
+
+    /**
+     * Get all kuitansi related to user's invoices
+     */
+    public function kuitansis()
+    {
+        return $this->hasManyThrough(Kuitansi::class, Invoice::class, 'id_sales', 'id_invoice');
+    }
 }

@@ -4,15 +4,20 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\SuratPerjanjianController;
 use App\Http\Controllers\KuitansiController;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
+
+Route::get('/api/dashboard/chart', [DashboardController::class, 'getChartData'])
+    ->middleware(['auth'])
+    ->name('dashboard.chart');
 
 Route::get('/components-preview', function () {
     return view('components-preview');
@@ -39,6 +44,11 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/invoices/store-with-items', [InvoiceController::class, 'storeWithItems'])->middleware('permission:create-invoices')->name('invoices.storeWithItems');
     Route::get('/invoices/generate-number', [InvoiceController::class, 'generateInvoiceNumber'])->middleware('permission:create-invoices')->name('invoices.generateNumber');
     Route::post('/invoices/store-quick', [InvoiceController::class, 'storeQuick'])->middleware('permission:create-invoices')->name('invoices.storeQuick');
+    
+    // Workflow: Create Invoice from PKS
+    Route::get('/invoices/from-pks/{pks}', [InvoiceController::class, 'createFromPks'])->middleware('permission:create-invoices')->name('invoices.createFromPks');
+    Route::post('/invoices/from-pks/{pks}', [InvoiceController::class, 'storeFromPks'])->middleware('permission:create-invoices')->name('invoices.storeFromPks');
+    Route::get('/invoices/available-pks', [InvoiceController::class, 'getAvailablePks'])->middleware('permission:view-invoices')->name('invoices.availablePks');
     
     // DataTables server-side endpoint
     Route::get('/invoices/data', [InvoiceController::class, 'getData'])->middleware('permission:view-invoices')->name('invoices.data');
@@ -111,6 +121,11 @@ Route::middleware(['auth'])->group(function () {
     
     // Quick store from modal
     Route::post('/kuitansis/store-quick', [KuitansiController::class, 'storeQuick'])->middleware('permission:create-kuitansi')->name('kuitansis.storeQuick');
+    
+    // Workflow: Create Kuitansi from Invoice
+    Route::get('/kuitansis/from-invoice/{invoice}', [KuitansiController::class, 'createFromInvoice'])->middleware('permission:create-kuitansi')->name('kuitansis.createFromInvoice');
+    Route::post('/kuitansis/from-invoice/{invoice}', [KuitansiController::class, 'storeFromInvoice'])->middleware('permission:create-kuitansi')->name('kuitansis.storeFromInvoice');
+    Route::get('/kuitansis/available-invoices', [KuitansiController::class, 'getAvailableInvoices'])->middleware('permission:view-kuitansi')->name('kuitansis.availableInvoices');
     
     // Mark as Lunas
     Route::post('/kuitansis/{kuitansi}/mark-lunas', [KuitansiController::class, 'markLunas'])->middleware('permission:edit-kuitansi')->name('kuitansis.markLunas');

@@ -201,6 +201,98 @@
                     </div>
                 </x-ui.card>
 
+                <!-- Payment Progress Card -->
+                <x-ui.card>
+                    <x-slot name="header">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Progress Pembayaran</h3>
+                            <span class="text-sm text-gray-500 dark:text-gray-400">{{ $invoice->kuitansis->count() }} kuitansi</span>
+                        </div>
+                    </x-slot>
+                    
+                    @php
+                        $totalPaid = $invoice->total_paid;
+                        $remainingAmount = $invoice->remaining_amount;
+                        $percentage = $invoice->total_harga > 0 ? min(100, ($totalPaid / $invoice->total_harga) * 100) : 0;
+                    @endphp
+                    
+                    <div class="space-y-4">
+                        <!-- Progress Bar -->
+                        <div>
+                            <div class="flex justify-between text-sm mb-2">
+                                <span class="text-gray-600 dark:text-gray-400">Terbayar</span>
+                                <span class="font-medium text-gray-900 dark:text-white">{{ number_format($percentage, 1) }}%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+                                <div class="bg-gradient-to-r from-emerald-500 to-emerald-600 h-3 rounded-full transition-all duration-500" style="width: {{ $percentage }}%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Stats -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl">
+                                <p class="text-xs text-emerald-600 dark:text-emerald-400">Sudah Dibayar</p>
+                                <p class="font-bold text-emerald-700 dark:text-emerald-300 text-sm mt-1">Rp {{ number_format($totalPaid, 0, ',', '.') }}</p>
+                            </div>
+                            <div class="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-xl">
+                                <p class="text-xs text-amber-600 dark:text-amber-400">Sisa Tagihan</p>
+                                <p class="font-bold text-amber-700 dark:text-amber-300 text-sm mt-1">Rp {{ number_format($remainingAmount, 0, ',', '.') }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Create Kuitansi Button -->
+                        @if($remainingAmount > 0)
+                            @can('create-kuitansi')
+                            <a href="{{ route('kuitansis.createFromInvoice', $invoice->id) }}" class="block w-full py-2 px-4 bg-emerald-600 hover:bg-emerald-700 text-white text-center rounded-xl text-sm font-medium transition-colors">
+                                + Buat Kuitansi Pembayaran
+                            </a>
+                            @endcan
+                        @else
+                        <div class="p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl text-center">
+                            <svg class="w-6 h-6 text-emerald-600 dark:text-emerald-400 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <p class="text-sm font-medium text-emerald-700 dark:text-emerald-300">Invoice Lunas</p>
+                        </div>
+                        @endif
+                    </div>
+                </x-ui.card>
+
+                <!-- PKS Info Card (if linked) -->
+                @if($invoice->pks)
+                <x-ui.card class="border-2 border-primary-200 dark:border-primary-800">
+                    <x-slot name="header">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+                                <svg class="w-5 h-5 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Terhubung ke PKS</h3>
+                        </div>
+                    </x-slot>
+                    
+                    <div class="space-y-3">
+                        <div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">No. PKS</p>
+                            <a href="{{ route('surat-perjanjians.show', $invoice->pks->id) }}" class="font-semibold text-primary-600 dark:text-primary-400 hover:underline">
+                                {{ $invoice->pks->no_surat }}
+                            </a>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Nilai Kontrak</p>
+                            <p class="font-semibold text-gray-900 dark:text-white">Rp {{ number_format($invoice->pks->nilai_kontrak, 0, ',', '.') }}</p>
+                        </div>
+                        <a href="{{ route('surat-perjanjians.show', $invoice->pks->id) }}" class="inline-flex items-center gap-2 text-sm text-primary-600 dark:text-primary-400 hover:underline">
+                            Lihat PKS
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                            </svg>
+                        </a>
+                    </div>
+                </x-ui.card>
+                @endif
+
                 <!-- Customer Info Card -->
                 <x-ui.card>
                     <x-slot name="header">

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Invoice;
 use App\Models\Sales;
+use App\Models\SuratPerjanjian;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -138,7 +139,7 @@ class InvoiceController extends Controller
      */
     public function show(Invoice $invoice)
     {
-        $invoice->load('sales', 'detailInvoices');
+        $invoice->load('sales', 'detailInvoices', 'pks', 'kuitansis');
         return view('invoices.show', compact('invoice'));
     }
 
@@ -326,5 +327,126 @@ class InvoiceController extends Controller
 
         return redirect()->route('invoices.edit', $invoice->id)
             ->with('success', 'Invoice berhasil dibuat! Silakan lengkapi detail invoice.');
+    }
+
+    /**
+     * Create invoice from PKS (Surat Perjanjian Kerjasama).
+     */
+    public function createFromPks(SuratPerjanjian $pks)
+    {
+        // Check if PKS is approved
+        if ($pks->status_surat !== 'Disetujui') {
+            return redirect()->back()
+                ->with('error', 'Hanya PKS dengan status Disetujui yang dapat dibuat Invoice!');
+        }
+
+        $salesList = Sales::all();
+        
+        // Pre-fill data from PKS
+        $prefillData = [
+            'nama_pelanggan' => $pks->nama_pelanggan,
+            'alamat' => $pks->alamat_pelanggan,
+            'no_telp' => $pks->no_telp_pelanggan,
+            'email' => $pks->email_pelanggan,
+            'id_sales' => $pks->id_sales,
+            'no_kontrak' => $pks->no_surat,
+            'id_pks' => $pks->id,
+        ];
+        
+        // Calculate remaining contract value
+        $remainingValue = $pks->remaining_contract_value;
+        
+        return view('invoices.create-from-pks', compact('pks', 'salesList', 'prefillData', 'remainingValue'));
+    }
+
+    /**
+     * Store invoice created from PKS.
+     */
+    public function storeFromPks(Request $request, SuratPerjanjian $pks)
+    {
+        // Validate PKS status
+        if ($pks->status_surat !== 'Disetujui') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Hanya PKS dengan status Disetujui yang dapat dibuat Invoice!'
+            ], 400);
+        }
+
+        $validated = $request->validate([
+            'invoice_number' => 'required|string|max:50|unique:invoices,invoice_number',
+            'tanggal_invoice' => 'required|date',
+            'nama_pelanggan' => 'required|string|max:255',
+            'alamat' => 'nullable|string',
+            'no_telp' => 'nullable|string|max:50',
+            'email' => 'nullable|email|max:255',
+            'total_harga' => 'required|numeric|min:0',
+            'status_pembayaran' => 'required|in:Lunas,Belum Lunas,Cicilan',
+            'jatuh_tempo' => 'required|date',
+            'keterangan' => 'nullable|string',
+            'id_sales' => 'required|exists:sales,id',
+        ]);
+
+        // Check if total doesn't exceed remaining contract value
+        $remainingValue = $pks->remaining_contract_value;
+        if ($validated['total_harga'] > $remainingValue) {
+            return response()->json([
+                'success' => false,
+                'message' => "Total invoice tidak boleh melebihi sisa nilai kontrak (Rp " . number_format($remainingValue, 0, ',', '.') . ")"
+            ], 400);
+        }
+
+        // Create invoice linked to PKS
+        $invoice = Invoice::create([
+            'invoice_number' => $validated['invoice_number'],
+            'no_kontrak' => $pks->no_surat,
+            'tanggal_invoice' => $validated['tanggal_invoice'],
+            'nama_pelanggan' => $validated['nama_pelanggan'],
+            'alamat' => $validated['alamat'],
+            'no_telp' => $validated['no_telp'],
+            'email' => $validated['email'],
+            'total_harga' => $validated['total_harga'],
+            'status_pembayaran' => $validated['status_pembayaran'],
+            'jatuh_tempo' => $validated['jatuh_tempo'],
+            'keterangan' => $validated['keterangan'],
+            'id_sales' => $validated['id_sales'],
+            'id_pks' => $pks->id,
+        ]);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Invoice berhasil dibuat dari PKS!',
+                'redirect' => route('invoices.show', $invoice->id)
+            ]);
+        }
+
+        return redirect()->route('invoices.show', $invoice->id)
+            ->with('success', 'Invoice berhasil dibuat dari PKS!');
+    }
+
+    /**
+     * Get available PKS list for invoice creation.
+     */
+    public function getAvailablePks()
+    {
+        $pksList = SuratPerjanjian::where('status_surat', 'Disetujui')
+            ->with('sales')
+            ->get()
+            ->filter(function ($pks) {
+                return $pks->remaining_contract_value > 0;
+            })
+            ->map(function ($pks) {
+                return [
+                    'id' => $pks->id,
+                    'no_surat' => $pks->no_surat,
+                    'nama_pelanggan' => $pks->nama_pelanggan,
+                    'nilai_kontrak' => $pks->nilai_kontrak,
+                    'total_invoiced' => $pks->total_invoiced,
+                    'remaining_value' => $pks->remaining_contract_value,
+                    'sales_name' => $pks->sales->nama_sales ?? '-',
+                ];
+            });
+
+        return response()->json($pksList->values());
     }
 }

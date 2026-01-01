@@ -40,4 +40,33 @@ class SuratPerjanjian extends Model
     {
         return $this->hasMany(DetailSurat::class, 'id_surat');
     }
+
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class, 'id_pks');
+    }
+
+    /**
+     * Get total invoiced amount
+     */
+    public function getTotalInvoicedAttribute(): float
+    {
+        return $this->invoices()->sum('total_harga');
+    }
+
+    /**
+     * Get remaining contract value that can be invoiced
+     */
+    public function getRemainingContractValueAttribute(): float
+    {
+        return max(0, $this->nilai_kontrak - $this->total_invoiced);
+    }
+
+    /**
+     * Check if PKS can create new invoice
+     */
+    public function canCreateInvoice(): bool
+    {
+        return $this->status_surat === 'Disetujui' && $this->remaining_contract_value > 0;
+    }
 }

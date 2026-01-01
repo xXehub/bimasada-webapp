@@ -1,0 +1,324 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "=== BIMASADA WEBAPP DEVELOPMENT ROADMAP ===",
+            "type": "shell",
+            "command": "echo 'Development Roadmap - See phases below'",
+            "problemMatcher": []
+        },
+
+        {
+            "label": "────────────────────────────────────────────",
+            "type": "shell",
+            "command": "echo ''",
+            "problemMatcher": []
+        },
+
+        {
+            "label": "📌 PHASE 1: SURAT PERJANJIAN (PKS) MODULE",
+            "detail": "Kontrak Kerja Sama - Core workflow untuk Sales",
+            "type": "shell",
+            "command": "echo 'Phase 1 Tasks'",
+            "problemMatcher": [],
+            "group": "build"
+        },
+        {
+            "label": "  1.1 [TODO] Create SuratPerjanjianController",
+            "detail": "CRUD operations untuk Surat Perjanjian/PKS",
+            "type": "shell",
+            "command": "php artisan make:controller SuratPerjanjianController --resource",
+            "problemMatcher": []
+        },
+        {
+            "label": "  1.2 [TODO] Create PKS Index Page (List View)",
+            "detail": "DataTables dengan filter status, search, export",
+            "type": "shell",
+            "command": "echo 'Create views/surat-perjanjians/index.blade.php'",
+            "problemMatcher": []
+        },
+        {
+            "label": "  1.3 [TODO] Create PKS Form (Create/Edit)",
+            "detail": "Form input dengan validasi lengkap",
+            "type": "shell",
+            "command": "echo 'Create views/surat-perjanjians/create.blade.php & edit.blade.php'",
+            "problemMatcher": []
+        },
+        {
+            "label": "  1.4 [TODO] Create PKS Detail/Show Page",
+            "detail": "View detail PKS dengan preview cetak",
+            "type": "shell",
+            "command": "echo 'Create views/surat-perjanjians/show.blade.php'",
+            "problemMatcher": []
+        },
+        {
+            "label": "  1.5 [TODO] PKS Print/Export Feature",
+            "detail": "Generate PDF untuk cetak kontrak",
+            "type": "shell",
+            "command": "echo 'PDF generation for PKS'",
+            "problemMatcher": []
+        },
+        {
+            "label": "  1.6 [TODO] PKS Status Workflow",
+            "detail": "Status: Draft → Pending Approval → Approved → Active → Completed",
+            "type": "shell",
+            "command": "echo 'Implement status workflow'",
+            "problemMatcher": []
+        },
+        {
+            "label": "  1.7 [TODO] Add PKS Routes & Navigation",
+            "detail": "Register routes dan tambah ke sidebar menu",
+            "type": "shell",
+            "command": "echo 'Add routes to web.php'",
+            "problemMatcher": []
+        },
+
+        {
+            "label": "────────────────────────────────────────────",
+            "type": "shell",
+            "command": "echo ''",
+            "problemMatcher": []
+        },
+
+        {
+            "label": "📌 PHASE 2: KUITANSI MODULE",
+            "detail": "Bukti pembayaran dari client",
+            "type": "shell",
+            "command": "echo 'Phase 2 Tasks'",
+            "problemMatcher": [],
+            "group": "build"
+        },
+        {
+            "label": "  2.1 [TODO] Create KuitansiController",
+            "detail": "CRUD operations untuk Kuitansi",
+            "type": "shell",
+            "command": "php artisan make:controller KuitansiController --resource",
+            "problemMatcher": []
+        },
+        {
+            "label": "  2.2 [TODO] Create Kuitansi Index Page",
+            "detail": "DataTables dengan relasi ke Invoice",
+            "type": "shell",
+            "command": "echo 'Create views/kuitansis/index.blade.php'",
+            "problemMatcher": []
+        },
+        {
+            "label": "  2.3 [TODO] Create Kuitansi Form",
+            "detail": "Form dengan select Invoice terkait",
+            "type": "shell",
+            "command": "echo 'Create views/kuitansis/create.blade.php'",
+            "problemMatcher": []
+        },
+        {
+            "label": "  2.4 [TODO] Create Kuitansi Detail Page",
+            "detail": "View detail dengan print preview",
+            "type": "shell",
+            "command": "echo 'Create views/kuitansis/show.blade.php'",
+            "problemMatcher": []
+        },
+        {
+            "label": "  2.5 [TODO] Kuitansi Print Feature",
+            "detail": "Generate PDF kuitansi",
+            "type": "shell",
+            "command": "echo 'PDF generation for Kuitansi'",
+            "problemMatcher": []
+        },
+        {
+            "label": "  2.6 [TODO] Link Kuitansi to Invoice",
+            "detail": "Update status pembayaran invoice saat kuitansi dibuat",
+            "type": "shell",
+            "command": "echo 'Invoice payment status update'",
+            "problemMatcher": []
+        },
+        {
+            "label": "  2.7 [TODO] Add Kuitansi Routes & Navigation",
+            "detail": "Register routes dan tambah ke sidebar menu",
+            "type": "shell",
+            "command": "echo 'Add routes to web.php'",
+            "problemMatcher": []
+        },
+
+        {
+            "label": "────────────────────────────────────────────",
+            "type": "shell",
+            "command": "echo ''",
+            "problemMatcher": []
+        },
+
+        {
+            "label": "📌 PHASE 3: APPROVAL WORKFLOW",
+            "detail": "Sistem approval untuk Marketing Manager",
+            "type": "shell",
+            "command": "echo 'Phase 3 Tasks'",
+            "problemMatcher": [],
+            "group": "build"
+        },
+        {
+            "label": "  3.1 [TODO] Add Approval Status to Models",
+            "detail": "Tambah field approval_status, approved_by, approved_at",
+            "type": "shell",
+            "command": "echo 'Create migration for approval fields'",
+            "problemMatcher": []
+        },
+        {
+            "label": "  3.2 [TODO] PKS Approval System",
+            "detail": "Marketing Manager approve/reject PKS",
+            "type": "shell",
+            "command": "echo 'Implement PKS approval'",
+            "problemMatcher": []
+        },
+        {
+            "label": "  3.3 [TODO] Invoice Review System",
+            "detail": "Marketing Manager review & request revision",
+            "type": "shell",
+            "command": "echo 'Implement Invoice review workflow'",
+            "problemMatcher": []
+        },
+        {
+            "label": "  3.4 [TODO] Approval Permissions",
+            "detail": "Tambah permissions: approve-pks, review-invoices",
+            "type": "shell",
+            "command": "echo 'Update RolePermissionSeeder'",
+            "problemMatcher": []
+        },
+        {
+            "label": "  3.5 [TODO] Approval History/Log",
+            "detail": "Catat history approval dengan timestamps",
+            "type": "shell",
+            "command": "echo 'Create approval_logs table'",
+            "problemMatcher": []
+        },
+
+        {
+            "label": "────────────────────────────────────────────",
+            "type": "shell",
+            "command": "echo ''",
+            "problemMatcher": []
+        },
+
+        {
+            "label": "📌 PHASE 4: DASHBOARD & NOTIFICATIONS",
+            "detail": "Dashboard role-based dan notifikasi",
+            "type": "shell",
+            "command": "echo 'Phase 4 Tasks'",
+            "problemMatcher": [],
+            "group": "build"
+        },
+        {
+            "label": "  4.1 [TODO] Sales Dashboard",
+            "detail": "Widget: PKS pending, Invoice status, Pembayaran",
+            "type": "shell",
+            "command": "echo 'Create Sales dashboard view'",
+            "problemMatcher": []
+        },
+        {
+            "label": "  4.2 [TODO] Marketing Manager Dashboard",
+            "detail": "Widget: PKS to approve, Invoice to review, Statistics",
+            "type": "shell",
+            "command": "echo 'Create Manager dashboard view'",
+            "problemMatcher": []
+        },
+        {
+            "label": "  4.3 [TODO] Notification System",
+            "detail": "Notifikasi untuk PKS baru, approval, revision request",
+            "type": "shell",
+            "command": "echo 'Implement notification system'",
+            "problemMatcher": []
+        },
+        {
+            "label": "  4.4 [TODO] Activity Timeline",
+            "detail": "Timeline aktivitas dokumen (created, approved, dll)",
+            "type": "shell",
+            "command": "echo 'Create activity timeline component'",
+            "problemMatcher": []
+        },
+
+        {
+            "label": "────────────────────────────────────────────",
+            "type": "shell",
+            "command": "echo ''",
+            "problemMatcher": []
+        },
+
+        {
+            "label": "📌 PHASE 5: DOCUMENT ARCHIVE",
+            "detail": "Sistem penyimpanan dokumen",
+            "type": "shell",
+            "command": "echo 'Phase 5 Tasks'",
+            "problemMatcher": [],
+            "group": "build"
+        },
+        {
+            "label": "  5.1 [TODO] Document Archive View",
+            "detail": "View semua dokumen (PKS, Invoice, Kuitansi) yang sudah complete",
+            "type": "shell",
+            "command": "echo 'Create archive view'",
+            "problemMatcher": []
+        },
+        {
+            "label": "  5.2 [TODO] Document Search & Filter",
+            "detail": "Search by client, date range, type, status",
+            "type": "shell",
+            "command": "echo 'Advanced search filters'",
+            "problemMatcher": []
+        },
+        {
+            "label": "  5.3 [TODO] Document Export",
+            "detail": "Export to Excel, PDF batch",
+            "type": "shell",
+            "command": "echo 'Export functionality'",
+            "problemMatcher": []
+        },
+        {
+            "label": "  5.4 [TODO] Document Relations View",
+            "detail": "View relasi PKS → Invoice → Kuitansi per client",
+            "type": "shell",
+            "command": "echo 'Related documents view'",
+            "problemMatcher": []
+        },
+
+        {
+            "label": "────────────────────────────────────────────",
+            "type": "shell",
+            "command": "echo ''",
+            "problemMatcher": []
+        },
+
+        {
+            "label": "📌 PHASE 6: PRINT & REPORTS",
+            "detail": "Cetak dokumen dan laporan",
+            "type": "shell",
+            "command": "echo 'Phase 6 Tasks'",
+            "problemMatcher": [],
+            "group": "build"
+        },
+        {
+            "label": "  6.1 [TODO] PKS Print Template",
+            "detail": "Template cetak Surat Perjanjian Kerja Sama",
+            "type": "shell",
+            "command": "echo 'Create PKS print template'",
+            "problemMatcher": []
+        },
+        {
+            "label": "  6.2 [TODO] Invoice Print Template",
+            "detail": "Template cetak Invoice profesional",
+            "type": "shell",
+            "command": "echo 'Create Invoice print template'",
+            "problemMatcher": []
+        },
+        {
+            "label": "  6.3 [TODO] Kuitansi Print Template",
+            "detail": "Template cetak Kuitansi pembayaran",
+            "type": "shell",
+            "command": "echo 'Create Kuitansi print template'",
+            "problemMatcher": []
+        },
+        {
+            "label": "  6.4 [TODO] Monthly/Period Reports",
+            "detail": "Laporan per periode (penjualan, pembayaran, dll)",
+            "type": "shell",
+            "command": "echo 'Create report views'",
+            "problemMatcher": []
+        }
+    ]
+}

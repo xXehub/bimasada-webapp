@@ -506,4 +506,162 @@ class KuitansiController extends Controller
             'message' => 'Kuitansi berhasil dihapus.',
         ]);
     }
+
+    /**
+     * Create kuitansi from Invoice.
+     */
+    public function createFromInvoice(Invoice $invoice)
+    {
+        // Check if invoice is not fully paid
+        if ($invoice->is_fully_paid) {
+            return redirect()->back()
+                ->with('error', 'Invoice ini sudah lunas!');
+        }
+
+        $salesList = Sales::orderBy('nama_sales')->get();
+        
+        // Pre-fill data from Invoice
+        $prefillData = [
+            'nama_pelanggan' => $invoice->nama_pelanggan,
+            'alamat' => $invoice->alamat,
+            'no_telp' => $invoice->no_telp,
+            'id_sales' => $invoice->id_sales,
+            'id_invoice' => $invoice->id,
+        ];
+        
+        // Calculate remaining amount
+        $remainingAmount = $invoice->remaining_amount;
+        
+        // Generate kuitansi number
+        $year = date('Y');
+        $month = date('m');
+        $lastKuitansi = Kuitansi::whereYear('created_at', $year)
+            ->whereMonth('created_at', $month)
+            ->whereNotNull('no_kuitansi')
+            ->orderBy('no_kuitansi', 'desc')
+            ->first();
+
+        if ($lastKuitansi && preg_match('/KTN-' . $year . '-' . $month . '-(\d+)/', $lastKuitansi->no_kuitansi, $matches)) {
+            $nextNumber = intval($matches[1]) + 1;
+        } else {
+            $nextNumber = 1;
+        }
+        $noKuitansi = 'KTN-' . $year . '-' . $month . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+
+        return view('kuitansis.create-from-invoice', compact('invoice', 'salesList', 'prefillData', 'remainingAmount', 'noKuitansi'));
+    }
+
+    /**
+     * Store kuitansi created from Invoice.
+     */
+    public function storeFromInvoice(Request $request, Invoice $invoice)
+    {
+        // Check if invoice is not fully paid
+        if ($invoice->is_fully_paid) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invoice ini sudah lunas!'
+            ], 400);
+        }
+
+        $validated = $request->validate([
+            'no_kuitansi' => 'nullable|string|max:50|unique:kuitansis,no_kuitansi',
+            'tanggal_kuitansi' => 'required|date',
+            'nama_pelanggan' => 'required|string|max:255',
+            'alamat' => 'nullable|string|max:500',
+            'no_telp' => 'nullable|string|max:20',
+            'total_bayar' => 'required|numeric|min:0',
+            'invoice_pembayaran' => 'required|in:Cash,Transfer,Ciro',
+            'keterangan' => 'nullable|string',
+            'status_kuitansi' => 'nullable|in:Draft,Terkirim,Lunas,Batal',
+            'id_sales' => 'required|exists:sales,id',
+        ]);
+
+        // Check if payment amount doesn't exceed remaining
+        $remainingAmount = $invoice->remaining_amount;
+        if ($validated['total_bayar'] > $remainingAmount) {
+            return response()->json([
+                'success' => false,
+                'message' => "Total pembayaran tidak boleh melebihi sisa tagihan (Rp " . number_format($remainingAmount, 0, ',', '.') . ")"
+            ], 400);
+        }
+
+        // Generate kuitansi number if not provided
+        if (empty($validated['no_kuitansi'])) {
+            $year = date('Y');
+            $month = date('m');
+            $lastKuitansi = Kuitansi::whereYear('created_at', $year)
+                ->whereMonth('created_at', $month)
+                ->whereNotNull('no_kuitansi')
+                ->orderBy('no_kuitansi', 'desc')
+                ->first();
+
+            if ($lastKuitansi && preg_match('/KTN-' . $year . '-' . $month . '-(\d+)/', $lastKuitansi->no_kuitansi, $matches)) {
+                $nextNumber = intval($matches[1]) + 1;
+            } else {
+                $nextNumber = 1;
+            }
+            $validated['no_kuitansi'] = 'KTN-' . $year . '-' . $month . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+        }
+
+        // Create kuitansi linked to Invoice
+        $kuitansi = Kuitansi::create([
+            'no_kuitansi' => $validated['no_kuitansi'],
+            'tanggal_kuitansi' => $validated['tanggal_kuitansi'],
+            'nama_pelanggan' => $validated['nama_pelanggan'],
+            'alamat' => $validated['alamat'] ?? null,
+            'no_telp' => $validated['no_telp'] ?? null,
+            'total_bayar' => $validated['total_bayar'],
+            'invoice_pembayaran' => $validated['invoice_pembayaran'],
+            'keterangan' => $validated['keterangan'] ?? null,
+            'status_kuitansi' => $validated['status_kuitansi'] ?? 'Draft',
+            'id_sales' => $validated['id_sales'],
+            'id_invoice' => $invoice->id,
+        ]);
+
+        // Check if invoice is now fully paid and update status
+        $newRemainingAmount = $invoice->fresh()->remaining_amount;
+        if ($newRemainingAmount <= 0) {
+            $invoice->update(['status_pembayaran' => 'Lunas']);
+        } elseif ($invoice->kuitansis()->count() > 0) {
+            $invoice->update(['status_pembayaran' => 'Cicilan']);
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Kuitansi berhasil dibuat dari Invoice!',
+                'redirect' => route('kuitansis.show', $kuitansi->id)
+            ]);
+        }
+
+        return redirect()->route('kuitansis.show', $kuitansi->id)
+            ->with('success', 'Kuitansi berhasil dibuat dari Invoice!');
+    }
+
+    /**
+     * Get available invoices list for kuitansi creation.
+     */
+    public function getAvailableInvoices()
+    {
+        $invoicesList = Invoice::with('sales')
+            ->where('status_pembayaran', '!=', 'Lunas')
+            ->get()
+            ->filter(function ($invoice) {
+                return $invoice->remaining_amount > 0;
+            })
+            ->map(function ($invoice) {
+                return [
+                    'id' => $invoice->id,
+                    'invoice_number' => $invoice->invoice_number,
+                    'nama_pelanggan' => $invoice->nama_pelanggan,
+                    'total_harga' => $invoice->total_harga,
+                    'total_paid' => $invoice->total_paid,
+                    'remaining_amount' => $invoice->remaining_amount,
+                    'sales_name' => $invoice->sales->nama_sales ?? '-',
+                ];
+            });
+
+        return response()->json($invoicesList->values());
+    }
 }

@@ -143,7 +143,7 @@ class SuratPerjanjianController extends Controller
      */
     public function show(SuratPerjanjian $suratPerjanjian)
     {
-        $suratPerjanjian->load('sales', 'detailSurats');
+        $suratPerjanjian->load('sales', 'detailSurats', 'invoices');
         return view('surat-perjanjians.show', compact('suratPerjanjian'));
     }
 

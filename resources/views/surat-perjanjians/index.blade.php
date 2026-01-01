@@ -3,17 +3,45 @@
 
     @push('styles')
     <style>
-        /* Custom DataTables Styling */
-        .dataTables_wrapper {
-            font-family: inherit;
+        /* ============================================
+           BIMASADA DataTables Custom Styling
+           Matching global design system
+        ============================================ */
+        
+        /* Keyframe Animations */
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
         }
         
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+        
+        /* Hide default DataTables elements we're replacing */
         .dataTables_filter,
         .dataTables_length {
             display: none !important;
         }
         
-        #pks-table thead th {
+        /* Table Container */
+        #pks-table_wrapper {
+            width: 100%;
+        }
+        
+        /* Table Base Styling */
+        table.dataTable {
+            width: 100% !important;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        
+        /* Table Header */
+        table.dataTable thead th {
             padding: 0.875rem 1rem;
             text-align: left;
             font-size: 0.75rem;
@@ -24,68 +52,70 @@
             border-bottom: 1px solid;
         }
         
-        .light #pks-table thead th,
-        :root:not(.dark) #pks-table thead th {
+        .light table.dataTable thead th,
+        :root:not(.dark) table.dataTable thead th {
             background-color: rgb(249 250 251);
             color: rgb(75 85 99);
             border-color: rgb(229 231 235);
         }
         
-        .dark #pks-table thead th {
+        .dark table.dataTable thead th {
             background-color: rgb(30 32 38);
             color: rgb(209 213 219);
             border-color: rgb(55 65 81);
         }
         
-        #pks-table tbody td {
+        /* Table Body */
+        table.dataTable tbody td {
             padding: 1rem;
             vertical-align: middle;
             border-bottom: 1px solid;
         }
         
-        .light #pks-table tbody td,
-        :root:not(.dark) #pks-table tbody td {
+        .light table.dataTable tbody td,
+        :root:not(.dark) table.dataTable tbody td {
             border-color: rgb(243 244 246);
         }
         
-        .dark #pks-table tbody td {
+        .dark table.dataTable tbody td {
             border-color: rgb(55 65 81);
         }
         
-        #pks-table tbody tr {
+        /* Table Rows */
+        table.dataTable tbody tr {
             transition: background-color 0.15s ease;
         }
         
-        .light #pks-table tbody tr,
-        :root:not(.dark) #pks-table tbody tr {
+        .light table.dataTable tbody tr,
+        :root:not(.dark) table.dataTable tbody tr {
             background-color: white;
         }
         
-        .light #pks-table tbody tr:hover,
-        :root:not(.dark) #pks-table tbody tr:hover {
+        .light table.dataTable tbody tr:hover,
+        :root:not(.dark) table.dataTable tbody tr:hover {
             background-color: rgb(249 250 251);
         }
         
-        .dark #pks-table tbody tr {
+        .dark table.dataTable tbody tr {
             background-color: rgb(24 26 32);
         }
         
-        .dark #pks-table tbody tr:hover {
+        .dark table.dataTable tbody tr:hover {
             background-color: rgb(30 32 38);
         }
-
+        
         /* Sorting Icons */
-        #pks-table thead th.sorting,
-        #pks-table thead th.sorting_asc,
-        #pks-table thead th.sorting_desc {
+        table.dataTable thead th.sorting,
+        table.dataTable thead th.sorting_asc,
+        table.dataTable thead th.sorting_desc {
             cursor: pointer;
             position: relative;
             padding-right: 1.75rem;
         }
         
-        #pks-table thead th.sorting::after,
-        #pks-table thead th.sorting_asc::after,
-        #pks-table thead th.sorting_desc::after {
+        table.dataTable thead th.sorting::after,
+        table.dataTable thead th.sorting_asc::after,
+        table.dataTable thead th.sorting_desc::after {
             position: absolute;
             right: 0.5rem;
             top: 50%;
@@ -94,23 +124,39 @@
             opacity: 0.5;
         }
         
-        #pks-table thead th.sorting::after { content: "⇅"; }
-        #pks-table thead th.sorting_asc::after { content: "↑"; opacity: 1; }
-        #pks-table thead th.sorting_desc::after { content: "↓"; opacity: 1; }
+        table.dataTable thead th.sorting::after {
+            content: "⇅";
+        }
         
-        .light #pks-table thead th.sorting_asc::after,
-        .light #pks-table thead th.sorting_desc::after,
-        :root:not(.dark) #pks-table thead th.sorting_asc::after,
-        :root:not(.dark) #pks-table thead th.sorting_desc::after {
+        table.dataTable thead th.sorting_asc::after {
+            content: "↑";
+            opacity: 1;
+        }
+        
+        .light table.dataTable thead th.sorting_asc::after,
+        :root:not(.dark) table.dataTable thead th.sorting_asc::after {
             color: rgb(79 70 229);
         }
         
-        .dark #pks-table thead th.sorting_asc::after,
-        .dark #pks-table thead th.sorting_desc::after {
+        .dark table.dataTable thead th.sorting_asc::after {
             color: rgb(129 140 248);
         }
-
-        /* Pagination */
+        
+        table.dataTable thead th.sorting_desc::after {
+            content: "↓";
+            opacity: 1;
+        }
+        
+        .light table.dataTable thead th.sorting_desc::after,
+        :root:not(.dark) table.dataTable thead th.sorting_desc::after {
+            color: rgb(79 70 229);
+        }
+        
+        .dark table.dataTable thead th.sorting_desc::after {
+            color: rgb(129 140 248);
+        }
+        
+        /* Info Text */
         .dataTables_info {
             padding: 1rem 1.5rem;
             font-size: 0.875rem;
@@ -124,7 +170,8 @@
         .dark .dataTables_info {
             color: rgb(156 163 175);
         }
-
+        
+        /* Pagination Container */
         .dataTables_paginate {
             display: flex;
             align-items: center;
@@ -132,6 +179,7 @@
             padding: 1rem 1.5rem;
         }
         
+        /* Pagination Buttons */
         .dataTables_paginate .paginate_button {
             display: inline-flex;
             align-items: center;
@@ -168,17 +216,19 @@
             color: white;
         }
         
+        /* Current Page Button */
         .dataTables_paginate .paginate_button.current {
             background: linear-gradient(135deg, rgb(79 70 229) 0%, rgb(99 102 241) 100%) !important;
             color: white !important;
             box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.25);
         }
         
+        /* Disabled Pagination */
         .dataTables_paginate .paginate_button.disabled {
             opacity: 0.4;
             cursor: not-allowed;
         }
-
+        
         /* Footer Area */
         .dt-footer {
             display: flex;
@@ -206,8 +256,12 @@
             border-color: rgb(55 65 81);
             background-color: rgb(24 26 32);
         }
-
-        /* Processing Indicator */
+        
+        /* Processing Indicator - Loading State */
+        .dataTables_wrapper {
+            position: relative;
+        }
+        
         .dataTables_processing {
             position: absolute !important;
             top: 50% !important;
@@ -223,13 +277,53 @@
         :root:not(.dark) .dataTables_processing {
             background-color: white;
             color: rgb(75 85 99);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
         
         .dark .dataTables_processing {
             background-color: rgb(30 32 38);
             color: rgb(156 163 175);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Table wrapper relative positioning for loading */
+        #pks-table_wrapper {
+            position: relative;
+            min-height: auto;
+        }
+        
+        /* Only apply min-height when processing */
+        #pks-table_wrapper.processing {
+            min-height: 400px;
+        }
+        
+        /* Empty Table State */
+        .dataTables_empty {
+            padding: 3rem !important;
+            text-align: center;
+        }
+        
+        /* Remove default DataTables borders */
+        table.dataTable.no-footer {
+            border-bottom: none;
+        }
+        
+        table.dataTable.stripe tbody tr.odd,
+        table.dataTable.display tbody tr.odd {
+            background-color: transparent;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            table.dataTable thead th,
+            table.dataTable tbody td {
+                padding: 0.75rem 0.5rem;
+            }
+            
+            .dataTables_paginate {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
         }
 
         /* Custom scrollbar */

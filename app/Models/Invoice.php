@@ -21,6 +21,7 @@ class Invoice extends Model
         'jatuh_tempo',
         'keterangan',
         'id_sales',
+        'id_pks',
     ];
 
     protected $casts = [
@@ -35,6 +36,11 @@ class Invoice extends Model
         return $this->belongsTo(Sales::class, 'id_sales');
     }
 
+    public function pks(): BelongsTo
+    {
+        return $this->belongsTo(SuratPerjanjian::class, 'id_pks');
+    }
+
     public function detailInvoices(): HasMany
     {
         return $this->hasMany(DetailInvoice::class, 'id_invoice');
@@ -43,5 +49,29 @@ class Invoice extends Model
     public function kuitansis(): HasMany
     {
         return $this->hasMany(Kuitansi::class, 'id_invoice');
+    }
+
+    /**
+     * Get total paid amount from kuitansis
+     */
+    public function getTotalPaidAttribute(): float
+    {
+        return $this->kuitansis()->where('status_kuitansi', 'Lunas')->sum('total_bayar');
+    }
+
+    /**
+     * Get remaining amount to pay
+     */
+    public function getRemainingAmountAttribute(): float
+    {
+        return max(0, $this->total_harga - $this->total_paid);
+    }
+
+    /**
+     * Check if invoice is fully paid
+     */
+    public function getIsFullyPaidAttribute(): bool
+    {
+        return $this->remaining_amount <= 0;
     }
 }

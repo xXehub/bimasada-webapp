@@ -279,6 +279,90 @@
                     </div>
                 </x-ui.card>
 
+                <!-- Invoice Progress Card -->
+                @if($suratPerjanjian->status_surat === 'Disetujui')
+                <x-ui.card>
+                    <x-slot name="header">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Progress Invoice</h3>
+                            <span class="text-sm text-gray-500 dark:text-gray-400">{{ $suratPerjanjian->invoices->count() }} invoice</span>
+                        </div>
+                    </x-slot>
+                    
+                    @php
+                        $totalInvoiced = $suratPerjanjian->total_invoiced;
+                        $remainingValue = $suratPerjanjian->remaining_contract_value;
+                        $percentage = $suratPerjanjian->nilai_kontrak > 0 ? min(100, ($totalInvoiced / $suratPerjanjian->nilai_kontrak) * 100) : 0;
+                    @endphp
+                    
+                    <div class="space-y-4">
+                        <!-- Progress Bar -->
+                        <div>
+                            <div class="flex justify-between text-sm mb-2">
+                                <span class="text-gray-600 dark:text-gray-400">Tertagih</span>
+                                <span class="font-medium text-gray-900 dark:text-white">{{ number_format($percentage, 1) }}%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+                                <div class="bg-gradient-to-r from-primary-500 to-emerald-500 h-3 rounded-full transition-all duration-500" style="width: {{ $percentage }}%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Stats -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl">
+                                <p class="text-xs text-emerald-600 dark:text-emerald-400">Sudah Ditagih</p>
+                                <p class="font-bold text-emerald-700 dark:text-emerald-300 text-sm mt-1">Rp {{ number_format($totalInvoiced, 0, ',', '.') }}</p>
+                            </div>
+                            <div class="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-xl">
+                                <p class="text-xs text-amber-600 dark:text-amber-400">Sisa Nilai</p>
+                                <p class="font-bold text-amber-700 dark:text-amber-300 text-sm mt-1">Rp {{ number_format($remainingValue, 0, ',', '.') }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Invoice List -->
+                        @if($suratPerjanjian->invoices->count() > 0)
+                        <div class="space-y-2 pt-2 border-t border-gray-200 dark:border-dark-border">
+                            <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Invoice Terkait</p>
+                            @foreach($suratPerjanjian->invoices->take(3) as $invoice)
+                            <a href="{{ route('invoices.show', $invoice->id) }}" class="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-hover transition-colors">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-6 h-6 rounded bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+                                        <svg class="w-3 h-3 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                        </svg>
+                                    </div>
+                                    <span class="text-sm text-gray-700 dark:text-gray-300">{{ $invoice->invoice_number }}</span>
+                                </div>
+                                <span class="text-xs font-medium {{ $invoice->status_pembayaran === 'Lunas' ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400' }}">
+                                    Rp {{ number_format($invoice->total_harga, 0, ',', '.') }}
+                                </span>
+                            </a>
+                            @endforeach
+                            @if($suratPerjanjian->invoices->count() > 3)
+                            <p class="text-xs text-gray-500 dark:text-gray-400 text-center pt-1">
+                                +{{ $suratPerjanjian->invoices->count() - 3 }} invoice lainnya
+                            </p>
+                            @endif
+                        </div>
+                        @endif
+
+                        <!-- Create Invoice Button -->
+                        @if($remainingValue > 0)
+                        <a href="{{ route('invoices.createFromPks', $suratPerjanjian->id) }}" class="block w-full py-2 px-4 bg-primary-600 hover:bg-primary-700 text-white text-center rounded-xl text-sm font-medium transition-colors">
+                            + Buat Invoice Baru
+                        </a>
+                        @else
+                        <div class="p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl text-center">
+                            <svg class="w-6 h-6 text-emerald-600 dark:text-emerald-400 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <p class="text-sm font-medium text-emerald-700 dark:text-emerald-300">Kontrak Selesai Ditagih</p>
+                        </div>
+                        @endif
+                    </div>
+                </x-ui.card>
+                @endif
+
                 <!-- Quick Actions Card -->
                 <x-ui.card>
                     <x-slot name="header">
@@ -322,10 +406,24 @@
                                 </svg>
                             </div>
                             <div>
-                                <p class="font-medium text-gray-900 dark:text-white">Buat Invoice</p>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Dari PKS ini</p>
+                                <p class="font-medium text-gray-900 dark:text-white">Buat Invoice Baru</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Invoice mandiri</p>
                             </div>
                         </a>
+
+                        @if($suratPerjanjian->status_surat === 'Disetujui' && $suratPerjanjian->remaining_contract_value > 0)
+                        <a href="{{ route('invoices.createFromPks', $suratPerjanjian->id) }}" class="flex items-center gap-3 p-3 rounded-xl bg-primary-50 dark:bg-primary-900/30 hover:bg-primary-100 dark:hover:bg-primary-900/50 transition-colors border-2 border-primary-200 dark:border-primary-800">
+                            <div class="w-10 h-10 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="font-medium text-primary-900 dark:text-primary-100">Invoice dari PKS</p>
+                                <p class="text-sm text-primary-600 dark:text-primary-400">Terhubung ke kontrak ini</p>
+                            </div>
+                        </a>
+                        @endif
 
                         <button type="button" onclick="window.print()" class="w-full flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-dark-hover hover:bg-gray-100 dark:hover:bg-dark-sidebar transition-colors text-left">
                             <div class="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center flex-shrink-0">

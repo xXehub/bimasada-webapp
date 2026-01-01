@@ -3,17 +3,42 @@
 
     @push('styles')
     <style>
-        /* Custom DataTables Styling */
-        .dataTables_wrapper {
-            font-family: inherit;
+        /* ============================================
+           BIMASADA DataTables Custom Styling
+           Matching global design system
+        ============================================ */
+        
+        /* Keyframe Animations */
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
         
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+        
+        /* Hide default DataTables elements we're replacing */
         .dataTables_filter,
         .dataTables_length {
             display: none !important;
         }
         
-        #kuitansi-table thead th {
+        /* Table Container */
+        #kuitansi-table_wrapper {
+            width: 100%;
+            position: relative;
+        }
+        
+        /* Table Base Styling */
+        table.dataTable {
+            width: 100% !important;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        
+        /* Table Header */
+        table.dataTable thead th {
             padding: 0.875rem 1rem;
             text-align: left;
             font-size: 0.75rem;
@@ -24,68 +49,70 @@
             border-bottom: 1px solid;
         }
         
-        .light #kuitansi-table thead th,
-        :root:not(.dark) #kuitansi-table thead th {
+        .light table.dataTable thead th,
+        :root:not(.dark) table.dataTable thead th {
             background-color: rgb(249 250 251);
             color: rgb(75 85 99);
             border-color: rgb(229 231 235);
         }
         
-        .dark #kuitansi-table thead th {
+        .dark table.dataTable thead th {
             background-color: rgb(30 32 38);
             color: rgb(209 213 219);
             border-color: rgb(55 65 81);
         }
         
-        #kuitansi-table tbody td {
+        /* Table Body */
+        table.dataTable tbody td {
             padding: 1rem;
             vertical-align: middle;
             border-bottom: 1px solid;
         }
         
-        .light #kuitansi-table tbody td,
-        :root:not(.dark) #kuitansi-table tbody td {
+        .light table.dataTable tbody td,
+        :root:not(.dark) table.dataTable tbody td {
             border-color: rgb(243 244 246);
         }
         
-        .dark #kuitansi-table tbody td {
+        .dark table.dataTable tbody td {
             border-color: rgb(55 65 81);
         }
         
-        #kuitansi-table tbody tr {
+        /* Table Rows */
+        table.dataTable tbody tr {
             transition: background-color 0.15s ease;
         }
         
-        .light #kuitansi-table tbody tr,
-        :root:not(.dark) #kuitansi-table tbody tr {
+        .light table.dataTable tbody tr,
+        :root:not(.dark) table.dataTable tbody tr {
             background-color: white;
         }
         
-        .light #kuitansi-table tbody tr:hover,
-        :root:not(.dark) #kuitansi-table tbody tr:hover {
+        .light table.dataTable tbody tr:hover,
+        :root:not(.dark) table.dataTable tbody tr:hover {
             background-color: rgb(249 250 251);
         }
         
-        .dark #kuitansi-table tbody tr {
+        .dark table.dataTable tbody tr {
             background-color: rgb(24 26 32);
         }
         
-        .dark #kuitansi-table tbody tr:hover {
+        .dark table.dataTable tbody tr:hover {
             background-color: rgb(30 32 38);
         }
-
+        
         /* Sorting Icons */
-        #kuitansi-table thead th.sorting,
-        #kuitansi-table thead th.sorting_asc,
-        #kuitansi-table thead th.sorting_desc {
+        table.dataTable thead th.sorting,
+        table.dataTable thead th.sorting_asc,
+        table.dataTable thead th.sorting_desc {
             cursor: pointer;
             position: relative;
             padding-right: 1.75rem;
         }
         
-        #kuitansi-table thead th.sorting::after,
-        #kuitansi-table thead th.sorting_asc::after,
-        #kuitansi-table thead th.sorting_desc::after {
+        table.dataTable thead th.sorting::after,
+        table.dataTable thead th.sorting_asc::after,
+        table.dataTable thead th.sorting_desc::after {
             position: absolute;
             right: 0.5rem;
             top: 50%;
@@ -94,23 +121,23 @@
             opacity: 0.5;
         }
         
-        #kuitansi-table thead th.sorting::after { content: "⇅"; }
-        #kuitansi-table thead th.sorting_asc::after { content: "↑"; opacity: 1; }
-        #kuitansi-table thead th.sorting_desc::after { content: "↓"; opacity: 1; }
+        table.dataTable thead th.sorting::after { content: "⇅"; }
+        table.dataTable thead th.sorting_asc::after { content: "↑"; opacity: 1; }
+        table.dataTable thead th.sorting_desc::after { content: "↓"; opacity: 1; }
         
-        .light #kuitansi-table thead th.sorting_asc::after,
-        .light #kuitansi-table thead th.sorting_desc::after,
-        :root:not(.dark) #kuitansi-table thead th.sorting_asc::after,
-        :root:not(.dark) #kuitansi-table thead th.sorting_desc::after {
+        .light table.dataTable thead th.sorting_asc::after,
+        .light table.dataTable thead th.sorting_desc::after,
+        :root:not(.dark) table.dataTable thead th.sorting_asc::after,
+        :root:not(.dark) table.dataTable thead th.sorting_desc::after {
             color: rgb(79 70 229);
         }
         
-        .dark #kuitansi-table thead th.sorting_asc::after,
-        .dark #kuitansi-table thead th.sorting_desc::after {
+        .dark table.dataTable thead th.sorting_asc::after,
+        .dark table.dataTable thead th.sorting_desc::after {
             color: rgb(129 140 248);
         }
 
-        /* Pagination */
+        /* Info Text */
         .dataTables_info {
             padding: 1rem 1.5rem;
             font-size: 0.875rem;
@@ -125,6 +152,7 @@
             color: rgb(156 163 175);
         }
 
+        /* Pagination Container */
         .dataTables_paginate {
             display: flex;
             align-items: center;
@@ -132,6 +160,7 @@
             padding: 1rem 1.5rem;
         }
         
+        /* Pagination Buttons */
         .dataTables_paginate .paginate_button {
             display: inline-flex;
             align-items: center;
@@ -168,12 +197,14 @@
             color: white;
         }
         
+        /* Current Page Button */
         .dataTables_paginate .paginate_button.current {
             background: linear-gradient(135deg, rgb(79 70 229) 0%, rgb(99 102 241) 100%) !important;
             color: white !important;
             box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.25);
         }
         
+        /* Disabled Pagination */
         .dataTables_paginate .paginate_button.disabled {
             opacity: 0.4;
             cursor: not-allowed;
@@ -207,7 +238,11 @@
             background-color: rgb(24 26 32);
         }
 
-        /* Processing Indicator */
+        /* Processing Indicator - Loading State */
+        .dataTables_wrapper {
+            position: relative;
+        }
+        
         .dataTables_processing {
             position: absolute !important;
             top: 50% !important;
@@ -223,13 +258,62 @@
         :root:not(.dark) .dataTables_processing {
             background-color: white;
             color: rgb(75 85 99);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
         
         .dark .dataTables_processing {
             background-color: rgb(30 32 38);
             color: rgb(156 163 175);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Table wrapper relative positioning for loading */
+        #kuitansi-table_wrapper {
+            position: relative;
+            min-height: auto;
+        }
+        
+        /* Only apply min-height when processing */
+        #kuitansi-table_wrapper.processing {
+            min-height: 400px;
+        }
+        
+        /* Empty Table State */
+        .dataTables_empty {
+            padding: 3rem !important;
+            text-align: center;
+        }
+        
+        .light .dataTables_empty,
+        :root:not(.dark) .dataTables_empty {
+            color: rgb(107 114 128);
+        }
+        
+        .dark .dataTables_empty {
+            color: rgb(156 163 175);
+        }
+        
+        /* Remove default DataTables borders */
+        table.dataTable.no-footer {
+            border-bottom: none;
+        }
+        
+        table.dataTable.stripe tbody tr.odd,
+        table.dataTable.display tbody tr.odd {
+            background-color: transparent;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            table.dataTable thead th,
+            table.dataTable tbody td {
+                padding: 0.75rem 0.5rem;
+            }
+            
+            .dataTables_paginate {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
         }
 
         /* Animation for stats cards */
@@ -615,24 +699,63 @@
                         order: [[1, 'desc']],
                         pageLength: 10,
                         language: {
-                            processing: '<div class="flex items-center gap-3"><div class="animate-spin w-5 h-5 border-2 border-primary-600 border-t-transparent rounded-full"></div><span>Memuat data...</span></div>',
-                            emptyTable: '<div class="py-8 text-center text-gray-500 dark:text-gray-400">Tidak ada data kuitansi</div>',
-                            info: 'Menampilkan _START_ - _END_ dari _TOTAL_ data',
-                            infoEmpty: 'Tidak ada data',
-                            infoFiltered: '(difilter dari _MAX_ total data)',
-                            lengthMenu: 'Tampilkan _MENU_ data',
-                            zeroRecords: 'Tidak ada data yang cocok',
+                            processing: `
+                                <div class="flex items-center justify-center gap-3 py-8">
+                                    <div class="relative">
+                                        <div class="w-10 h-10 rounded-full border-4 border-primary-200 dark:border-primary-900"></div>
+                                        <div class="absolute top-0 left-0 w-10 h-10 rounded-full border-4 border-transparent border-t-primary-600 animate-spin"></div>
+                                    </div>
+                                    <span class="text-gray-600 dark:text-gray-400 font-medium">Memuat data...</span>
+                                </div>
+                            `,
+                            emptyTable: `
+                                <div class="flex flex-col items-center justify-center py-16">
+                                    <div class="w-20 h-20 rounded-xl bg-gradient-to-br from-gray-100 to-gray-50 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center mb-5 shadow-inner">
+                                        <svg class="w-10 h-10 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                        </svg>
+                                    </div>
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Belum ada Kuitansi</h3>
+                                    <p class="text-gray-500 dark:text-gray-400 mb-6 text-center max-w-sm">Mulai dengan membuat kuitansi pembayaran pertama Anda.</p>
+                                    <a href="{{ route('kuitansis.create') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-lg hover:from-primary-700 hover:to-primary-600 transition-all shadow-lg shadow-primary-600/25 font-medium">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                        </svg>
+                                        Buat Kuitansi
+                                    </a>
+                                </div>
+                            `,
+                            zeroRecords: `
+                                <div class="flex flex-col items-center justify-center py-16">
+                                    <div class="w-20 h-20 rounded-xl bg-gradient-to-br from-amber-100 to-amber-50 dark:from-amber-900/30 dark:to-amber-900/10 flex items-center justify-center mb-5">
+                                        <svg class="w-10 h-10 text-amber-500 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                        </svg>
+                                    </div>
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Tidak ada hasil</h3>
+                                    <p class="text-gray-500 dark:text-gray-400 text-center max-w-sm">Coba sesuaikan pencarian atau filter untuk menemukan yang Anda cari.</p>
+                                </div>
+                            `,
+                            info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ kuitansi",
+                            infoEmpty: "Tidak ada kuitansi tersedia",
+                            infoFiltered: "(difilter dari _MAX_ total)",
+                            lengthMenu: "Tampilkan _MENU_ data",
                             paginate: {
-                                first: '«',
-                                last: '»',
-                                next: '›',
-                                previous: '‹'
+                                first: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/></svg>`,
+                                last: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>`,
+                                next: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>`,
+                                previous: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>`
                             }
                         },
                         drawCallback: function(settings) {
-                            self.tableInfo = `${settings._iDisplayStart + 1} - ${settings._iDisplayStart + settings._iDisplayLength > settings.fnRecordsDisplay() ? settings.fnRecordsDisplay() : settings._iDisplayStart + settings._iDisplayLength} dari ${settings.fnRecordsDisplay()} data`;
+                            const info = self.dataTable.page.info();
+                            if (info.recordsTotal > 0) {
+                                self.tableInfo = `${info.start + 1}-${info.end} dari ${info.recordsTotal}`;
+                            } else {
+                                self.tableInfo = '';
+                            }
                         },
-                        dom: '<"dt-top"<"dt-length"l><"dt-search"f>>rt<"dt-footer"<"dt-info"i><"dt-paging"p>>'
+                        dom: 'rt<"dt-footer"ip>'
                     });
                 },
 
