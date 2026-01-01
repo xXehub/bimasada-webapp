@@ -182,8 +182,10 @@ class InvoiceController extends Controller
     {
         $invoice->delete();
 
-        return redirect()->route('invoices.index')
-            ->with('success', 'Invoice berhasil dihapus!');
+        return response()->json([
+            'success' => true,
+            'message' => 'Invoice berhasil dihapus!'
+        ]);
     }
 
     /**

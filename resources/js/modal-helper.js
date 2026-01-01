@@ -1,324 +1,158 @@
 /**
- * BIMASADA Modal & Notification Helper
- * Reusable modal and notification system
+ * BIMASADA Modal & Notification Helper - REBUILT
  */
 
-// ============================================
-// MODAL SYSTEM
-// ============================================
+// Modal System
 window.Modal = {
-    // Show modal
-    show(modalId) {
-        const modal = document.getElementById(modalId);
-        if (!modal) return;
-        
-        modal.classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
-        
-        // Animate backdrop
-        const backdrop = modal.querySelector('.modal-backdrop');
-        const panel = modal.querySelector('.modal-panel');
-        
-        requestAnimationFrame(() => {
-            backdrop.style.opacity = '1';
-            panel.style.transform = 'scale(1)';
-            panel.style.opacity = '1';
-        });
+    show(id) {
+        const m = document.getElementById(id);
+        if (m) { m.classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
+    },
+    hide(id) {
+        const m = document.getElementById(id);
+        if (m) { m.classList.add('hidden'); document.body.style.overflow = ''; }
     },
     
-    // Hide modal
-    hide(modalId) {
-        const modal = document.getElementById(modalId);
-        if (!modal) return;
+    confirmDelete(opts = {}) {
+        const {modalId = 'confirm-delete-modal', title = 'Konfirmasi Hapus', message = 'Yakin hapus?', itemName = '', onConfirm = () => {}, onCancel = () => {}} = opts;
+        const m = document.getElementById(modalId);
+        if (!m) return;
         
-        const backdrop = modal.querySelector('.modal-backdrop');
-        const panel = modal.querySelector('.modal-panel');
+        m.querySelector('.modal-title').textContent = title;
+        m.querySelector('.modal-message').textContent = message;
+        const item = m.querySelector('.modal-item-name');
+        if (itemName) { item.classList.remove('hidden'); item.querySelector('p').textContent = itemName; } else { item.classList.add('hidden'); }
         
-        backdrop.style.opacity = '0';
-        panel.style.transform = 'scale(0.95)';
-        panel.style.opacity = '0';
+        const conf = m.querySelector('.modal-confirm');
+        const canc = m.querySelector('.modal-cancel');
+        const newConf = conf.cloneNode(true);
+        const newCanc = canc.cloneNode(true);
+        conf.replaceWith(newConf);
+        canc.replaceWith(newCanc);
         
-        setTimeout(() => {
-            modal.classList.add('hidden');
-            document.body.style.overflow = '';
-        }, 200);
-    },
-    
-    // Confirm Delete Modal
-    confirmDelete(options = {}) {
-        const {
-            modalId = 'confirm-delete-modal',
-            title = 'Konfirmasi Hapus',
-            message = 'Apakah Anda yakin ingin menghapus data ini?',
-            itemName = '',
-            onConfirm = () => {},
-            onCancel = () => {}
-        } = options;
+        newConf.onclick = () => { this.hide(modalId); onConfirm(); };
+        newCanc.onclick = () => { this.hide(modalId); onCancel(); };
         
-        const modal = document.getElementById(modalId);
-        if (!modal) {
-            console.error(`Modal with id "${modalId}" not found`);
-            return;
-        }
+        const esc = (e) => { if (e.key === 'Escape') { this.hide(modalId); onCancel(); document.removeEventListener('keydown', esc); } };
+        document.addEventListener('keydown', esc);
         
-        // Update content
-        const modalTitle = modal.querySelector('.modal-title, #modal-title');
-        const modalMessage = modal.querySelector('.modal-message');
-        const modalItemName = modal.querySelector('.modal-item-name');
-        
-        if (modalTitle) modalTitle.textContent = title;
-        if (modalMessage) modalMessage.textContent = message;
-        
-        if (itemName && modalItemName) {
-            modalItemName.classList.remove('hidden');
-            modalItemName.querySelector('span').textContent = itemName;
-        } else if (modalItemName) {
-            modalItemName.classList.add('hidden');
-        }
-        
-        // Setup event handlers
-        const confirmBtn = modal.querySelector('.modal-confirm');
-        const cancelBtn = modal.querySelector('.modal-cancel');
-        const backdrop = modal.querySelector('.modal-backdrop');
-        
-        // Remove old event listeners by cloning
-        const newConfirmBtn = confirmBtn.cloneNode(true);
-        const newCancelBtn = cancelBtn.cloneNode(true);
-        confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
-        cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
-        
-        // Add new event listeners
-        newConfirmBtn.addEventListener('click', () => {
-            this.hide(modalId);
-            onConfirm();
-        });
-        
-        newCancelBtn.addEventListener('click', () => {
-            this.hide(modalId);
-            onCancel();
-        });
-        
-        backdrop.addEventListener('click', () => {
-            this.hide(modalId);
-            onCancel();
-        });
-        
-        // Show modal
         this.show(modalId);
     },
     
-    // Alert Modal
-    alert(options = {}) {
-        const {
-            modalId = 'alert-modal',
-            type = 'info', // success, error, warning, info
-            title = 'Alert',
-            message = '',
-            onConfirm = () => {}
-        } = options;
+    alert(opts = {}) {
+        const {modalId = 'alert-modal', title = 'Alert', message = '', onConfirm = () => {}} = opts;
+        const m = document.getElementById(modalId);
+        if (!m) return;
         
-        const modal = document.getElementById(modalId);
-        if (!modal) {
-            console.error(`Modal with id "${modalId}" not found`);
-            return;
-        }
+        m.querySelector('.modal-title').textContent = title;
+        m.querySelector('.modal-message').textContent = message;
+        const conf = m.querySelector('.modal-confirm');
+        const newConf = conf.cloneNode(true);
+        conf.replaceWith(newConf);
+        newConf.onclick = () => { this.hide(modalId); onConfirm(); };
         
-        // Update content
-        const modalTitle = modal.querySelector('.modal-title');
-        const modalMessage = modal.querySelector('.modal-message');
+        const esc = (e) => { if (e.key === 'Escape') { this.hide(modalId); onConfirm(); document.removeEventListener('keydown', esc); } };
+        document.addEventListener('keydown', esc);
         
-        if (modalTitle) modalTitle.textContent = title;
-        if (modalMessage) modalMessage.textContent = message;
-        
-        // Setup event handlers
-        const confirmBtn = modal.querySelector('.modal-confirm');
-        const backdrop = modal.querySelector('.modal-backdrop');
-        
-        // Remove old event listeners by cloning
-        const newConfirmBtn = confirmBtn.cloneNode(true);
-        confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
-        
-        // Add new event listener
-        newConfirmBtn.addEventListener('click', () => {
-            this.hide(modalId);
-            onConfirm();
-        });
-        
-        backdrop.addEventListener('click', () => {
-            this.hide(modalId);
-            onConfirm();
-        });
-        
-        // Show modal
         this.show(modalId);
     },
     
-    // Confirm Modal
-    confirm(options = {}) {
-        const {
-            modalId = 'confirm-modal',
-            title = 'Konfirmasi',
-            message = 'Apakah Anda yakin?',
-            onConfirm = () => {},
-            onCancel = () => {}
-        } = options;
+    confirm(opts = {}) {
+        const {modalId = 'confirm-modal', title = 'Konfirmasi', message = 'Yakin?', onConfirm = () => {}, onCancel = () => {}} = opts;
+        const m = document.getElementById(modalId);
+        if (!m) return;
         
-        const modal = document.getElementById(modalId);
-        if (!modal) {
-            console.error(`Modal with id "${modalId}" not found`);
-            return;
-        }
+        m.querySelector('.modal-title').textContent = title;
+        m.querySelector('.modal-message').textContent = message;
+        const conf = m.querySelector('.modal-confirm');
+        const canc = m.querySelector('.modal-cancel');
+        const newConf = conf.cloneNode(true);
+        const newCanc = canc.cloneNode(true);
+        conf.replaceWith(newConf);
+        canc.replaceWith(newCanc);
         
-        // Update content
-        const modalTitle = modal.querySelector('.modal-title');
-        const modalMessage = modal.querySelector('.modal-message');
+        newConf.onclick = () => { this.hide(modalId); onConfirm(); };
+        newCanc.onclick = () => { this.hide(modalId); onCancel(); };
         
-        if (modalTitle) modalTitle.textContent = title;
-        if (modalMessage) modalMessage.textContent = message;
+        const esc = (e) => { if (e.key === 'Escape') { this.hide(modalId); onCancel(); document.removeEventListener('keydown', esc); } };
+        document.addEventListener('keydown', esc);
         
-        // Setup event handlers
-        const confirmBtn = modal.querySelector('.modal-confirm');
-        const cancelBtn = modal.querySelector('.modal-cancel');
-        const backdrop = modal.querySelector('.modal-backdrop');
-        
-        // Remove old event listeners by cloning
-        const newConfirmBtn = confirmBtn.cloneNode(true);
-        const newCancelBtn = cancelBtn.cloneNode(true);
-        confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
-        cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
-        
-        // Add new event listeners
-        newConfirmBtn.addEventListener('click', () => {
-            this.hide(modalId);
-            onConfirm();
-        });
-        
-        newCancelBtn.addEventListener('click', () => {
-            this.hide(modalId);
-            onCancel();
-        });
-        
-        backdrop.addEventListener('click', () => {
-            this.hide(modalId);
-            onCancel();
-        });
-        
-        // Show modal
         this.show(modalId);
     }
 };
 
-// ============================================
-// UTILITY FUNCTIONS
-// ============================================
-
-// Handle AJAX delete with confirmation
-window.deleteWithConfirm = function(url, itemName = '', onSuccess = null, onError = null) {
-    Modal.confirmDelete({
-        itemName: itemName,
-        onConfirm: () => {
-            // Show loading notification
-            const loadingNotif = Notification.info('Menghapus...', 'Sedang menghapus data', 0);
-            
-            // Perform delete
-            fetch(url, {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Remove loading notification
-                if (loadingNotif) loadingNotif.remove();
-                
-                if (data.success) {
-                    Notification.success('Berhasil!', data.message || 'Data berhasil dihapus');
-                    if (onSuccess) onSuccess(data);
-                } else {
-                    Notification.error('Gagal!', data.message || 'Gagal menghapus data');
-                    if (onError) onError(data);
-                }
-            })
-            .catch(error => {
-                // Remove loading notification
-                if (loadingNotif) loadingNotif.remove();
-                
-                Notification.error('Error!', 'Terjadi kesalahan saat menghapus data');
-                if (onError) onError(error);
-            });
+// Notification System
+window.Notification = {
+    create(title, msg, type = 'info', dur = 5000) {
+        const cont = document.getElementById('notification-container');
+        if (!cont) { console.error('notification-container not found'); return; }
+        
+        const tmpl = document.getElementById('notification-template');
+        if (!tmpl) { console.error('notification-template not found'); return; }
+        
+        const notif = tmpl.content.cloneNode(true).querySelector('.notification-item');
+        if (!notif) { console.error('notification-item not found in template'); return; }
+        
+        // Show appropriate icon
+        const iconClass = `notification-icon-${type}`;
+        const iconEl = notif.querySelector(`.${iconClass}`);
+        if (iconEl) iconEl.classList.remove('hidden');
+        
+        // Set content
+        const titleEl = notif.querySelector('.notification-title');
+        if (titleEl) titleEl.textContent = title;
+        
+        const msgEl = notif.querySelector('.notification-message');
+        if (msgEl) msgEl.textContent = msg;
+        
+        // Progress bar config
+        const progColors = {
+            success: 'bg-emerald-500',
+            error: 'bg-red-500',
+            warning: 'bg-amber-500',
+            info: 'bg-blue-500'
+        };
+        const progBar = notif.querySelector('.notification-progress-bar');
+        if (progBar) progBar.classList.add(...(progColors[type] || progColors.info).split(' '));
+        
+        cont.appendChild(notif);
+        
+        const close = () => {
+            notif.style.opacity = '0';
+            notif.style.transform = 'translateX(100%)';
+            setTimeout(() => notif.remove(), 300);
+        };
+        
+        const closeBtn = notif.querySelector('button');
+        if (closeBtn) closeBtn.onclick = close;
+        
+        if (dur > 0) {
+            if (progBar) {
+                progBar.style.width = '100%';
+                progBar.style.transition = `width ${dur}ms linear`;
+                setTimeout(() => { if (progBar) progBar.style.width = '0%'; }, 10);
+            }
+            setTimeout(close, dur);
+        } else {
+            const progContainer = notif.querySelector('.notification-progress');
+            if (progContainer) progContainer.style.display = 'none';
         }
-    });
+    },
+    success(t, m, d) { this.create(t, m, 'success', d); },
+    error(t, m, d) { this.create(t, m, 'error', d); },
+    warning(t, m, d) { this.create(t, m, 'warning', d); },
+    info(t, m, d) { this.create(t, m, 'info', d); }
 };
 
-// Show Laravel validation errors
-window.showValidationErrors = function(errors) {
-    const errorMessages = Object.values(errors).flat();
-    const message = errorMessages.join('\n');
-    
-    Notification.error(
-        'Validasi Gagal',
-        errorMessages[0], // Show first error
-        7000
-    );
-    
-    // Show all errors if more than one
-    if (errorMessages.length > 1) {
-        errorMessages.slice(1).forEach((msg, index) => {
-            setTimeout(() => {
-                Notification.error('Error', msg, 7000);
-            }, (index + 1) * 300);
+// Auto show session notifications
+document.addEventListener('DOMContentLoaded', () => {
+    if (window.sessionNotifications && typeof window.sessionNotifications === 'object') {
+        Object.keys(window.sessionNotifications).forEach(type => {
+            const msg = window.sessionNotifications[type];
+            if (msg && Notification[type]) {
+                const titles = { success: 'Berhasil!', error: 'Error!', warning: 'Perhatian!', info: 'Informasi', status: 'Status' };
+                Notification[type](titles[type] || 'Notifikasi', msg);
+            }
         });
-    }
-};
-
-// Initialize modal animations
-document.addEventListener('DOMContentLoaded', function() {
-    // Setup modal animations
-    document.querySelectorAll('.modal').forEach(modal => {
-        const backdrop = modal.querySelector('.modal-backdrop');
-        const panel = modal.querySelector('.modal-panel');
-        
-        if (backdrop) {
-            backdrop.style.transition = 'opacity 0.2s ease-out';
-            backdrop.style.opacity = '0';
-        }
-        
-        if (panel) {
-            panel.style.transition = 'all 0.2s ease-out';
-            panel.style.transform = 'scale(0.95)';
-            panel.style.opacity = '0';
-        }
-    });
-    
-    // Close modal on escape key
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            document.querySelectorAll('.modal:not(.hidden)').forEach(modal => {
-                Modal.hide(modal.id);
-            });
-        }
-    });
-    
-    // Auto-show session notifications
-    // This will work globally without needing to add script to each page
-    const sessionData = window.sessionNotifications || {};
-    
-    if (sessionData.success) {
-        Notification.success('Berhasil!', sessionData.success);
-    }
-    if (sessionData.error) {
-        Notification.error('Error!', sessionData.error);
-    }
-    if (sessionData.warning) {
-        Notification.warning('Peringatan!', sessionData.warning);
-    }
-    if (sessionData.info) {
-        Notification.info('Info', sessionData.info);
-    }
-    if (sessionData.status) {
-        Notification.success('Berhasil!', sessionData.status);
     }
 });

@@ -32,31 +32,34 @@ class RolePermissionSeeder extends Seeder
             'manage-roles',
         ];
 
+        $createdPermissions = [];
         foreach ($permissions as $permission) {
-            Permission::create(['name' => $permission]);
+            $createdPermissions[$permission] = Permission::firstOrCreate(
+                ['name' => $permission, 'guard_name' => 'web']
+            );
         }
 
         // Create Roles
-        $marketingManager = Role::create(['name' => 'Marketing Manager']);
-        $sales = Role::create(['name' => 'Sales']);
+        $marketingManager = Role::firstOrCreate(['name' => 'Marketing Manager', 'guard_name' => 'web']);
+        $sales = Role::firstOrCreate(['name' => 'Sales', 'guard_name' => 'web']);
 
         // Assign Permissions to Marketing Manager (Full Access)
         $marketingManager->givePermissionTo([
-            'view-invoices',
-            'create-invoices',
-            'edit-invoices',
-            'delete-invoices',
-            'export-invoices',
-            'manage-users',
-            'manage-roles',
+            $createdPermissions['view-invoices'],
+            $createdPermissions['create-invoices'],
+            $createdPermissions['edit-invoices'],
+            $createdPermissions['delete-invoices'],
+            $createdPermissions['export-invoices'],
+            $createdPermissions['manage-users'],
+            $createdPermissions['manage-roles'],
         ]);
 
         // Assign Permissions to Sales (Limited Access)
         $sales->givePermissionTo([
-            'view-invoices',
-            'create-invoices',
-            'edit-invoices',
-            'export-invoices',
+            $createdPermissions['view-invoices'],
+            $createdPermissions['create-invoices'],
+            $createdPermissions['edit-invoices'],
+            $createdPermissions['export-invoices'],
         ]);
 
         // Create default users

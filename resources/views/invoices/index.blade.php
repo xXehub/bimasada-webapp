@@ -787,8 +787,6 @@
                         itemName: invoiceNumber,
                         message: 'Apakah Anda yakin ingin menghapus invoice ini? Tindakan ini tidak dapat dibatalkan.',
                         onConfirm: () => {
-                            // Show loading notification
-                            Notification.info('Menghapus...', 'Sedang menghapus invoice', 0);
                             
                             fetch(`/invoices/${id}`, {
                                 method: 'DELETE',
