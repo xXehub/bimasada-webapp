@@ -14,6 +14,9 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        
+        <!-- Session Notification Data -->
+        <x-session-notification />
     </head>
     <body class="font-sans antialiased">
         <div class="min-h-screen bg-gray-100">
@@ -34,6 +37,15 @@
             </main>
         </div>
         
+        <!-- Notification Component -->
+        <x-notification />
+        
+        <!-- Global Modals -->
+        <x-modals.confirm-delete />
+        <x-modals.alert id="alert-modal" />
+        <x-modals.confirm id="confirm-modal" />
+        
+        @stack('modals')
         @stack('scripts')
     </body>
 </html>

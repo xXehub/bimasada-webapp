@@ -1,170 +1,333 @@
-<x-layout.app>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('User Management') }}
-        </h2>
-    </x-slot>
-
+<x-layout.app title="User Management">
     @push('styles')
+    <!-- DataTables CSS - Using minimal CSS, custom styling below -->
     <style>
-        /* DataTables Custom Styling - Matching Invoice Design System */
+        /* ============================================
+           BIMASADA DataTables Custom Styling
+           Matching global design system
+        ============================================ */
+        
+        /* Keyframe Animations */
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+        
+        /* Hide default DataTables elements we're replacing */
+        .dataTables_filter,
+        .dataTables_length {
+            display: none !important;
+        }
+        
+        /* Table Container */
         #users-table_wrapper {
             width: 100%;
         }
-
-        #users-table_wrapper .dt-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 1.5rem;
-            background: #f9fafb;
-            border-top: 1px solid #e5e7eb;
-        }
-
-        .dark #users-table_wrapper .dt-footer {
-            background: #1f2937;
-            border-color: #374151;
-        }
-
-        #users-table_wrapper .dataTables_info {
-            color: #6b7280;
-            font-size: 0.875rem;
-            margin: 0;
-        }
-
-        .dark #users-table_wrapper .dataTables_info {
-            color: #9ca3af;
-        }
-
-        #users-table_wrapper .dataTables_paginate {
-            margin: 0;
-        }
-
-        #users-table_wrapper .dataTables_paginate .paginate_button {
-            padding: 0.5rem 0.75rem;
-            margin: 0 0.125rem;
-            border: 1px solid #e5e7eb;
-            border-radius: 0.375rem;
-            background: white;
-            color: #374151;
-            font-size: 0.875rem;
-            cursor: pointer;
-            transition: all 0.15s;
-            min-width: 2.5rem;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .dark #users-table_wrapper .dataTables_paginate .paginate_button {
-            background: #374151;
-            border-color: #4b5563;
-            color: #d1d5db;
-        }
-
-        #users-table_wrapper .dataTables_paginate .paginate_button:hover {
-            background: #f3f4f6;
-            border-color: #d1d5db;
-            color: #111827;
-        }
-
-        .dark #users-table_wrapper .dataTables_paginate .paginate_button:hover {
-            background: #4b5563;
-            border-color: #6b7280;
-            color: #f9fafb;
-        }
-
-        #users-table_wrapper .dataTables_paginate .paginate_button.current {
-            background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
-            border-color: #4f46e5;
-            color: white;
-            font-weight: 600;
-        }
-
-        #users-table_wrapper .dataTables_paginate .paginate_button.current:hover {
-            background: linear-gradient(135deg, #4338ca 0%, #3730a3 100%);
-            border-color: #4338ca;
-            color: white;
-        }
-
-        #users-table_wrapper .dataTables_paginate .paginate_button.disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        #users-table {
+        
+        /* Table Base Styling */
+        table.dataTable {
             width: 100% !important;
             border-collapse: separate;
             border-spacing: 0;
         }
-
-        #users-table thead th {
-            padding: 1rem 1.5rem;
+        
+        /* Table Header */
+        table.dataTable thead th {
+            padding: 0.875rem 1rem;
             text-align: left;
             font-size: 0.75rem;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            color: #6b7280;
-            background: #f9fafb;
-            border-bottom: 1px solid #e5e7eb;
             white-space: nowrap;
+            border-bottom: 1px solid;
         }
-
-        .dark #users-table thead th {
-            background: #1f2937;
-            color: #9ca3af;
-            border-color: #374151;
+        
+        .light table.dataTable thead th,
+        :root:not(.dark) table.dataTable thead th {
+            background-color: rgb(249 250 251);
+            color: rgb(75 85 99);
+            border-color: rgb(229 231 235);
         }
-
-        #users-table tbody td {
+        
+        .dark table.dataTable thead th {
+            background-color: rgb(30 32 38);
+            color: rgb(209 213 219);
+            border-color: rgb(55 65 81);
+        }
+        
+        /* Table Body */
+        table.dataTable tbody td {
+            padding: 1rem;
+            vertical-align: middle;
+            border-bottom: 1px solid;
+        }
+        
+        .light table.dataTable tbody td,
+        :root:not(.dark) table.dataTable tbody td {
+            border-color: rgb(243 244 246);
+        }
+        
+        .dark table.dataTable tbody td {
+            border-color: rgb(55 65 81);
+        }
+        
+        /* Table Rows */
+        table.dataTable tbody tr {
+            transition: background-color 0.15s ease;
+        }
+        
+        .light table.dataTable tbody tr,
+        :root:not(.dark) table.dataTable tbody tr {
+            background-color: white;
+        }
+        
+        .light table.dataTable tbody tr:hover,
+        :root:not(.dark) table.dataTable tbody tr:hover {
+            background-color: rgb(249 250 251);
+        }
+        
+        .dark table.dataTable tbody tr {
+            background-color: rgb(24 26 32);
+        }
+        
+        .dark table.dataTable tbody tr:hover {
+            background-color: rgb(30 32 38);
+        }
+        
+        /* Sorting Icons */
+        table.dataTable thead th.sorting,
+        table.dataTable thead th.sorting_asc,
+        table.dataTable thead th.sorting_desc {
+            cursor: pointer;
+            position: relative;
+            padding-right: 1.75rem;
+        }
+        
+        table.dataTable thead th.sorting::after,
+        table.dataTable thead th.sorting_asc::after,
+        table.dataTable thead th.sorting_desc::after {
+            position: absolute;
+            right: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.75rem;
+            opacity: 0.5;
+        }
+        
+        table.dataTable thead th.sorting::after {
+            content: "⇅";
+        }
+        
+        table.dataTable thead th.sorting_asc::after {
+            content: "↑";
+            opacity: 1;
+        }
+        
+        .light table.dataTable thead th.sorting_asc::after,
+        :root:not(.dark) table.dataTable thead th.sorting_asc::after {
+            color: rgb(79 70 229);
+        }
+        
+        .dark table.dataTable thead th.sorting_asc::after {
+            color: rgb(129 140 248);
+        }
+        
+        table.dataTable thead th.sorting_desc::after {
+            content: "↓";
+            opacity: 1;
+        }
+        
+        .light table.dataTable thead th.sorting_desc::after,
+        :root:not(.dark) table.dataTable thead th.sorting_desc::after {
+            color: rgb(79 70 229);
+        }
+        
+        .dark table.dataTable thead th.sorting_desc::after {
+            color: rgb(129 140 248);
+        }
+        
+        /* Info Text */
+        .dataTables_info {
             padding: 1rem 1.5rem;
-            color: #111827;
             font-size: 0.875rem;
-            border-bottom: 1px solid #e5e7eb;
         }
-
-        .dark #users-table tbody td {
-            color: #f9fafb;
-            border-color: #374151;
+        
+        .light .dataTables_info,
+        :root:not(.dark) .dataTables_info {
+            color: rgb(107 114 128);
         }
-
-        #users-table tbody tr {
-            transition: background-color 0.15s;
+        
+        .dark .dataTables_info {
+            color: rgb(156 163 175);
         }
-
-        #users-table tbody tr:hover {
-            background: #f9fafb;
+        
+        /* Pagination Container */
+        .dataTables_paginate {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 1rem 1.5rem;
         }
-
-        .dark #users-table tbody tr:hover {
-            background: #1f2937;
+        
+        /* Pagination Buttons */
+        .dataTables_paginate .paginate_button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 2.25rem;
+            height: 2.25rem;
+            padding: 0 0.75rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            border: none !important;
+            background: transparent !important;
         }
-
-        #users-table tbody tr:last-child td {
+        
+        .light .dataTables_paginate .paginate_button,
+        :root:not(.dark) .dataTables_paginate .paginate_button {
+            color: rgb(75 85 99);
+        }
+        
+        .light .dataTables_paginate .paginate_button:hover:not(.disabled):not(.current),
+        :root:not(.dark) .dataTables_paginate .paginate_button:hover:not(.disabled):not(.current) {
+            background-color: rgb(243 244 246) !important;
+            color: rgb(17 24 39);
+        }
+        
+        .dark .dataTables_paginate .paginate_button {
+            color: rgb(156 163 175);
+        }
+        
+        .dark .dataTables_paginate .paginate_button:hover:not(.disabled):not(.current) {
+            background-color: rgb(55 65 81) !important;
+            color: white;
+        }
+        
+        /* Current Page Button */
+        .dataTables_paginate .paginate_button.current {
+            background: linear-gradient(135deg, rgb(79 70 229) 0%, rgb(99 102 241) 100%) !important;
+            color: white !important;
+            box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.25);
+        }
+        
+        /* Disabled Pagination */
+        .dataTables_paginate .paginate_button.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        
+        /* Footer Area */
+        .dt-footer {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            border-top: 1px solid;
+        }
+        
+        @media (min-width: 640px) {
+            .dt-footer {
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+            }
+        }
+        
+        .light .dt-footer,
+        :root:not(.dark) .dt-footer {
+            border-color: rgb(229 231 235);
+            background-color: rgb(249 250 251);
+        }
+        
+        .dark .dt-footer {
+            border-color: rgb(55 65 81);
+            background-color: rgb(24 26 32);
+        }
+        
+        /* Processing Indicator - Loading State */
+        .dataTables_wrapper {
+            position: relative;
+        }
+        
+        .dataTables_processing {
+            position: absolute !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            margin: 0 !important;
+            padding: 2rem 3rem !important;
+            border-radius: 0.75rem !important;
+            z-index: 1000 !important;
+        }
+        
+        .light .dataTables_processing,
+        :root:not(.dark) .dataTables_processing {
+            background-color: white;
+            color: rgb(75 85 99);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .dark .dataTables_processing {
+            background-color: rgb(30 32 38);
+            color: rgb(156 163 175);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Table wrapper relative positioning for loading */
+        #users-table_wrapper {
+            position: relative;
+            min-height: auto;
+        }
+        
+        /* Only apply min-height when processing */
+        #users-table_wrapper.processing {
+            min-height: 400px;
+        }
+        
+        /* Empty Table State */
+        .dataTables_empty {
+            padding: 3rem !important;
+            text-align: center;
+        }
+        
+        /* Remove default DataTables borders */
+        table.dataTable.no-footer {
             border-bottom: none;
         }
-
-        div.dataTables_processing {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 0.75rem;
-            padding: 2rem;
-            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
-            z-index: 9999;
+        
+        table.dataTable.stripe tbody tr.odd,
+        table.dataTable.display tbody tr.odd {
+            background-color: transparent;
         }
-
-        .dark div.dataTables_processing {
-            background: #1f2937;
-            border-color: #374151;
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            table.dataTable thead th,
+            table.dataTable tbody td {
+                padding: 0.75rem 0.5rem;
+            }
+            
+            .dataTables_paginate {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
         }
     </style>
     @endpush
 
+    <!-- Max-width Container for 80% layout -->
     <div class="mb-8">
         <div x-data="userManagement()" class="space-y-8">
             
@@ -172,7 +335,7 @@
             <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900 dark:text-white">User Management</h1>
-                    <p class="text-gray-500 dark:text-gray-400 mt-1">Manage system users and their roles</p>
+                    <p class="text-gray-500 dark:text-gray-400 mt-1">Manage and track all system users</p>
                 </div>
                 <div class="flex flex-wrap gap-3">
                     <x-ui.button variant="primary" href="{{ route('users.create') }}">
@@ -245,7 +408,76 @@
                 </x-ui.card>
             </div>
 
-            <!-- DataTable Card -->
+            <!-- Filters & Search -->
+            <x-ui.card>
+                <div class="flex flex-col lg:flex-row gap-4">
+                    <!-- Per Page (Kiri) -->
+                    <div class="w-full lg:w-48">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                            Show entries
+                        </label>
+                        <input 
+                            type="number"
+                            x-model="perPage"
+                            x-on:blur="changePageLength()"
+                            x-on:keyup.enter="changePageLength()"
+                            min="1"
+                            max="1000"
+                            placeholder="10"
+                            class="w-full px-4 py-2.5 bg-white dark:bg-dark-hover border border-gray-300 dark:border-dark-border rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                        >
+                    </div>
+
+                    <!-- Role Filter -->
+                    <div class="w-full lg:w-48">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                            Role
+                        </label>
+                        <select 
+                            x-model="roleFilter"
+                            x-on:change="applyFilter()"
+                            class="w-full px-4 py-2.5 bg-white dark:bg-dark-hover border border-gray-300 dark:border-dark-border rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                        >
+                            <option value="">All Roles</option>
+                            <option value="admin">Admin</option>
+                            <option value="manager">Manager</option>
+                            <option value="staff">Staff</option>
+                        </select>
+                    </div>
+
+                    <!-- Search (Kanan, flex-1) -->
+                    <div class="flex-1">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                            Search
+                        </label>
+                        <x-ui.input 
+                            type="text" 
+                            x-model="searchQuery"
+                            x-on:input.debounce.300ms="applySearch()"
+                            placeholder="Search by name, email..."
+                        >
+                            <x-slot name="icon">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                </svg>
+                            </x-slot>
+                        </x-ui.input>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="flex items-end gap-2">
+                        <x-ui.button variant="ghost" x-on:click="resetFilters()">
+                            <x-slot name="icon">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                </svg>
+                            </x-slot>
+                            Reset
+                        </x-ui.button>
+                    </div>
+                </div>
+            </x-ui.card>
+
             <!-- User Table with DataTables -->
             <div class="bg-white dark:bg-dark-card rounded-md border border-gray-200 dark:border-dark-border shadow-soft overflow-hidden">
                 <!-- Table Header Info -->
@@ -288,13 +520,19 @@
 
         </div>
     </div>
+    <!-- End Max-width Container -->
 
     @push('scripts')
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- DataTables JS -->
     <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+    
     <script>
         function userManagement() {
             return {
+                searchQuery: '',
+                roleFilter: '',
+                perPage: '10',
                 tableInfo: '',
                 dataTable: null,
 
@@ -309,8 +547,14 @@
                         processing: true,
                         serverSide: true,
                         ajax: {
-                            url: '{{ route('users.data') }}',
-                            type: 'GET'
+                            url: '{{ route("users.data") }}',
+                            data: function(d) {
+                                // Send custom filters to server
+                                d.role = self.roleFilter;
+                                d.search = {
+                                    value: self.searchQuery
+                                };
+                            }
                         },
                         columns: [
                             { 
@@ -425,39 +669,71 @@
                             }
                         }
                     });
+                },
+
+                changePageLength() {
+                    if (this.dataTable && this.perPage) {
+                        this.dataTable.page.len(parseInt(this.perPage)).draw();
+                    }
+                },
+
+                applyFilter() {
+                    if (this.dataTable) {
+                        this.dataTable.ajax.reload();
+                    }
+                },
+
+                applySearch() {
+                    if (this.dataTable) {
+                        this.dataTable.ajax.reload();
+                    }
+                },
+
+                resetFilters() {
+                    this.searchQuery = '';
+                    this.roleFilter = '';
+                    this.perPage = '10';
+                    if (this.dataTable) {
+                        this.dataTable.page.len(10).draw();
+                        this.dataTable.ajax.reload();
+                    }
                 }
             };
         }
 
-        // Delete user function
-        function deleteUser(userId) {
-            if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
-                return;
-            }
-
-            fetch(`/users/${userId}`, {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Reload DataTable
-                    $('#users-table').DataTable().ajax.reload();
+        // Delete user function with modal
+        function deleteUser(userId, userName = '') {
+            Modal.confirmDelete({
+                itemName: userName,
+                onConfirm: () => {
+                    // Show loading notification
+                    Notification.info('Menghapus...', 'Sedang menghapus user', 0);
                     
-                    // Show success message
-                    alert(data.message);
-                } else {
-                    alert(data.message || 'Failed to delete user');
+                    fetch(`/users/${userId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Reload DataTable
+                            $('#users-table').DataTable().ajax.reload();
+                            
+                            // Show success notification
+                            Notification.success('Berhasil!', data.message || 'User berhasil dihapus');
+                        } else {
+                            Notification.error('Gagal!', data.message || 'Gagal menghapus user');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Notification.error('Error!', 'Terjadi kesalahan saat menghapus user');
+                    });
                 }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred while deleting the user');
             });
         }
     </script>

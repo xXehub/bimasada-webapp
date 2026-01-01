@@ -18,6 +18,9 @@
     <!-- jQuery for DataTables -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     
+    <!-- Session Notification Data -->
+    <x-session-notification />
+    
     @stack('styles')
     
     <script>
@@ -107,6 +110,15 @@
     <!-- Toast Notifications -->
     <x-ui.toast />
     
+    <!-- Notification Component -->
+    <x-notification />
+    
+    <!-- Global Modals -->
+    <x-modals.confirm-delete />
+    <x-modals.alert id="alert-modal" />
+    <x-modals.confirm id="confirm-modal" />
+    
+    @stack('modals')
     @stack('scripts')
 </body>
 </html>

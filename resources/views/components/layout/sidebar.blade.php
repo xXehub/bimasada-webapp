@@ -207,6 +207,28 @@
                         Kendaraan
                     </div>
                 </li>
+                
+                <!-- Users -->
+                <li class="relative">
+                    <a 
+                        href="{{ route('users.index') }}" 
+                        class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-secondary-600 font-medium hover:bg-primary-50 hover:text-primary dark:text-secondary-300 dark:hover:bg-dark-hover dark:hover:text-primary-400 transition-all duration-200 {{ request()->routeIs('users.*') ? 'bg-primary-50 text-primary font-semibold dark:bg-primary-900/30 dark:text-primary-400' : '' }}"
+                        :class="{ 'justify-center': !sidebarOpen }"
+                    >
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                        <span x-show="sidebarOpen" x-transition.opacity class="truncate">Users</span>
+                    </a>
+                    <!-- Tooltip -->
+                    <div 
+                        x-show="!sidebarOpen" 
+                        x-transition.opacity
+                        class="absolute left-full top-1/2 -translate-y-1/2 ml-3 px-2 py-1 bg-secondary-900 dark:bg-secondary-700 text-white text-sm rounded-lg opacity-0 hover:opacity-100 pointer-events-none whitespace-nowrap z-[60] hidden lg:block"
+                    >
+                        Users
+                    </div>
+                </li>
             </ul>
         </div>
         

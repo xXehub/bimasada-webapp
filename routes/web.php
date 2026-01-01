@@ -20,6 +20,10 @@ Route::get('/components-demo', function () {
     return view('components-demo');
 })->middleware(['auth'])->name('components.demo');
 
+Route::get('/demo/notifications-modals', function () {
+    return view('demo.notifications-modals');
+})->middleware(['auth'])->name('demo.notifications-modals');
+
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

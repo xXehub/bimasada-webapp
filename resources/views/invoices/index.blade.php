@@ -288,6 +288,11 @@
         /* Table wrapper relative positioning for loading */
         #invoices-table_wrapper {
             position: relative;
+            min-height: auto;
+        }
+        
+        /* Only apply min-height when processing */
+        #invoices-table_wrapper.processing {
             min-height: 400px;
         }
         
@@ -528,60 +533,8 @@
             </div>
         </div>
 
-        <!-- Delete Confirmation Modal (Single reusable modal) -->
-        <div 
-            x-show="showDeleteModal" 
-            x-cloak
-            class="fixed inset-0 z-50 overflow-y-auto"
-            x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-        >
-            <div class="flex min-h-screen items-center justify-center p-4">
-                <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" @click="showDeleteModal = false"></div>
-                
-                <div 
-                    class="relative bg-white dark:bg-dark-card rounded-xl shadow-xl max-w-sm w-full p-6 border border-gray-200 dark:border-dark-border"
-                    x-transition:enter="transition ease-out duration-300"
-                    x-transition:enter-start="opacity-0 scale-95"
-                    x-transition:enter-end="opacity-100 scale-100"
-                >
-                    <div class="text-center">
-                        <div class="mx-auto w-14 h-14 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mb-4">
-                            <svg class="w-7 h-7 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                            </svg>
-                        </div>
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Delete Invoice?</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
-                            Are you sure you want to delete invoice <strong x-text="deleteInvoiceNumber" class="text-gray-700 dark:text-gray-300"></strong>?
-                            This action cannot be undone.
-                        </p>
-                        <div class="flex items-center justify-center gap-3">
-                            <button 
-                                @click="showDeleteModal = false"
-                                class="px-5 py-2.5 rounded-lg bg-gray-100 dark:bg-dark-hover text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                            >
-                                Cancel
-                            </button>
-                            <form :action="deleteUrl" method="POST" class="inline">
-                                @csrf
-                                @method('DELETE')
-                                <button 
-                                    type="submit"
-                                    class="px-5 py-2.5 rounded-lg bg-red-600 text-white font-medium hover:bg-red-700 transition-colors shadow-lg shadow-red-600/25"
-                                >
-                                    Delete
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <!-- Delete Confirmation Modal - Using Reusable Component -->
+        <!-- Modal will be handled by JavaScript -->
     </div>
     <!-- End Max-width Container -->
 
@@ -600,10 +553,6 @@
                 statusFilter: '',
                 perPage: '10',
                 tableInfo: '',
-                showDeleteModal: false,
-                deleteInvoiceId: null,
-                deleteInvoiceNumber: '',
-                deleteUrl: '',
                 dataTable: null,
 
                 init() {
@@ -799,7 +748,7 @@
 
                     // Listen for delete invoice event
                     window.addEventListener('delete-invoice', (e) => {
-                        this.openDeleteModal(e.detail.id, e.detail.number);
+                        this.deleteInvoice(e.detail.id, e.detail.number);
                     });
                 },
 
@@ -833,11 +782,40 @@
                     }
                 },
 
-                openDeleteModal(id, invoiceNumber) {
-                    this.deleteInvoiceId = id;
-                    this.deleteInvoiceNumber = invoiceNumber;
-                    this.deleteUrl = `/invoices/${id}`;
-                    this.showDeleteModal = true;
+                deleteInvoice(id, invoiceNumber) {
+                    Modal.confirmDelete({
+                        itemName: invoiceNumber,
+                        message: 'Apakah Anda yakin ingin menghapus invoice ini? Tindakan ini tidak dapat dibatalkan.',
+                        onConfirm: () => {
+                            // Show loading notification
+                            Notification.info('Menghapus...', 'Sedang menghapus invoice', 0);
+                            
+                            fetch(`/invoices/${id}`, {
+                                method: 'DELETE',
+                                headers: {
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                    'Accept': 'application/json',
+                                    'Content-Type': 'application/json'
+                                }
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    // Reload DataTable
+                                    this.dataTable.ajax.reload();
+                                    
+                                    // Show success notification
+                                    Notification.success('Berhasil!', data.message || 'Invoice berhasil dihapus');
+                                } else {
+                                    Notification.error('Gagal!', data.message || 'Gagal menghapus invoice');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                Notification.error('Error!', 'Terjadi kesalahan saat menghapus invoice');
+                            });
+                        }
+                    });
                 }
             }
         }
