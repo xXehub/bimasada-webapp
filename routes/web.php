@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\SuratPerjanjianController;
+use App\Http\Controllers\KuitansiController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -66,6 +68,67 @@ Route::middleware(['auth'])->group(function () {
     // Permissions
     Route::get('/permissions/data', [App\Http\Controllers\PermissionController::class, 'getData'])->name('permissions.data');
     Route::resource('permissions', App\Http\Controllers\PermissionController::class);
+});
+
+// Surat Perjanjian Kerjasama (PKS) Routes
+Route::middleware(['auth'])->group(function () {
+    // DataTables server-side endpoint
+    Route::get('/surat-perjanjians/data', [SuratPerjanjianController::class, 'getData'])->middleware('permission:view-pks')->name('surat-perjanjians.data');
+    
+    // Generate PKS number
+    Route::get('/surat-perjanjians/generate-number', [SuratPerjanjianController::class, 'generatePKSNumber'])->middleware('permission:create-pks')->name('surat-perjanjians.generateNumber');
+    
+    // Quick store from modal
+    Route::post('/surat-perjanjians/store-quick', [SuratPerjanjianController::class, 'storeQuick'])->middleware('permission:create-pks')->name('surat-perjanjians.storeQuick');
+    
+    // Approval route (Marketing Manager only)
+    Route::post('/surat-perjanjians/{suratPerjanjian}/approve', [SuratPerjanjianController::class, 'approve'])->middleware('permission:approve-pks')->name('surat-perjanjians.approve');
+    Route::post('/surat-perjanjians/{suratPerjanjian}/reject', [SuratPerjanjianController::class, 'reject'])->middleware('permission:approve-pks')->name('surat-perjanjians.reject');
+    
+    // Update status
+    Route::patch('/surat-perjanjians/{suratPerjanjian}/status', [SuratPerjanjianController::class, 'updateStatus'])->middleware('permission:edit-pks')->name('surat-perjanjians.updateStatus');
+    
+    // Resource routes with permissions
+    Route::get('/surat-perjanjians', [SuratPerjanjianController::class, 'index'])->middleware('permission:view-pks')->name('surat-perjanjians.index');
+    Route::get('/surat-perjanjians/create', [SuratPerjanjianController::class, 'create'])->middleware('permission:create-pks')->name('surat-perjanjians.create');
+    Route::post('/surat-perjanjians', [SuratPerjanjianController::class, 'store'])->middleware('permission:create-pks')->name('surat-perjanjians.store');
+    Route::get('/surat-perjanjians/{suratPerjanjian}', [SuratPerjanjianController::class, 'show'])->middleware('permission:view-pks')->name('surat-perjanjians.show');
+    Route::get('/surat-perjanjians/{suratPerjanjian}/edit', [SuratPerjanjianController::class, 'edit'])->middleware('permission:edit-pks')->name('surat-perjanjians.edit');
+    Route::put('/surat-perjanjians/{suratPerjanjian}', [SuratPerjanjianController::class, 'update'])->middleware('permission:edit-pks')->name('surat-perjanjians.update');
+    Route::patch('/surat-perjanjians/{suratPerjanjian}', [SuratPerjanjianController::class, 'update'])->middleware('permission:edit-pks');
+    
+    // Only Marketing Manager can delete PKS
+    Route::delete('/surat-perjanjians/{suratPerjanjian}', [SuratPerjanjianController::class, 'destroy'])->middleware('permission:delete-pks')->name('surat-perjanjians.destroy');
+});
+
+// Kuitansi Routes
+Route::middleware(['auth'])->group(function () {
+    // DataTables server-side endpoint
+    Route::get('/kuitansis/data', [KuitansiController::class, 'getData'])->middleware('permission:view-kuitansi')->name('kuitansis.data');
+    
+    // Generate Kuitansi number
+    Route::get('/kuitansis/generate-number', [KuitansiController::class, 'generateKuitansiNumber'])->middleware('permission:create-kuitansi')->name('kuitansis.generateNumber');
+    
+    // Quick store from modal
+    Route::post('/kuitansis/store-quick', [KuitansiController::class, 'storeQuick'])->middleware('permission:create-kuitansi')->name('kuitansis.storeQuick');
+    
+    // Mark as Lunas
+    Route::post('/kuitansis/{kuitansi}/mark-lunas', [KuitansiController::class, 'markLunas'])->middleware('permission:edit-kuitansi')->name('kuitansis.markLunas');
+    
+    // Update status
+    Route::patch('/kuitansis/{kuitansi}/status', [KuitansiController::class, 'updateStatus'])->middleware('permission:edit-kuitansi')->name('kuitansis.updateStatus');
+    
+    // Resource routes with permissions
+    Route::get('/kuitansis', [KuitansiController::class, 'index'])->middleware('permission:view-kuitansi')->name('kuitansis.index');
+    Route::get('/kuitansis/create', [KuitansiController::class, 'create'])->middleware('permission:create-kuitansi')->name('kuitansis.create');
+    Route::post('/kuitansis', [KuitansiController::class, 'store'])->middleware('permission:create-kuitansi')->name('kuitansis.store');
+    Route::get('/kuitansis/{kuitansi}', [KuitansiController::class, 'show'])->middleware('permission:view-kuitansi')->name('kuitansis.show');
+    Route::get('/kuitansis/{kuitansi}/edit', [KuitansiController::class, 'edit'])->middleware('permission:edit-kuitansi')->name('kuitansis.edit');
+    Route::put('/kuitansis/{kuitansi}', [KuitansiController::class, 'update'])->middleware('permission:edit-kuitansi')->name('kuitansis.update');
+    Route::patch('/kuitansis/{kuitansi}', [KuitansiController::class, 'update'])->middleware('permission:edit-kuitansi');
+    
+    // Only Marketing Manager can delete Kuitansi
+    Route::delete('/kuitansis/{kuitansi}', [KuitansiController::class, 'destroy'])->middleware('permission:delete-kuitansi')->name('kuitansis.destroy');
 });
 
 require __DIR__.'/auth.php';

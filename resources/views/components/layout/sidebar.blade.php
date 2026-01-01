@@ -97,6 +97,72 @@
                     </div>
                 </li>
                 
+                <!-- Surat Perjanjian (PKS) Management (with submenu) -->
+                <li class="relative" x-data="{ open: {{ request()->routeIs('surat-perjanjians.*') ? 'true' : 'false' }} }">
+                    <button 
+                        @click="sidebarOpen ? open = !open : (sidebarOpen = true, open = true)"
+                        class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-secondary-600 font-medium hover:bg-primary-50 hover:text-primary dark:text-secondary-300 dark:hover:bg-dark-hover dark:hover:text-primary-400 transition-all duration-200 w-full {{ request()->routeIs('surat-perjanjians.*') ? 'bg-primary-50 text-primary font-semibold dark:bg-primary-900/30 dark:text-primary-400' : '' }}"
+                        :class="{ 'justify-center': !sidebarOpen }"
+                    >
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span x-show="sidebarOpen" x-transition.opacity class="flex-1 text-left truncate">Surat Perjanjian</span>
+                        <svg 
+                            x-show="sidebarOpen" 
+                            x-transition.opacity
+                            class="w-4 h-4 transition-transform duration-200 flex-shrink-0"
+                            :class="{ 'rotate-180': open }"
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                        >
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    
+                    <!-- Tooltip -->
+                    <div 
+                        x-show="!sidebarOpen" 
+                        x-transition.opacity
+                        class="absolute left-full top-1/2 -translate-y-1/2 ml-3 px-2 py-1 bg-secondary-900 dark:bg-secondary-700 text-white text-sm rounded-lg opacity-0 hover:opacity-100 pointer-events-none whitespace-nowrap z-[60] hidden lg:block"
+                    >
+                        Surat Perjanjian
+                    </div>
+                    
+                    <!-- Submenu -->
+                    <div 
+                        x-show="open && sidebarOpen" 
+                        x-collapse
+                        x-cloak
+                    >
+                        <ul class="mt-1 ml-4 pl-3 border-l-2 border-secondary-200 dark:border-dark-border space-y-1">
+                            <li>
+                                <a 
+                                    href="{{ route('surat-perjanjians.index') }}" 
+                                    class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-secondary-600 hover:bg-primary-50 hover:text-primary dark:text-secondary-400 dark:hover:bg-dark-hover dark:hover:text-primary-400 transition-all duration-200 {{ request()->routeIs('surat-perjanjians.index') ? 'bg-primary-50 text-primary font-semibold dark:bg-primary-900/30 dark:text-primary-400' : '' }}"
+                                >
+                                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                                    </svg>
+                                    <span>Daftar PKS</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a 
+                                    href="{{ route('surat-perjanjians.create') }}" 
+                                    class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-secondary-600 hover:bg-primary-50 hover:text-primary dark:text-secondary-400 dark:hover:bg-dark-hover dark:hover:text-primary-400 transition-all duration-200 {{ request()->routeIs('surat-perjanjians.create') ? 'bg-primary-50 text-primary font-semibold dark:bg-primary-900/30 dark:text-primary-400' : '' }}"
+                                >
+                                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                    </svg>
+                                    <span>Buat PKS Baru</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+                
                 <!-- Invoice Management (with submenu) -->
                 <li class="relative" x-data="{ open: {{ request()->routeIs('invoices.*') ? 'true' : 'false' }} }">
                     <button 
@@ -105,7 +171,7 @@
                         :class="{ 'justify-center': !sidebarOpen }"
                     >
                         <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                         </svg>
                         <span x-show="sidebarOpen" x-transition.opacity class="flex-1 text-left truncate">Invoice</span>
                         <svg 
@@ -157,6 +223,72 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                                     </svg>
                                     <span>Input Invoice</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+                
+                <!-- Kuitansi Management (with submenu) -->
+                <li class="relative" x-data="{ open: {{ request()->routeIs('kuitansis.*') ? 'true' : 'false' }} }">
+                    <button 
+                        @click="sidebarOpen ? open = !open : (sidebarOpen = true, open = true)"
+                        class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-secondary-600 font-medium hover:bg-primary-50 hover:text-primary dark:text-secondary-300 dark:hover:bg-dark-hover dark:hover:text-primary-400 transition-all duration-200 w-full {{ request()->routeIs('kuitansis.*') ? 'bg-primary-50 text-primary font-semibold dark:bg-primary-900/30 dark:text-primary-400' : '' }}"
+                        :class="{ 'justify-center': !sidebarOpen }"
+                    >
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        <span x-show="sidebarOpen" x-transition.opacity class="flex-1 text-left truncate">Kuitansi</span>
+                        <svg 
+                            x-show="sidebarOpen" 
+                            x-transition.opacity
+                            class="w-4 h-4 transition-transform duration-200 flex-shrink-0"
+                            :class="{ 'rotate-180': open }"
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                        >
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    
+                    <!-- Tooltip -->
+                    <div 
+                        x-show="!sidebarOpen" 
+                        x-transition.opacity
+                        class="absolute left-full top-1/2 -translate-y-1/2 ml-3 px-2 py-1 bg-secondary-900 dark:bg-secondary-700 text-white text-sm rounded-lg opacity-0 hover:opacity-100 pointer-events-none whitespace-nowrap z-[60] hidden lg:block"
+                    >
+                        Kuitansi
+                    </div>
+                    
+                    <!-- Submenu -->
+                    <div 
+                        x-show="open && sidebarOpen" 
+                        x-collapse
+                        x-cloak
+                    >
+                        <ul class="mt-1 ml-4 pl-3 border-l-2 border-secondary-200 dark:border-dark-border space-y-1">
+                            <li>
+                                <a 
+                                    href="{{ route('kuitansis.index') }}" 
+                                    class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-secondary-600 hover:bg-primary-50 hover:text-primary dark:text-secondary-400 dark:hover:bg-dark-hover dark:hover:text-primary-400 transition-all duration-200 {{ request()->routeIs('kuitansis.index') ? 'bg-primary-50 text-primary font-semibold dark:bg-primary-900/30 dark:text-primary-400' : '' }}"
+                                >
+                                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                                    </svg>
+                                    <span>Daftar Kuitansi</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a 
+                                    href="{{ route('kuitansis.create') }}" 
+                                    class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-secondary-600 hover:bg-primary-50 hover:text-primary dark:text-secondary-400 dark:hover:bg-dark-hover dark:hover:text-primary-400 transition-all duration-200 {{ request()->routeIs('kuitansis.create') ? 'bg-primary-50 text-primary font-semibold dark:bg-primary-900/30 dark:text-primary-400' : '' }}"
+                                >
+                                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                    </svg>
+                                    <span>Buat Kuitansi Baru</span>
                                 </a>
                             </li>
                         </ul>

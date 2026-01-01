@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class SuratPerjanjian extends Model
 {
     protected $fillable = [
+        'no_surat',
         'tanggal_surat',
         'nama_pelanggan',
         'alamat_pelanggan',

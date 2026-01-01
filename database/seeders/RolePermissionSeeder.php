@@ -27,6 +27,21 @@ class RolePermissionSeeder extends Seeder
             'delete-invoices',
             'export-invoices',
             
+            // PKS (Surat Perjanjian) Permissions
+            'view-pks',
+            'create-pks',
+            'edit-pks',
+            'delete-pks',
+            'approve-pks',
+            'export-pks',
+            
+            // Kuitansi Permissions
+            'view-kuitansi',
+            'create-kuitansi',
+            'edit-kuitansi',
+            'delete-kuitansi',
+            'export-kuitansi',
+            
             // User Management Permissions (Marketing Manager only)
             'manage-users',
             'manage-roles',
@@ -45,37 +60,71 @@ class RolePermissionSeeder extends Seeder
 
         // Assign Permissions to Marketing Manager (Full Access)
         $marketingManager->givePermissionTo([
+            // Invoice
             $createdPermissions['view-invoices'],
             $createdPermissions['create-invoices'],
             $createdPermissions['edit-invoices'],
             $createdPermissions['delete-invoices'],
             $createdPermissions['export-invoices'],
+            // PKS
+            $createdPermissions['view-pks'],
+            $createdPermissions['create-pks'],
+            $createdPermissions['edit-pks'],
+            $createdPermissions['delete-pks'],
+            $createdPermissions['approve-pks'],
+            $createdPermissions['export-pks'],
+            // Kuitansi
+            $createdPermissions['view-kuitansi'],
+            $createdPermissions['create-kuitansi'],
+            $createdPermissions['edit-kuitansi'],
+            $createdPermissions['delete-kuitansi'],
+            $createdPermissions['export-kuitansi'],
+            // User Management
             $createdPermissions['manage-users'],
             $createdPermissions['manage-roles'],
         ]);
 
-        // Assign Permissions to Sales (Limited Access)
+        // Assign Permissions to Sales (Limited Access - can create/edit but not delete/approve)
         $sales->givePermissionTo([
+            // Invoice
             $createdPermissions['view-invoices'],
             $createdPermissions['create-invoices'],
             $createdPermissions['edit-invoices'],
             $createdPermissions['export-invoices'],
+            // PKS (Sales cannot approve or delete)
+            $createdPermissions['view-pks'],
+            $createdPermissions['create-pks'],
+            $createdPermissions['edit-pks'],
+            $createdPermissions['export-pks'],
+            // Kuitansi
+            $createdPermissions['view-kuitansi'],
+            $createdPermissions['create-kuitansi'],
+            $createdPermissions['edit-kuitansi'],
+            $createdPermissions['export-kuitansi'],
         ]);
 
-        // Create default users
-        $manager = User::create([
-            'name' => 'Manager Bimasada',
-            'email' => 'manager@bimasada.com',
-            'password' => Hash::make('manager123'),
-        ]);
-        $manager->assignRole('Marketing Manager');
+        // Create default users (only if not exists)
+        $manager = User::firstOrCreate(
+            ['email' => 'manager@bimasada.com'],
+            [
+                'name' => 'Manager Bimasada',
+                'password' => Hash::make('manager123'),
+            ]
+        );
+        if (!$manager->hasRole('Marketing Manager')) {
+            $manager->assignRole('Marketing Manager');
+        }
 
-        $salesUser = User::create([
-            'name' => 'Sales Bimasada',
-            'email' => 'sales@bimasada.com',
-            'password' => Hash::make('sales123'),
-        ]);
-        $salesUser->assignRole('Sales');
+        $salesUser = User::firstOrCreate(
+            ['email' => 'sales@bimasada.com'],
+            [
+                'name' => 'Sales Bimasada',
+                'password' => Hash::make('sales123'),
+            ]
+        );
+        if (!$salesUser->hasRole('Sales')) {
+            $salesUser->assignRole('Sales');
+        }
 
         $this->command->info('Roles and permissions seeded successfully!');
         $this->command->info('Marketing Manager: manager@bimasada.com / manager123');

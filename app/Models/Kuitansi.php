@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Kuitansi extends Model
 {
     protected $fillable = [
+        'no_kuitansi',
         'tanggal_kuitansi',
         'nama_pelanggan',
         'alamat',
@@ -16,6 +17,7 @@ class Kuitansi extends Model
         'total_bayar',
         'invoice_pembayaran',
         'keterangan',
+        'status_kuitansi',
         'id_sales',
         'id_invoice',
     ];
