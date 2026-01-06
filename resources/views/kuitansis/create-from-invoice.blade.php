@@ -187,20 +187,20 @@
                         </select>
                     </div>
 
-                    <!-- Status -->
+                    <!-- Status - Hidden, always Lunas -->
+                    <input type="hidden" name="status_kuitansi" value="Lunas">
+                    
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                            Status Kuitansi <span class="text-red-500">*</span>
+                            Status Kuitansi
                         </label>
-                        <select 
-                            name="status_kuitansi" 
-                            required
-                            class="w-full px-4 py-2.5 bg-white dark:bg-dark-hover border border-gray-300 dark:border-dark-border rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
-                        >
-                            <option value="Draft" {{ old('status_kuitansi', 'Draft') == 'Draft' ? 'selected' : '' }}>Draft</option>
-                            <option value="Terkirim" {{ old('status_kuitansi') == 'Terkirim' ? 'selected' : '' }}>Terkirim</option>
-                            <option value="Lunas" {{ old('status_kuitansi') == 'Lunas' ? 'selected' : '' }}>Lunas</option>
-                        </select>
+                        <div class="flex items-center gap-2 px-4 py-2.5 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-xl">
+                            <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span class="font-semibold text-green-700 dark:text-green-300">Lunas</span>
+                        </div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Kuitansi sebagai tanda terima pembayaran</p>
                     </div>
 
                     <!-- Sales Person -->

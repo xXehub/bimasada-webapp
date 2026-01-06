@@ -94,15 +94,13 @@
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                             Payment Status <span class="text-red-500">*</span>
                         </label>
-                        <select 
-                            name="status_pembayaran" 
-                            required
-                            class="w-full px-4 py-2.5 bg-white dark:bg-dark-hover border border-gray-300 dark:border-dark-border rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
-                        >
-                            <option value="">Select Status</option>
-                            <option value="Belum Lunas" {{ old('status_pembayaran', 'Belum Lunas') == 'Belum Lunas' ? 'selected' : '' }}>Belum Lunas</option>
-                            <option value="Cicilan" {{ old('status_pembayaran') == 'Cicilan' ? 'selected' : '' }}>Cicilan</option>
-                        </select>
+                        <input 
+                            type="text" 
+                            value="Belum Lunas"
+                            readonly
+                            class="w-full px-4 py-2.5 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-dark-border rounded-xl text-gray-900 dark:text-white cursor-not-allowed"
+                        />
+                        <input type="hidden" name="status_pembayaran" value="Belum Lunas">
                         <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Status akan otomatis "Lunas" saat pembayaran kuitansi terpenuhi</p>
                     </div>
 

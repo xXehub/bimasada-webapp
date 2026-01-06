@@ -663,7 +663,7 @@ class KuitansiController extends Controller
             $validated['no_kuitansi'] = 'KTN-' . $year . '-' . $month . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
         }
 
-        // Create kuitansi linked to Invoice
+        // Create kuitansi linked to Invoice - Always Lunas (tanda terima pembayaran)
         $kuitansi = Kuitansi::create([
             'no_kuitansi' => $validated['no_kuitansi'],
             'tanggal_kuitansi' => $validated['tanggal_kuitansi'],
@@ -673,7 +673,7 @@ class KuitansiController extends Controller
             'total_bayar' => $validated['total_bayar'],
             'invoice_pembayaran' => $validated['invoice_pembayaran'],
             'keterangan' => $validated['keterangan'] ?? null,
-            'status_kuitansi' => $validated['status_kuitansi'] ?? 'Draft',
+            'status_kuitansi' => 'Lunas', // Always Lunas - kuitansi = tanda terima
             'id_sales' => $validated['id_sales'],
             'id_invoice' => $invoice->id,
         ]);
