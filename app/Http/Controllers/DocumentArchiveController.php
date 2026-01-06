@@ -41,55 +41,67 @@ class DocumentArchiveController extends Controller
     }
 
     /**
-     * Get archive statistics
+     * Get archive statistics - OPTIMIZED
      */
     private function getArchiveStats($user)
     {
         $isManager = $user->hasRole('Marketing Manager');
         
-        // PKS Stats
-        $pksQuery = SuratPerjanjian::query();
+        // PKS Stats - OPTIMIZED: Single query with groupBy
+        $pksQuery = DB::table('surat_perjanjians')
+            ->select('status_surat', DB::raw('COUNT(*) as count'));
         if (!$isManager) {
             $pksQuery->where('id_sales', $user->id);
         }
+        $pksRaw = $pksQuery->groupBy('status_surat')->pluck('count', 'status_surat')->toArray();
+        
         $pksStats = [
-            'total' => (clone $pksQuery)->count(),
-            'active' => (clone $pksQuery)->where('status_surat', 'Aktif')->count(),
-            'completed' => (clone $pksQuery)->where('status_surat', 'Selesai')->count(),
-            'cancelled' => (clone $pksQuery)->where('status_surat', 'Dibatalkan')->count(),
+            'total' => array_sum($pksRaw),
+            'active' => $pksRaw['Aktif'] ?? 0,
+            'completed' => $pksRaw['Selesai'] ?? 0,
+            'cancelled' => $pksRaw['Dibatalkan'] ?? 0,
         ];
 
-        // Invoice Stats
-        $invoiceQuery = Invoice::query();
+        // Invoice Stats - OPTIMIZED: Single query with groupBy
+        $invoiceQuery = DB::table('invoices')
+            ->select('status_pembayaran', DB::raw('COUNT(*) as count'));
         if (!$isManager) {
             $invoiceQuery->where('id_sales', $user->id);
         }
+        $invoiceRaw = $invoiceQuery->groupBy('status_pembayaran')->pluck('count', 'status_pembayaran')->toArray();
+        
         $invoiceStats = [
-            'total' => (clone $invoiceQuery)->count(),
-            'paid' => (clone $invoiceQuery)->where('status_pembayaran', 'Lunas')->count(),
-            'pending' => (clone $invoiceQuery)->whereIn('status_pembayaran', ['Terkirim', 'Dibayar Sebagian'])->count(),
-            'overdue' => (clone $invoiceQuery)->where('status_pembayaran', 'Jatuh Tempo')->count(),
+            'total' => array_sum($invoiceRaw),
+            'paid' => $invoiceRaw['Lunas'] ?? 0,
+            'pending' => ($invoiceRaw['Terkirim'] ?? 0) + ($invoiceRaw['Dibayar Sebagian'] ?? 0),
+            'overdue' => $invoiceRaw['Jatuh Tempo'] ?? 0,
         ];
 
-        // Kuitansi Stats
-        $kuitansiQuery = Kuitansi::query();
+        // Kuitansi Stats - OPTIMIZED: Single query
+        $now = Carbon::now();
+        $kuitansiQuery = DB::table('kuitansis')
+            ->select(
+                DB::raw('COUNT(*) as total'),
+                DB::raw('SUM(CASE WHEN EXTRACT(MONTH FROM tanggal_kuitansi) = ' . $now->month . ' AND EXTRACT(YEAR FROM tanggal_kuitansi) = ' . $now->year . ' THEN 1 ELSE 0 END) as this_month')
+            );
         if (!$isManager) {
-            $kuitansiQuery->whereHas('invoice', fn($q) => $q->where('id_sales', $user->id));
+            $kuitansiQuery->join('invoices', 'kuitansis.id_invoice', '=', 'invoices.id')
+                          ->where('invoices.id_sales', $user->id);
         }
+        $kuitansiRaw = $kuitansiQuery->first();
+        
         $kuitansiStats = [
-            'total' => (clone $kuitansiQuery)->count(),
-            'this_month' => (clone $kuitansiQuery)
-                ->whereMonth('tanggal_kuitansi', Carbon::now()->month)
-                ->whereYear('tanggal_kuitansi', Carbon::now()->year)
-                ->count(),
+            'total' => $kuitansiRaw->total ?? 0,
+            'this_month' => $kuitansiRaw->this_month ?? 0,
         ];
 
-        // Total Revenue
-        $revenueQuery = Invoice::where('status_pembayaran', 'Lunas');
+        // Total Revenue - OPTIMIZED
+        $revenueQuery = DB::table('invoices')
+            ->where('status_pembayaran', 'Lunas');
         if (!$isManager) {
             $revenueQuery->where('id_sales', $user->id);
         }
-        $totalRevenue = $revenueQuery->sum('total_harga');
+        $totalRevenue = $revenueQuery->sum('total_harga') ?? 0;
 
         return [
             'pks' => $pksStats,

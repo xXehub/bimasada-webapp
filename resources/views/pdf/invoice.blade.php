@@ -7,7 +7,7 @@
     <style>
         @page {
             size: A4;
-            margin: 2cm 2cm 2cm 2cm;
+            margin: 3cm 3cm 3cm 3cm;
         }
         * {
             margin: 0;
@@ -33,11 +33,11 @@
         }
         .logo-cell {
             display: table-cell;
-            width: 80px;
+            width: 110px;
             vertical-align: middle;
         }
         .logo-cell img {
-            width: 70px;
+            width: 100px;
             height: auto;
         }
         .company-cell {

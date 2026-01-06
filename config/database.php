@@ -96,6 +96,12 @@ return [
             'prefix_indexes' => true,
             'search_path' => 'public',
             'sslmode' => 'prefer',
+            // Optimasi untuk koneksi remote (Supabase)
+            'options' => [
+                \PDO::ATTR_PERSISTENT => true,           // Persistent connection
+                \PDO::ATTR_EMULATE_PREPARES => true,     // Faster prepared statements
+                \PDO::ATTR_TIMEOUT => 30,                // Connection timeout 30 detik
+            ],
         ],
 
         'sqlsrv' => [
