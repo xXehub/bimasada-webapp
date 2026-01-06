@@ -4,10 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Surat Perjanjian {{ $pks->no_surat }}</title>
+    @php
+        $logoPath = public_path('assets/bimasadalogo.png');
+        $logoData = '';
+        if (file_exists($logoPath)) {
+            $logoData = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
+        }
+    @endphp
     <style>
         @page {
             size: A4;
-            margin: 3cm 3cm 3cm 3cm;
+            margin: 25mm 25mm 25mm 25mm;
         }
         * {
             margin: 0;
@@ -156,7 +163,11 @@
         <!-- Header with Logo -->
         <div class="header">
             <div class="logo-cell">
-                <img src="{{ public_path('assets/bimasadalogo.png') }}" alt="Bimasada Logo">
+                @if($logoData)
+                    <img src="{{ $logoData }}" alt="Bimasada Logo">
+                @else
+                    <span style="font-weight:bold;color:#1e3a8a;">BIMASADA</span>
+                @endif
             </div>
             <div class="company-cell">
                 <div class="company-name">PT. BIMASADA JAYA PERSADA</div>

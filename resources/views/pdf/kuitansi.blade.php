@@ -4,10 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kuitansi {{ $kuitansi->no_kuitansi }}</title>
+    @php
+        $logoPath = public_path('assets/bimasadalogo.png');
+        $logoData = '';
+        if (file_exists($logoPath)) {
+            $logoData = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
+        }
+    @endphp
     <style>
         @page {
             size: A4;
-            margin: 3cm 3cm 3cm 3cm;
+            margin: 25mm 25mm 25mm 25mm;
         }
         * {
             margin: 0;
@@ -23,6 +30,7 @@
         }
         .container {
             max-width: 100%;
+            padding: 0;
         }
         .header {
             display: table;
@@ -208,7 +216,11 @@
         <!-- Header with Logo -->
         <div class="header">
             <div class="logo-cell">
-                <img src="{{ public_path('assets/bimasadalogo.png') }}" alt="Bimasada Logo">
+                @if($logoData)
+                    <img src="{{ $logoData }}" alt="Bimasada Logo">
+                @else
+                    <span style="font-weight:bold;color:#1e3a8a;">BIMASADA</span>
+                @endif
             </div>
             <div class="company-cell">
                 <div class="company-name">PT. BIMASADA JAYA PERSADA</div>
@@ -232,12 +244,12 @@
                     <tr>
                         <td>Sudah Terima Dari</td>
                         <td>:</td>
-                        <td><strong>{{ $kuitansi->nama_penyetor ?? $kuitansi->invoice->nama_pelanggan ?? '-' }}</strong></td>
+                        <td><strong>{{ $kuitansi->nama_pelanggan ?? $kuitansi->invoice->nama_pelanggan ?? '-' }}</strong></td>
                     </tr>
                     <tr>
                         <td>Alamat</td>
                         <td>:</td>
-                        <td>{{ $kuitansi->alamat_penyetor ?? $kuitansi->invoice->alamat ?? '-' }}</td>
+                        <td>{{ $kuitansi->alamat ?? $kuitansi->invoice->alamat ?? '-' }}</td>
                     </tr>
                     <tr>
                         <td>Untuk Pembayaran</td>
@@ -251,9 +263,9 @@
         <!-- Amount Box -->
         <div class="amount-box">
             <div class="amount-label">Jumlah Uang</div>
-            <div class="amount-value">Rp {{ number_format($kuitansi->jumlah_bayar ?? 0, 0, ',', '.') }}</div>
+            <div class="amount-value">Rp {{ number_format($kuitansi->total_bayar ?? 0, 0, ',', '.') }}</div>
             <div class="amount-words">
-                <strong>Terbilang:</strong> {{ ucwords(App\Helpers\Terbilang::convert($kuitansi->jumlah_bayar ?? 0)) }} Rupiah
+                <strong>Terbilang:</strong> {{ ucwords(App\Helpers\Terbilang::convert($kuitansi->total_bayar ?? 0)) }} Rupiah
             </div>
         </div>
 
@@ -285,12 +297,12 @@
                 <tr>
                     <td>Tanggal Pembayaran</td>
                     <td>:</td>
-                    <td><strong>{{ $kuitansi->tanggal_bayar ? \Carbon\Carbon::parse($kuitansi->tanggal_bayar)->translatedFormat('d F Y') : now()->translatedFormat('d F Y') }}</strong></td>
+                    <td><strong>{{ $kuitansi->tanggal_kuitansi ? \Carbon\Carbon::parse($kuitansi->tanggal_kuitansi)->translatedFormat('d F Y') : now()->translatedFormat('d F Y') }}</strong></td>
                 </tr>
                 <tr>
                     <td>Metode Pembayaran</td>
                     <td>:</td>
-                    <td><strong>{{ $kuitansi->metode_pembayaran ?? 'Tunai' }}</strong></td>
+                    <td><strong>{{ $kuitansi->invoice_pembayaran ?? 'Tunai' }}</strong></td>
                 </tr>
                 <tr>
                     <td>Status</td>
@@ -310,7 +322,7 @@
         @endif
 
         <!-- Notes -->
-        @if($kuitansi->catatan)
+        @if($kuitansi->catatan ?? false)
         <div class="notes">
             <div class="notes-title">Catatan:</div>
             <p>{{ $kuitansi->catatan }}</p>
@@ -324,10 +336,10 @@
                     <td class="signature-box">
                         Penyetor,
                         <div class="signature-space"></div>
-                        <div class="signature-name">{{ $kuitansi->nama_penyetor ?? $kuitansi->invoice->nama_pelanggan ?? '...................' }}</div>
+                        <div class="signature-name">{{ $kuitansi->nama_pelanggan ?? $kuitansi->invoice->nama_pelanggan ?? '...................' }}</div>
                     </td>
                     <td class="signature-box">
-                        Jakarta, {{ $kuitansi->tanggal_bayar ? \Carbon\Carbon::parse($kuitansi->tanggal_bayar)->translatedFormat('d F Y') : now()->translatedFormat('d F Y') }}<br>
+                        Surabaya, {{ $kuitansi->tanggal_kuitansi ? \Carbon\Carbon::parse($kuitansi->tanggal_kuitansi)->translatedFormat('d F Y') : now()->translatedFormat('d F Y') }}<br>
                         Penerima,
                         <div class="signature-space"></div>
                         <div class="signature-name">PT. BIMASADA JAYA PERSADA</div>
