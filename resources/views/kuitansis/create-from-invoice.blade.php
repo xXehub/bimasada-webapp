@@ -26,7 +26,7 @@
                     </div>
                     <div>
                         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Buat Kuitansi dari Invoice</h1>
-                        <p class="text-gray-500 dark:text-gray-400 mt-0.5">Kuitansi akan terhubung dengan Invoice</p>
+                        <p class="text-gray-500 dark:text-gray-400 mt-0.5">Kuitansi sebagai tanda terima pembayaran</p>
                     </div>
                 </div>
                 <div class="flex flex-wrap gap-2">
@@ -83,28 +83,6 @@
                     <x-ui.badge :type="$statusVariant">{{ $invoice->status_pembayaran }}</x-ui.badge>
                 </div>
             </div>
-
-            <!-- Progress Bar -->
-            <div class="mt-4 p-4 bg-white dark:bg-dark-card rounded-xl">
-                <div class="flex justify-between text-sm mb-2">
-                    <span class="text-gray-600 dark:text-gray-400">Progress Pembayaran</span>
-                    <span class="font-medium text-gray-900 dark:text-white">
-                        Rp {{ number_format($invoice->total_paid, 0, ',', '.') }} / Rp {{ number_format($invoice->total_harga, 0, ',', '.') }}
-                    </span>
-                </div>
-                @php
-                    $percentage = $invoice->total_harga > 0 ? min(100, ($invoice->total_paid / $invoice->total_harga) * 100) : 0;
-                @endphp
-                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
-                    <div class="bg-emerald-600 h-3 rounded-full transition-all duration-500" style="width: {{ $percentage }}%"></div>
-                </div>
-                <div class="flex justify-between text-xs mt-2">
-                    <span class="text-gray-500 dark:text-gray-400">{{ number_format($percentage, 1) }}% terbayar</span>
-                    <span class="text-emerald-600 dark:text-emerald-400 font-medium">
-                        Sisa: Rp {{ number_format($remainingAmount, 0, ',', '.') }}
-                    </span>
-                </div>
-            </div>
         </x-ui.card>
 
         <!-- Error Summary -->
@@ -122,6 +100,7 @@
         <form id="kuitansiForm" action="{{ route('kuitansis.storeFromInvoice', $invoice->id) }}" method="POST" class="space-y-6">
             @csrf
             <input type="hidden" name="id_invoice" value="{{ $invoice->id }}">
+            <input type="hidden" name="total_bayar" value="{{ $remainingAmount }}">
 
             <!-- Kuitansi Information Card -->
             <x-ui.card>
@@ -292,77 +271,115 @@
                 </div>
             </x-ui.card>
 
-            <!-- Payment Amount Card -->
+            <!-- Invoice Items Card (Synced from Invoice) -->
             <x-ui.card>
                 <x-slot name="header">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center">
-                            <svg class="w-5 h-5 text-rose-600 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                                <svg class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Item Pembayaran</h3>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ $invoice->detailInvoices->count() }} item(s) dari Invoice</p>
+                            </div>
+                        </div>
+                        <x-ui.badge type="secondary">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                             </svg>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Jumlah Pembayaran</h3>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Total pembayaran kuitansi</p>
-                        </div>
+                            Readonly
+                        </x-ui.badge>
                     </div>
                 </x-slot>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                            Total Bayar (Rp) <span class="text-red-500">*</span>
-                        </label>
-                        <div class="relative">
-                            <div class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">
-                                <span class="text-sm font-semibold">Rp</span>
-                            </div>
-                            <input 
-                                type="number" 
-                                step="0.01" 
-                                name="total_bayar" 
-                                id="total_bayar"
-                                placeholder="0" 
-                                value="{{ old('total_bayar') }}"
-                                max="{{ $remainingAmount }}"
-                                required
-                                class="w-full pl-12 pr-4 py-2.5 bg-white dark:bg-dark-hover border border-gray-300 dark:border-dark-border rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
-                            >
-                        </div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                            Maksimal: <span class="font-medium text-emerald-600 dark:text-emerald-400">Rp {{ number_format($remainingAmount, 0, ',', '.') }}</span>
-                        </p>
+                @if($invoice->detailInvoices->count() > 0)
+                    <div class="overflow-x-auto -mx-6 -mb-6">
+                        <table class="w-full">
+                            <thead class="bg-gray-50 dark:bg-dark-sidebar border-y border-gray-200 dark:border-dark-border">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider w-12">#</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Item / Deskripsi</th>
+                                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Qty</th>
+                                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Harga Satuan</th>
+                                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200 dark:divide-dark-border">
+                                @foreach($invoice->detailInvoices as $index => $detail)
+                                <tr class="hover:bg-gray-50 dark:hover:bg-dark-hover transition-colors">
+                                    <td class="px-4 py-4 text-sm text-gray-600 dark:text-gray-400">{{ $index + 1 }}</td>
+                                    <td class="px-4 py-4 text-sm font-medium text-gray-900 dark:text-white">{{ $detail->id_kuitansi }}</td>
+                                    <td class="px-4 py-4 text-sm text-gray-900 dark:text-white text-right">{{ number_format($detail->jumlah, 0, ',', '.') }}</td>
+                                    <td class="px-4 py-4 text-sm text-gray-900 dark:text-white text-right">Rp {{ number_format($detail->harga_satuan, 0, ',', '.') }}</td>
+                                    <td class="px-4 py-4 text-sm font-semibold text-gray-900 dark:text-white text-right">Rp {{ number_format($detail->subtotal, 0, ',', '.') }}</td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                            <tfoot class="bg-gray-50 dark:bg-dark-sidebar border-t-2 border-gray-300 dark:border-dark-border">
+                                <tr>
+                                    <td colspan="4" class="px-4 py-4 text-right text-sm font-bold text-gray-900 dark:text-white uppercase">Total Amount:</td>
+                                    <td class="px-4 py-4 text-right text-lg font-bold text-primary-600 dark:text-primary-400">Rp {{ number_format($invoice->total_harga, 0, ',', '.') }}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
                     </div>
-                    
-                    <div class="flex items-start">
-                        <div class="p-4 rounded-xl bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200 dark:border-amber-800 w-full">
-                            <div class="flex items-start gap-3 text-sm text-amber-700 dark:text-amber-300">
-                                <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                                </svg>
-                                <div>
-                                    <p class="font-medium">Batas Sisa Tagihan</p>
-                                    <p class="mt-1 text-amber-600 dark:text-amber-400">Total pembayaran tidak boleh melebihi sisa tagihan invoice.</p>
-                                </div>
-                            </div>
+                @else
+                    <div class="text-center py-12">
+                        <div class="w-16 h-16 rounded-full bg-gray-100 dark:bg-dark-hover mx-auto flex items-center justify-center mb-4">
+                            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
                         </div>
+                        <p class="text-gray-500 dark:text-gray-400">Tidak ada item dalam invoice</p>
                     </div>
+                @endif
+            </x-ui.card>
 
-                    <!-- Quick amount buttons -->
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Quick Amount</label>
-                        <div class="flex flex-wrap gap-2">
-                            <button type="button" onclick="setAmount({{ $remainingAmount }})" class="px-3 py-1.5 text-sm bg-emerald-100 dark:bg-emerald-900/30 hover:bg-emerald-200 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 rounded-lg transition-colors font-medium">
-                                Full (Rp {{ number_format($remainingAmount, 0, ',', '.') }})
-                            </button>
-                            @if($remainingAmount >= 1000000)
-                            <button type="button" onclick="setAmount({{ $remainingAmount / 2 }})" class="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg transition-colors">
-                                50% (Rp {{ number_format($remainingAmount / 2, 0, ',', '.') }})
-                            </button>
-                            <button type="button" onclick="setAmount({{ $remainingAmount / 4 }})" class="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg transition-colors">
-                                25% (Rp {{ number_format($remainingAmount / 4, 0, ',', '.') }})
-                            </button>
-                            @endif
+            <!-- Total Payment Card (Non-editable) -->
+            <x-ui.card class="border-2 border-primary-200 dark:border-primary-800 bg-primary-50/50 dark:bg-primary-900/20">
+                <x-slot name="header">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+                                <svg class="w-5 h-5 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Total Pembayaran</h3>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Jumlah yang akan dibayarkan</p>
+                            </div>
+                        </div>
+                        <x-ui.badge type="success">Full Payment</x-ui.badge>
+                    </div>
+                </x-slot>
+                
+                <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-4">
+                            <div class="w-16 h-16 rounded-2xl bg-white dark:bg-dark-card shadow-sm flex items-center justify-center">
+                                <svg class="w-8 h-8 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Jumlah Bayar</p>
+                                <p class="text-3xl font-bold text-gray-900 dark:text-white">Rp {{ number_format($remainingAmount, 0, ',', '.') }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-4 rounded-xl bg-white dark:bg-dark-card border border-gray-200 dark:border-dark-border">
+                        <div class="flex items-start gap-3 text-sm">
+                            <svg class="w-5 h-5 flex-shrink-0 mt-0.5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <div class="text-gray-600 dark:text-gray-400">
+                                <p class="font-medium text-gray-900 dark:text-white">Pembayaran Penuh</p>
+                                <p class="mt-1">Kuitansi otomatis menggunakan total sisa tagihan dari invoice. Tidak dapat diubah.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -437,19 +454,6 @@
                     document.getElementById('no_kuitansi').value = data.no_kuitansi;
                 })
                 .catch(error => console.error('Error:', error));
-        });
-
-        // Set amount function for quick buttons
-        function setAmount(amount) {
-            document.getElementById('total_bayar').value = Math.floor(amount);
-        }
-
-        // Validate max amount
-        document.getElementById('total_bayar').addEventListener('input', function() {
-            const maxAmount = {{ $remainingAmount }};
-            if (parseFloat(this.value) > maxAmount) {
-                this.value = maxAmount;
-            }
         });
 
         // Form submission with AJAX

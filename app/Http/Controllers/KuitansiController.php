@@ -577,6 +577,9 @@ class KuitansiController extends Controller
                 ->with('error', 'Invoice ini sudah lunas!');
         }
 
+        // Load invoice with details
+        $invoice->load('detailInvoices');
+
         $salesList = Sales::orderBy('nama_sales')->get();
         
         // Pre-fill data from Invoice
@@ -588,7 +591,7 @@ class KuitansiController extends Controller
             'id_invoice' => $invoice->id,
         ];
         
-        // Calculate remaining amount
+        // Calculate remaining amount - this will be the fixed total_bayar
         $remainingAmount = $invoice->remaining_amount;
         
         // Generate kuitansi number
@@ -663,6 +666,9 @@ class KuitansiController extends Controller
             $validated['no_kuitansi'] = 'KTN-' . $year . '-' . $month . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
         }
 
+        // Force total_bayar to remaining amount (no cicilan, full payment only)
+        $validated['total_bayar'] = $remainingAmount;
+
         // Create kuitansi linked to Invoice - Always Lunas (tanda terima pembayaran)
         $kuitansi = Kuitansi::create([
             'no_kuitansi' => $validated['no_kuitansi'],
@@ -677,6 +683,17 @@ class KuitansiController extends Controller
             'id_sales' => $validated['id_sales'],
             'id_invoice' => $invoice->id,
         ]);
+
+        // Copy invoice items to kuitansi details
+        foreach ($invoice->detailInvoices as $detail) {
+            DetailKuitansi::create([
+                'id_kuitansi' => $kuitansi->id,
+                'id_txtKtl' => $detail->id_kuitansi, // nama item from invoice
+                'jumlah' => $detail->jumlah,
+                'harga_satuan' => $detail->harga_satuan,
+                'subtotal' => $detail->subtotal,
+            ]);
+        }
 
         // Auto-update invoice status based on total paid kuitansis
         $this->updateInvoicePaymentStatus($invoice->id);
