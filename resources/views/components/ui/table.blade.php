@@ -11,7 +11,7 @@
     }
 @endphp
 
-<div {{ $attributes->merge(['class' => 'overflow-hidden rounded-xl border border-gray-200 dark:border-dark-border bg-white dark:bg-dark-card']) }}>
+<div {{ $attributes->merge(['class' => 'overflow-hidden rounded-lg border border-gray-200 dark:border-dark-border bg-white dark:bg-dark-card']) }}>
     <div class="overflow-x-auto">
         <table class="{{ $tableClasses }}">
             @if(isset($head))

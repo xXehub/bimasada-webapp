@@ -14,17 +14,21 @@ use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
-    // Cache duration in seconds (5 minutes)
-    const CACHE_TTL = 300;
+    // Cache duration in seconds (10 minutes for remote DB)
+    const CACHE_TTL = 600;
 
     public function index()
     {
         $user = Auth::user();
         
-        // Get role-based dashboard data
-        if ($user->hasRole('Marketing Manager')) {
+        // Get cached roles to avoid DB query
+        $cached = Cache::get("user_roles_perms_{$user->id}");
+        $roles = $cached['roles'] ?? [];
+        
+        // Get role-based dashboard data (using cache first)
+        if (in_array('Marketing Manager', $roles) || (!$cached && $user->hasRole('Marketing Manager'))) {
             return $this->managerDashboard();
-        } elseif ($user->hasRole('Sales')) {
+        } elseif (in_array('Sales', $roles) || (!$cached && $user->hasRole('Sales'))) {
             return $this->salesDashboard();
         } else {
             return $this->adminDashboard();
@@ -75,14 +79,16 @@ class DashboardController extends Controller
             ];
 
             // OPTIMIZED: Single query for Kuitansi stats
+            $currentMonth = Carbon::now()->month;
+            $currentYear = Carbon::now()->year;
+            
             $kuitansiData = DB::table('kuitansis')
                 ->join('invoices', 'kuitansis.id_invoice', '=', 'invoices.id')
                 ->where('invoices.id_sales', $user->id)
                 ->select(
                     DB::raw('COUNT(*) as total'),
-                    DB::raw('SUM(CASE WHEN EXTRACT(MONTH FROM kuitansis.tanggal_kuitansi) = ? AND EXTRACT(YEAR FROM kuitansis.tanggal_kuitansi) = ? THEN 1 ELSE 0 END) as this_month')
+                    DB::raw("SUM(CASE WHEN EXTRACT(MONTH FROM kuitansis.tanggal_kuitansi) = {$currentMonth} AND EXTRACT(YEAR FROM kuitansis.tanggal_kuitansi) = {$currentYear} THEN 1 ELSE 0 END) as this_month")
                 )
-                ->setBindings([Carbon::now()->month, Carbon::now()->year])
                 ->first();
 
             $kuitansiStats = [
@@ -109,13 +115,52 @@ class DashboardController extends Controller
                 ? round((($thisMonthRevenue - $lastMonthRevenue) / $lastMonthRevenue) * 100, 1)
                 : ($thisMonthRevenue > 0 ? 100 : 0);
 
+            // Monthly trend for Sales (6 months)
+            $sixMonthsAgo = Carbon::now()->subMonths(5)->startOfMonth();
+            
+            $monthlyInvoices = DB::table('invoices')
+                ->select(
+                    DB::raw("TO_CHAR(created_at, 'YYYY-MM') as month_key"),
+                    DB::raw('COUNT(*) as count')
+                )
+                ->where('id_sales', $user->id)
+                ->where('created_at', '>=', $sixMonthsAgo)
+                ->groupBy(DB::raw("TO_CHAR(created_at, 'YYYY-MM')"))
+                ->pluck('count', 'month_key')
+                ->toArray();
+
+            $monthlyRevenue = DB::table('kuitansis')
+                ->join('invoices', 'kuitansis.id_invoice', '=', 'invoices.id')
+                ->select(
+                    DB::raw("TO_CHAR(kuitansis.tanggal_kuitansi, 'YYYY-MM') as month_key"),
+                    DB::raw('COALESCE(SUM(kuitansis.total_bayar), 0) as total')
+                )
+                ->where('invoices.id_sales', $user->id)
+                ->where('kuitansis.tanggal_kuitansi', '>=', $sixMonthsAgo)
+                ->groupBy(DB::raw("TO_CHAR(kuitansis.tanggal_kuitansi, 'YYYY-MM')"))
+                ->pluck('total', 'month_key')
+                ->toArray();
+
+            $monthlyTrend = collect();
+            for ($i = 5; $i >= 0; $i--) {
+                $month = Carbon::now()->subMonths($i);
+                $key = $month->format('Y-m');
+                $monthlyTrend->push([
+                    'month' => $month->format('M Y'),
+                    'month_short' => $month->format('M'),
+                    'invoices' => $monthlyInvoices[$key] ?? 0,
+                    'revenue' => $monthlyRevenue[$key] ?? 0,
+                ]);
+            }
+
             return compact(
                 'pksStats',
                 'invoiceStats',
                 'kuitansiStats',
                 'totalRevenue',
                 'thisMonthRevenue',
-                'revenueGrowth'
+                'revenueGrowth',
+                'monthlyTrend'
             );
         });
 
@@ -316,6 +361,7 @@ class DashboardController extends Controller
                 $key = $month->format('Y-m');
                 $monthlyTrend->push([
                     'month' => $month->format('M Y'),
+                    'month_short' => $month->format('M'),
                     'pks' => $monthlyPks[$key] ?? 0,
                     'invoices' => $monthlyInvoices[$key] ?? 0,
                     'revenue' => $monthlyRevenue[$key] ?? 0,

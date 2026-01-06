@@ -5,7 +5,7 @@
 ])
 
 @php
-    $baseClasses = 'inline-flex items-center font-semibold rounded-md';
+    $baseClasses = 'inline-flex items-center font-semibold rounded-lg';
     
     $variants = [
         'primary' => 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400',

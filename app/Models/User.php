@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Cache;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
@@ -45,6 +46,30 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Check if user has role from cache (faster for remote DB)
+     */
+    public function hasRoleCached(string $role): bool
+    {
+        $cached = Cache::get("user_roles_perms_{$this->id}");
+        if ($cached && isset($cached['roles'])) {
+            return in_array($role, $cached['roles']);
+        }
+        return $this->hasRole($role);
+    }
+
+    /**
+     * Check if user has permission from cache (faster for remote DB)
+     */
+    public function hasPermissionCached(string $permission): bool
+    {
+        $cached = Cache::get("user_roles_perms_{$this->id}");
+        if ($cached && isset($cached['permissions'])) {
+            return in_array($permission, $cached['permissions']);
+        }
+        return $this->hasPermissionTo($permission);
     }
 
     /**

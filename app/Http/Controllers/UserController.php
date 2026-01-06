@@ -7,6 +7,7 @@ use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Cache;
 use Spatie\Permission\Models\Role;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -17,21 +18,21 @@ class UserController extends Controller
      */
     public function index()
     {
-        // Get all users count
-        $totalUsers = User::count();
-        $activeUsers = User::whereNotNull('email_verified_at')->count();
-        $pendingUsers = User::whereNull('email_verified_at')->count();
-        
-        // Count users with roles (administrators)
-        // This counts users who have ANY role assigned
-        $adminsCount = User::has('roles')->count();
-        
-        $stats = [
-            'total' => $totalUsers,
-            'active' => $activeUsers,
-            'pending' => $pendingUsers,
-            'admins' => $adminsCount,
-        ];
+        // Cache stats for 5 minutes to reduce DB queries on remote database
+        $stats = Cache::remember('user_stats', 300, function () {
+            // Single optimized query for all counts
+            $totalUsers = User::count();
+            $activeUsers = User::whereNotNull('email_verified_at')->count();
+            $pendingUsers = $totalUsers - $activeUsers;
+            $adminsCount = User::has('roles')->count();
+            
+            return [
+                'total' => $totalUsers,
+                'active' => $activeUsers,
+                'pending' => $pendingUsers,
+                'admins' => $adminsCount,
+            ];
+        });
         
         return view('users.index', compact('stats'));
     }

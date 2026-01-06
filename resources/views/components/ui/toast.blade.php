@@ -32,7 +32,7 @@ To trigger from JavaScript/Alpine:
             x-transition:leave="transition ease-in duration-200"
             x-transition:leave-start="opacity-100 transform translate-x-0 scale-100"
             x-transition:leave-end="opacity-0 transform translate-x-8 scale-95"
-            class="min-w-[320px] max-w-md bg-white dark:bg-dark-card rounded-xl shadow-lg border border-gray-200 dark:border-dark-border overflow-hidden pointer-events-auto"
+            class="min-w-[320px] max-w-md bg-white dark:bg-dark-card rounded-lg shadow-lg border border-gray-200 dark:border-dark-border overflow-hidden pointer-events-auto"
         >
             <!-- Progress bar -->
             <div 

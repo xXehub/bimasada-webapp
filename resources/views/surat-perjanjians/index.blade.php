@@ -535,6 +535,7 @@
                 <table id="pks-table" class="w-full">
                     <thead>
                         <tr>
+                            <th class="w-12">No</th>
                             <th>No. PKS</th>
                             <th>Tanggal</th>
                             <th>Pelanggan</th>
@@ -578,20 +579,47 @@
 
                 initDataTable() {
                     const self = this;
+                    let currentRequest = null;
                     
                     this.dataTable = $('#pks-table').DataTable({
                         processing: true,
                         serverSide: true,
+                        deferRender: true,
                         ajax: {
                             url: '{{ route("surat-perjanjians.data") }}',
+                            type: 'GET',
+                            timeout: 30000,
                             data: function(d) {
                                 d.status = self.statusFilter;
                                 d.search = {
                                     value: self.searchQuery
                                 };
+                            },
+                            beforeSend: function(xhr) {
+                                // Abort previous request if still pending
+                                if (currentRequest && currentRequest.readyState !== 4) {
+                                    currentRequest.abort();
+                                }
+                                currentRequest = xhr;
+                            },
+                            error: function(xhr, error, thrown) {
+                                // Ignore aborted requests - they're intentional
+                                if (error === 'abort') {
+                                    return;
+                                }
+                                console.error('DataTable error:', error);
                             }
                         },
                         columns: [
+                            {
+                                data: null,
+                                orderable: false,
+                                searchable: false,
+                                className: 'text-center',
+                                render: function(data, type, row, meta) {
+                                    return `<span class="text-gray-500 dark:text-gray-400">${meta.row + meta.settings._iDisplayStart + 1}</span>`;
+                                }
+                            },
                             { 
                                 data: 'no_surat_display',
                                 render: function(data, type, row) {

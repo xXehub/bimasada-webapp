@@ -503,6 +503,7 @@
                     <table id="users-table" class="w-full">
                         <thead>
                             <tr>
+                                <th class="w-12">No</th>
                                 <th>Name</th>
                                 <th>Email</th>
                                 <th>Roles</th>
@@ -542,21 +543,48 @@
 
                 initDataTable() {
                     const self = this;
+                    let currentRequest = null;
                     
                     this.dataTable = $('#users-table').DataTable({
                         processing: true,
                         serverSide: true,
+                        deferRender: true,
                         ajax: {
                             url: '{{ route("users.data") }}',
+                            type: 'GET',
+                            timeout: 30000,
                             data: function(d) {
                                 // Send custom filters to server
                                 d.role = self.roleFilter;
                                 d.search = {
                                     value: self.searchQuery
                                 };
+                            },
+                            beforeSend: function(xhr) {
+                                // Abort previous request if still pending
+                                if (currentRequest && currentRequest.readyState !== 4) {
+                                    currentRequest.abort();
+                                }
+                                currentRequest = xhr;
+                            },
+                            error: function(xhr, error, thrown) {
+                                // Ignore aborted requests - they're intentional
+                                if (error === 'abort') {
+                                    return;
+                                }
+                                console.error('DataTable error:', error);
                             }
                         },
                         columns: [
+                            {
+                                data: null,
+                                orderable: false,
+                                searchable: false,
+                                className: 'text-center',
+                                render: function(data, type, row, meta) {
+                                    return `<span class="text-gray-500 dark:text-gray-400">${meta.row + meta.settings._iDisplayStart + 1}</span>`;
+                                }
+                            },
                             { 
                                 data: 'name',
                                 render: function(data, type, row) {
@@ -592,11 +620,11 @@
                                 data: 'created_at',
                                 render: function(data) {
                                     const date = new Date(data);
-                                    return `<span class="text-gray-700 dark:text-gray-300">${date.toLocaleDateString('en-US', {
-                                        year: 'numeric',
-                                        month: 'short',
-                                        day: 'numeric'
-                                    })}</span>`;
+                                    const day = String(date.getDate()).padStart(2, '0');
+                                    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                                    const month = months[date.getMonth()];
+                                    const year = date.getFullYear();
+                                    return `<span class="text-gray-700 dark:text-gray-300">${day} ${month} ${year}</span>`;
                                 }
                             },
                             { 

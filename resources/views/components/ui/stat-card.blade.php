@@ -31,7 +31,7 @@
 <x-ui.card class="!p-4">
     <div class="flex items-center gap-4">
         @if($icon)
-            <div class="w-12 h-12 rounded-md {{ $iconBgClass }} flex items-center justify-center flex-shrink-0">
+            <div class="w-12 h-12 rounded-lg {{ $iconBgClass }} flex items-center justify-center flex-shrink-0">
                 <div class="w-6 h-6 {{ $iconTextClass }}">
                     {{ $icon }}
                 </div>

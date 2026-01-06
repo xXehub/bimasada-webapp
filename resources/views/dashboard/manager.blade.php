@@ -1,13 +1,46 @@
 <x-layout.app title="Dashboard Manager">
     
+    <!-- ApexCharts CDN -->
+    @push('styles')
+    <style>
+        .apexcharts-tooltip {
+            background: #1f2937 !important;
+            border: none !important;
+            border-radius: 8px !important;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2) !important;
+        }
+        .apexcharts-tooltip-title {
+            background: #374151 !important;
+            border-bottom: none !important;
+            color: #fff !important;
+        }
+        .apexcharts-tooltip-text {
+            color: #fff !important;
+        }
+    </style>
+    @endpush
+
     <!-- Welcome Section -->
     <div class="mb-8">
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            Dashboard Marketing Manager 📊
-        </h2>
-        <p class="text-gray-500 dark:text-gray-400">
-            Pantau kinerja tim dan kelola approval dokumen.
-        </p>
+        <div class="flex items-center justify-between">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+                    Dashboard Marketing Manager
+                    <svg class="w-6 h-6 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                    </svg>
+                </h2>
+                <p class="text-gray-500 dark:text-gray-400">
+                    Pantau kinerja tim dan kelola approval dokumen.
+                </p>
+            </div>
+            <div class="hidden sm:flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                {{ now()->translatedFormat('l, d F Y') }}
+            </div>
+        </div>
     </div>
     
     <!-- Main Stats -->
@@ -94,34 +127,29 @@
     <!-- Charts & Pending PKS -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         
-        <!-- Monthly Trend Chart -->
-        <div class="lg:col-span-2 rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-sm border border-gray-100 dark:border-gray-700">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Trend 6 Bulan Terakhir</h3>
-            
-            <div class="space-y-4">
-                @foreach($monthlyTrend as $data)
-                    <div class="flex items-center gap-4">
-                        <span class="w-16 text-sm text-gray-500 dark:text-gray-400">{{ $data['month'] }}</span>
-                        <div class="flex-1 flex items-center gap-2">
-                            <div class="flex-1 bg-gray-100 dark:bg-gray-700 rounded-full h-2.5 overflow-hidden">
-                                @php
-                                    $maxRevenue = $monthlyTrend->max('revenue') ?: 1;
-                                    $percentage = ($data['revenue'] / $maxRevenue) * 100;
-                                @endphp
-                                <div class="bg-gradient-to-r from-indigo-500 to-purple-500 h-full rounded-full transition-all duration-500" style="width: {{ $percentage }}%"></div>
-                            </div>
-                            <span class="w-28 text-sm font-medium text-gray-900 dark:text-white text-right">
-                                Rp {{ number_format($data['revenue'] / 1000000, 1) }}M
-                            </span>
-                        </div>
+        <!-- Monthly Trend Chart with ApexCharts -->
+        <div class="lg:col-span-2 rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Trend 6 Bulan Terakhir</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Pendapatan & Dokumen</p>
+                </div>
+                <div class="flex items-center gap-4 text-sm">
+                    <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 rounded-full bg-purple-500"></div>
+                        <span class="text-gray-600 dark:text-gray-400">Pendapatan</span>
                     </div>
-                @endforeach
+                    <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 rounded-full bg-emerald-500"></div>
+                        <span class="text-gray-600 dark:text-gray-400">Invoice</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 rounded-full bg-amber-500"></div>
+                        <span class="text-gray-600 dark:text-gray-400">PKS</span>
+                    </div>
+                </div>
             </div>
-            
-            <div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between text-sm">
-                <span class="text-gray-500 dark:text-gray-400">Total Pendapatan</span>
-                <span class="font-semibold text-gray-900 dark:text-white">Rp {{ number_format($totalRevenue, 0, ',', '.') }}</span>
-            </div>
+            <div id="revenue-chart" class="w-full" style="height: 280px; min-height: 280px;"></div>
         </div>
         
         <!-- PKS Pending Approval List -->
@@ -199,11 +227,11 @@
                                 </td>
                                 <td class="py-3 text-center">
                                     <span class="text-sm text-gray-900 dark:text-white">{{ $sales->pks_count }}</span>
-                                    <span class="text-xs text-gray-400">({{ $sales->pks_approved_count }}✓)</span>
+                                    <span class="text-xs text-emerald-500 inline-flex items-center gap-0.5">({{ $sales->pks_approved_count }}<svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>)</span>
                                 </td>
                                 <td class="py-3 text-center">
                                     <span class="text-sm text-gray-900 dark:text-white">{{ $sales->invoice_count }}</span>
-                                    <span class="text-xs text-gray-400">({{ $sales->invoice_paid_count }}✓)</span>
+                                    <span class="text-xs text-emerald-500 inline-flex items-center gap-0.5">({{ $sales->invoice_paid_count }}<svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>)</span>
                                 </td>
                                 <td class="py-3 text-right">
                                     <span class="text-sm font-medium text-gray-900 dark:text-white">
@@ -273,5 +301,131 @@
             </div>
         </div>
     </div>
+
+    @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Chart data from PHP
+            const monthlyData = @json($monthlyTrend);
+            const months = monthlyData.map(d => d.month_short);
+            const revenues = monthlyData.map(d => d.revenue);
+            const invoices = monthlyData.map(d => d.invoices);
+            const pks = monthlyData.map(d => d.pks);
+            
+            // Dark mode detection
+            const isDark = document.documentElement.classList.contains('dark');
+            const textColor = isDark ? '#9ca3af' : '#6b7280';
+            const gridColor = isDark ? '#374151' : '#e5e7eb';
+            
+            // Revenue Chart with 3 series - Fixed
+            const revenueOptions = {
+                series: [{
+                    name: 'Pendapatan',
+                    type: 'area',
+                    data: revenues
+                }, {
+                    name: 'Invoice',
+                    type: 'line',
+                    data: invoices
+                }, {
+                    name: 'PKS',
+                    type: 'line',
+                    data: pks
+                }],
+                chart: {
+                    height: 280,
+                    type: 'line',
+                    toolbar: { show: false },
+                    fontFamily: 'Poppins, sans-serif',
+                    background: 'transparent',
+                    parentHeightOffset: 0,
+                    redrawOnParentResize: true,
+                    events: {
+                        mounted: function(chartContext, config) {
+                            setTimeout(() => window.dispatchEvent(new Event('resize')), 100);
+                        }
+                    }
+                },
+                colors: ['#8b5cf6', '#10b981', '#f59e0b'],
+                fill: {
+                    type: ['gradient', 'solid', 'solid'],
+                    gradient: {
+                        shade: 'light',
+                        type: 'vertical',
+                        shadeIntensity: 0.5,
+                        opacityFrom: 0.5,
+                        opacityTo: 0.1,
+                        stops: [0, 100]
+                    }
+                },
+                stroke: {
+                    width: [2, 3, 3],
+                    curve: 'smooth'
+                },
+                markers: {
+                    size: [4, 5, 5],
+                    colors: ['#8b5cf6', '#10b981', '#f59e0b'],
+                    strokeWidth: 2,
+                    strokeColors: '#fff',
+                    hover: { size: 7 }
+                },
+                xaxis: {
+                    categories: months,
+                    labels: { style: { colors: textColor } },
+                    axisBorder: { show: false },
+                    axisTicks: { show: false }
+                },
+                yaxis: [{
+                    title: { text: 'Pendapatan (Rp)', style: { color: textColor, fontSize: '12px', fontWeight: 500 } },
+                    labels: {
+                        style: { colors: textColor },
+                        formatter: function(val) {
+                            if (val >= 1000000) return 'Rp ' + (val / 1000000).toFixed(1) + ' Jt';
+                            if (val >= 1000) return 'Rp ' + (val / 1000).toFixed(0) + ' Rb';
+                            return 'Rp ' + val;
+                        }
+                    },
+                    min: 0
+                }, {
+                    opposite: true,
+                    title: { text: 'Jumlah Dokumen', style: { color: textColor, fontSize: '12px', fontWeight: 500 } },
+                    labels: { style: { colors: textColor } },
+                    min: 0,
+                    forceNiceScale: true
+                }],
+                grid: {
+                    borderColor: gridColor,
+                    strokeDashArray: 4,
+                    padding: { left: 10, right: 10 }
+                },
+                legend: {
+                    show: false
+                },
+                tooltip: {
+                    shared: true,
+                    intersect: false,
+                    theme: isDark ? 'dark' : 'light',
+                    y: [{
+                        formatter: function(val) {
+                            return 'Rp ' + new Intl.NumberFormat('id-ID').format(val);
+                        }
+                    }, {
+                        formatter: function(val) {
+                            return val + ' invoice';
+                        }
+                    }, {
+                        formatter: function(val) {
+                            return val + ' PKS';
+                        }
+                    }]
+                }
+            };
+            
+            const revenueChart = new ApexCharts(document.querySelector("#revenue-chart"), revenueOptions);
+            revenueChart.render();
+        });
+    </script>
+    @endpush
 
 </x-layout.app>

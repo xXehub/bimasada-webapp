@@ -66,6 +66,9 @@ class KuitansiController extends Controller
             ->addColumn('no_kuitansi_display', function ($kuitansi) {
                 return $kuitansi->no_kuitansi ?? 'KTN-' . str_pad($kuitansi->id, 4, '0', STR_PAD_LEFT);
             })
+            ->addColumn('tanggal_kuitansi_display', function ($kuitansi) {
+                return $kuitansi->tanggal_kuitansi ? $kuitansi->tanggal_kuitansi->format('d M Y') : '-';
+            })
             ->addColumn('customer_display', function ($kuitansi) {
                 $html = '<div class="font-medium">' . e($kuitansi->nama_pelanggan) . '</div>';
                 if ($kuitansi->no_telp) {

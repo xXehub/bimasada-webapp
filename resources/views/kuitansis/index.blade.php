@@ -531,6 +531,7 @@
                 <table id="kuitansi-table" class="w-full">
                     <thead>
                         <tr>
+                            <th class="w-12">No</th>
                             <th>No. Kuitansi</th>
                             <th>Tanggal</th>
                             <th>Pelanggan</th>
@@ -571,20 +572,47 @@
 
                 initDataTable() {
                     const self = this;
+                    let currentRequest = null;
                     
                     this.dataTable = $('#kuitansi-table').DataTable({
                         processing: true,
                         serverSide: true,
+                        deferRender: true,
                         ajax: {
                             url: '{{ route("kuitansis.data") }}',
+                            type: 'GET',
+                            timeout: 30000,
                             data: function(d) {
                                 d.status = self.statusFilter;
                                 d.date_from = self.dateFrom;
                                 d.date_to = self.dateTo;
                                 d.search = { value: self.searchQuery };
+                            },
+                            beforeSend: function(xhr) {
+                                // Abort previous request if still pending
+                                if (currentRequest && currentRequest.readyState !== 4) {
+                                    currentRequest.abort();
+                                }
+                                currentRequest = xhr;
+                            },
+                            error: function(xhr, error, thrown) {
+                                // Ignore aborted requests - they're intentional
+                                if (error === 'abort') {
+                                    return;
+                                }
+                                console.error('DataTable error:', error);
                             }
                         },
                         columns: [
+                            {
+                                data: null,
+                                orderable: false,
+                                searchable: false,
+                                className: 'text-center',
+                                render: function(data, type, row, meta) {
+                                    return `<span class="text-gray-500 dark:text-gray-400">${meta.row + meta.settings._iDisplayStart + 1}</span>`;
+                                }
+                            },
                             { 
                                 data: 'no_kuitansi_display',
                                 render: function(data) {
@@ -592,7 +620,7 @@
                                 }
                             },
                             { 
-                                data: 'tanggal_kuitansi',
+                                data: 'tanggal_kuitansi_display',
                                 render: function(data) {
                                     return `<span class="text-gray-900 dark:text-white">${data}</span>`;
                                 }

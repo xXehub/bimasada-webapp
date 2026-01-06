@@ -195,8 +195,10 @@ return [
          * You may optionally indicate a specific cache driver to use for permission and
          * role caching using any of the `store` drivers listed in the cache.php config
          * file. Using 'default' here means to use the `default` set in cache.php.
+         * 
+         * Using 'file' for faster permission checks with remote database (Supabase)
          */
 
-        'store' => 'default',
+        'store' => 'file',
     ],
 ];

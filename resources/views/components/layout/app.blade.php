@@ -21,7 +21,7 @@
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
-    <!-- jQuery for DataTables -->
+    <!-- jQuery for DataTables - loaded with defer for non-blocking -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     
     <!-- Session Notification Data -->
@@ -34,6 +34,44 @@
         if (localStorage.getItem('darkMode') === 'true' || 
             (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
+        }
+        
+        // Global AJAX optimization - prevent cancellation issues
+        window.activeRequests = new Map();
+        window.isPageVisible = true;
+        
+        // Track page visibility to pause/resume requests
+        document.addEventListener('visibilitychange', function() {
+            window.isPageVisible = !document.hidden;
+        });
+        
+        // Debounce helper for search inputs
+        window.debounce = function(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        };
+        
+        // Abort all pending requests on page unload to prevent errors
+        window.addEventListener('beforeunload', function() {
+            window.activeRequests.forEach((controller, key) => {
+                try { controller.abort(); } catch(e) {}
+            });
+            window.activeRequests.clear();
+        });
+        
+        // Global AJAX settings for jQuery
+        if (typeof $ !== 'undefined') {
+            $.ajaxSetup({
+                timeout: 30000,
+                cache: false
+            });
         }
     </script>
     

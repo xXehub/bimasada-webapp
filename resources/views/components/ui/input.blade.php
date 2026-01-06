@@ -14,7 +14,7 @@
     $hasIcon = isset($icon);
     $hasIconRight = isset($iconRight);
     
-    $inputClasses = 'w-full px-4 py-2.5 rounded-md border transition-all duration-200 focus:outline-none focus:ring-2 dark:focus:ring-offset-dark-bg';
+    $inputClasses = 'w-full px-4 py-2.5 rounded-lg border transition-all duration-200 focus:outline-none focus:ring-2 dark:focus:ring-offset-dark-bg';
     
     if ($error) {
         $inputClasses .= ' border-red-300 focus:ring-red-500 focus:border-red-500 bg-red-50 dark:bg-red-900/10 dark:border-red-800';
