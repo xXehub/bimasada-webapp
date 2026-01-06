@@ -30,10 +30,12 @@
         }
         .container {
             max-width: 100%;
+            padding: 0 5mm;
         }
         .header {
             display: table;
             width: 100%;
+            margin-top: 5mm;
             margin-bottom: 15px;
             padding-bottom: 8px;
             border-bottom: 3px double #000;
