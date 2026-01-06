@@ -61,7 +61,15 @@
                         Edit PKS
                     </x-ui.button>
                 @endcan
-                <x-ui.button variant="outline" onclick="printPKS()">
+                <x-ui.button variant="outline" href="{{ route('pdf.pks', $suratPerjanjian) }}" target="_blank">
+                    <x-slot name="icon">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                    </x-slot>
+                    Download PDF
+                </x-ui.button>
+                <x-ui.button variant="outline" href="{{ route('pdf.pks.stream', $suratPerjanjian) }}" target="_blank">
                     <x-slot name="icon">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
@@ -461,17 +469,17 @@
                         </a>
                         @endif
 
-                        <button type="button" onclick="window.print()" class="w-full flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-dark-hover hover:bg-gray-100 dark:hover:bg-dark-sidebar transition-colors text-left">
+                        <a href="{{ route('pdf.pks', $suratPerjanjian) }}" target="_blank" class="w-full flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-dark-hover hover:bg-gray-100 dark:hover:bg-dark-sidebar transition-colors text-left">
                             <div class="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center flex-shrink-0">
                                 <svg class="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                 </svg>
                             </div>
                             <div>
-                                <p class="font-medium text-gray-900 dark:text-white">Print PKS</p>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Cetak dokumen</p>
+                                <p class="font-medium text-gray-900 dark:text-white">Download PDF PKS</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Unduh dokumen</p>
                             </div>
-                        </button>
+                        </a>
                     </div>
                 </x-ui.card>
 

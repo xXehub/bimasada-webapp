@@ -1,4 +1,7 @@
-{{-- Alias for x-ui.dropdown component --}}
+{{-- Alias for x-ui.dropdown component (Breeze compatibility) --}}
 <x-ui.dropdown {{ $attributes }}>
-    {{ $slot }}
+    <x-slot name="trigger">
+        {{ $trigger }}
+    </x-slot>
+    {{ $content ?? $slot }}
 </x-ui.dropdown>

@@ -29,7 +29,7 @@
             </x-ui.alert>
         @endif
 
-        <form action="{{ route('invoices.storeWithItems') }}" method="POST" class="space-y-6">
+        <form action="{{ route('invoices.storeWithItems') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
             @csrf
 
             <!-- Invoice Header Information -->
@@ -49,6 +49,16 @@
                 </x-slot>
                 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Invoice Number -->
+                    <x-ui.input 
+                        type="text" 
+                        name="no_invoice" 
+                        label="No. Invoice" 
+                        :value="old('no_invoice', $noInvoice)" 
+                        required 
+                        readonly
+                    />
+
                     <!-- Invoice Date -->
                     <x-ui.input 
                         type="date" 
@@ -85,7 +95,7 @@
                     </div>
 
                     <!-- Sales Person -->
-                    <div class="md:col-span-3">
+                    <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                             Sales Person <span class="text-red-500">*</span>
                         </label>
@@ -97,11 +107,81 @@
                             <option value="">Select Sales Person</option>
                             @foreach($salesList as $s)
                                 <option value="{{ $s->id }}" {{ old('id_sales') == $s->id ? 'selected' : '' }}>
-                                    {{ $s->id_sales }} - {{ $s->nama_sales }}
+                                    {{ $s->id_sales ?? '' }} - {{ $s->nama_sales }}
                                 </option>
                             @endforeach
                         </select>
                     </div>
+
+                    <!-- PKS Relation -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                            Surat Perjanjian (PKS)
+                        </label>
+                        <select 
+                            name="id_pks" 
+                            class="w-full px-4 py-2.5 bg-white dark:bg-dark-hover border border-gray-300 dark:border-dark-border rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                        >
+                            <option value="">-- Tanpa PKS --</option>
+                            @foreach($pksList as $pks)
+                                <option value="{{ $pks->id }}" {{ old('id_pks') == $pks->id ? 'selected' : '' }}>
+                                    {{ $pks->no_surat }} - {{ $pks->nama_pelanggan }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Pilih jika invoice terkait dengan surat perjanjian</p>
+                    </div>
+                </div>
+            </x-ui.card>
+
+            <!-- Bukti PKS Upload -->
+            <x-ui.card>
+                <x-slot name="header">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Bukti Surat Perjanjian</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Upload dokumen PKS (PDF/Gambar)</p>
+                        </div>
+                    </div>
+                </x-slot>
+                
+                <div class="space-y-4" x-data="{ fileName: null }">
+                    <div class="flex items-center justify-center w-full">
+                        <label for="bukti_pks" class="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-xl cursor-pointer transition-colors"
+                            :class="fileName ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-gray-300 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:border-gray-600'">
+                            <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                <template x-if="!fileName">
+                                    <div class="text-center">
+                                        <svg class="w-10 h-10 mb-3 text-gray-400 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                                        </svg>
+                                        <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to upload</span> atau drag and drop</p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">PDF, PNG, JPG (MAX. 5MB)</p>
+                                    </div>
+                                </template>
+                                <template x-if="fileName">
+                                    <div class="text-center">
+                                        <svg class="w-10 h-10 mb-3 text-green-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                        <p class="mb-2 text-sm text-green-600 dark:text-green-400 font-semibold" x-text="fileName"></p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">Klik untuk mengganti file</p>
+                                    </div>
+                                </template>
+                            </div>
+                            <input id="bukti_pks" name="bukti_pks" type="file" class="hidden" accept=".pdf,.jpg,.jpeg,.png" 
+                                @change="fileName = $event.target.files[0]?.name" />
+                        </label>
+                    </div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                        <span class="text-amber-600 dark:text-amber-400">💡</span> 
+                        Upload scan/foto surat perjanjian sebagai bukti pendukung invoice (opsional)
+                    </p>
                 </div>
             </x-ui.card>
 

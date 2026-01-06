@@ -111,7 +111,12 @@ class InvoiceController extends Controller
     public function create()
     {
         $salesList = Sales::select('id', 'nama_sales')->get();
-        return view('invoices.create', compact('salesList'));
+        $pksList = SuratPerjanjian::select('id', 'no_surat', 'nama_pelanggan', 'nilai_kontrak', 'status_surat')
+            ->where('status_surat', 'Disetujui')
+            ->orderBy('created_at', 'desc')
+            ->get();
+        $noInvoice = $this->generateNextInvoiceNumber();
+        return view('invoices.create', compact('salesList', 'pksList', 'noInvoice'));
     }
 
     /**
@@ -120,17 +125,32 @@ class InvoiceController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'no_invoice' => 'nullable|string|max:50|unique:invoices,no_invoice',
             'tanggal_invoice' => 'required|date',
             'nama_pelanggan' => 'required|string|max:255',
-            'alamat' => 'required|string',
-            'no_telp' => 'required|string|max:20',
-            'email' => 'required|email|max:255',
+            'alamat' => 'nullable|string',
+            'no_telp' => 'nullable|string|max:20',
+            'email' => 'nullable|email|max:255',
             'total_harga' => 'required|numeric|min:0',
             'status_pembayaran' => 'required|in:Lunas,Belum Lunas,Cicilan',
             'jatuh_tempo' => 'required|date',
             'keterangan' => 'nullable|string',
             'id_sales' => 'required|exists:sales,id',
+            'id_pks' => 'nullable|exists:surat_perjanjians,id',
+            'bukti_pks' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
         ]);
+
+        // Generate no_invoice if not provided
+        if (empty($validated['no_invoice'])) {
+            $validated['no_invoice'] = $this->generateNextInvoiceNumber();
+        }
+
+        // Handle file upload
+        if ($request->hasFile('bukti_pks')) {
+            $file = $request->file('bukti_pks');
+            $filename = 'bukti_pks_' . time() . '_' . $file->getClientOriginalName();
+            $validated['bukti_pks'] = $file->storeAs('invoices/bukti_pks', $filename, 'public');
+        }
 
         $invoice = Invoice::create($validated);
 
@@ -153,7 +173,12 @@ class InvoiceController extends Controller
     public function edit(Invoice $invoice)
     {
         $salesList = Sales::select('id', 'nama_sales')->get();
-        return view('invoices.edit', compact('invoice', 'salesList'));
+        $pksList = SuratPerjanjian::select('id', 'no_surat', 'nama_pelanggan', 'nilai_kontrak', 'status_surat')
+            ->where('status_surat', 'Disetujui')
+            ->orWhere('id', $invoice->id_pks)
+            ->orderBy('created_at', 'desc')
+            ->get();
+        return view('invoices.edit', compact('invoice', 'salesList', 'pksList'));
     }
 
     /**
@@ -162,17 +187,31 @@ class InvoiceController extends Controller
     public function update(Request $request, Invoice $invoice)
     {
         $validated = $request->validate([
+            'no_invoice' => 'nullable|string|max:50|unique:invoices,no_invoice,' . $invoice->id,
             'tanggal_invoice' => 'required|date',
             'nama_pelanggan' => 'required|string|max:255',
-            'alamat' => 'required|string',
-            'no_telp' => 'required|string|max:20',
-            'email' => 'required|email|max:255',
+            'alamat' => 'nullable|string',
+            'no_telp' => 'nullable|string|max:20',
+            'email' => 'nullable|email|max:255',
             'total_harga' => 'required|numeric|min:0',
-            'status_pembayaran' => 'required|in:Lunas,Belum Lunas,Cicilan',
+            'status_pembayaran' => 'required|in:Lunas,Belum Lunas,Cicilan,Revisi',
             'jatuh_tempo' => 'required|date',
             'keterangan' => 'nullable|string',
             'id_sales' => 'required|exists:sales,id',
+            'id_pks' => 'nullable|exists:surat_perjanjians,id',
+            'bukti_pks' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
         ]);
+
+        // Handle file upload
+        if ($request->hasFile('bukti_pks')) {
+            // Delete old file if exists
+            if ($invoice->bukti_pks && \Storage::disk('public')->exists($invoice->bukti_pks)) {
+                \Storage::disk('public')->delete($invoice->bukti_pks);
+            }
+            $file = $request->file('bukti_pks');
+            $filename = 'bukti_pks_' . time() . '_' . $file->getClientOriginalName();
+            $validated['bukti_pks'] = $file->storeAs('invoices/bukti_pks', $filename, 'public');
+        }
 
         $invoice->update($validated);
 
@@ -199,7 +238,12 @@ class InvoiceController extends Controller
     public function input()
     {
         $salesList = Sales::all();
-        return view('invoices.input', compact('salesList'));
+        $pksList = SuratPerjanjian::select('id', 'no_surat', 'nama_pelanggan', 'nilai_kontrak', 'status_surat')
+            ->where('status_surat', 'Disetujui')
+            ->orderBy('created_at', 'desc')
+            ->get();
+        $noInvoice = $this->generateNextInvoiceNumber();
+        return view('invoices.input', compact('salesList', 'pksList', 'noInvoice'));
     }
 
     /**
@@ -208,6 +252,7 @@ class InvoiceController extends Controller
     public function storeWithItems(Request $request)
     {
         $validated = $request->validate([
+            'no_invoice' => 'nullable|string|max:50|unique:invoices,no_invoice',
             'tanggal_invoice' => 'required|date',
             'nama_pelanggan' => 'required|string|max:255',
             'alamat' => 'nullable|string',
@@ -217,11 +262,24 @@ class InvoiceController extends Controller
             'jatuh_tempo' => 'required|date',
             'keterangan' => 'nullable|string',
             'id_sales' => 'required|exists:sales,id',
+            'id_pks' => 'nullable|exists:surat_perjanjians,id',
+            'bukti_pks' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
             'items' => 'required|array|min:1',
             'items.*.id_kuitansi' => 'required|string',
             'items.*.jumlah' => 'required|numeric|min:1',
             'items.*.harga_satuan' => 'required|numeric|min:0',
         ]);
+
+        // Generate no_invoice if not provided
+        $noInvoice = $validated['no_invoice'] ?? $this->generateNextInvoiceNumber();
+
+        // Handle file upload
+        $buktiPks = null;
+        if ($request->hasFile('bukti_pks')) {
+            $file = $request->file('bukti_pks');
+            $filename = 'bukti_pks_' . time() . '_' . $file->getClientOriginalName();
+            $buktiPks = $file->storeAs('invoices/bukti_pks', $filename, 'public');
+        }
 
         // Calculate total
         $total = 0;
@@ -231,6 +289,7 @@ class InvoiceController extends Controller
 
         // Create invoice
         $invoice = Invoice::create([
+            'no_invoice' => $noInvoice,
             'tanggal_invoice' => $validated['tanggal_invoice'],
             'nama_pelanggan' => $validated['nama_pelanggan'],
             'alamat' => $validated['alamat'],
@@ -241,6 +300,8 @@ class InvoiceController extends Controller
             'jatuh_tempo' => $validated['jatuh_tempo'],
             'keterangan' => $validated['keterangan'],
             'id_sales' => $validated['id_sales'],
+            'id_pks' => $validated['id_pks'] ?? null,
+            'bukti_pks' => $buktiPks,
         ]);
 
         // Create detail items
@@ -511,5 +572,27 @@ class InvoiceController extends Controller
             'message' => 'Status invoice berhasil diperbarui menjadi ' . $validated['status_pembayaran'],
             'new_status' => $validated['status_pembayaran']
         ]);
+    }
+
+    /**
+     * Generate next invoice number.
+     */
+    protected function generateNextInvoiceNumber(): string
+    {
+        $year = date('Y');
+        $month = date('m');
+        $prefix = 'INV-' . $year . $month . '-';
+        
+        $lastInvoice = Invoice::where('no_invoice', 'like', $prefix . '%')
+            ->orderByRaw("CAST(SUBSTRING(no_invoice, ?) AS INTEGER) DESC", [strlen($prefix) + 1])
+            ->first();
+        
+        if ($lastInvoice && preg_match('/INV-\d{6}-(\d{4})/', $lastInvoice->no_invoice, $matches)) {
+            $nextNumber = intval($matches[1]) + 1;
+        } else {
+            $nextNumber = 1;
+        }
+        
+        return $prefix . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
     }
 }

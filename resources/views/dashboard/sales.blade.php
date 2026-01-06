@@ -234,8 +234,8 @@
                             </svg>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <p class="text-sm font-medium text-gray-900 dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400">{{ $invoice->no_invoice }}</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $invoice->nama_client }} • Rp {{ number_format($invoice->grand_total, 0, ',', '.') }}</p>
+                            <p class="text-sm font-medium text-gray-900 dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400">{{ $invoice->no_invoice ?? 'INV-' . str_pad($invoice->id, 4, '0', STR_PAD_LEFT) }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $invoice->nama_pelanggan ?? $invoice->nama_client ?? '-' }} • Rp {{ number_format($invoice->total_harga ?? $invoice->grand_total ?? 0, 0, ',', '.') }}</p>
                         </div>
                         <span class="px-2 py-1 rounded-full text-xs font-medium
                             @if($invoice->status_invoice == 'Lunas') bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400

@@ -6,6 +6,7 @@ use App\Http\Controllers\SuratPerjanjianController;
 use App\Http\Controllers\KuitansiController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DocumentArchiveController;
+use App\Http\Controllers\PdfController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -159,6 +160,21 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/archive/relations', [DocumentArchiveController::class, 'showRelations'])->name('archive.relations');
     Route::get('/archive/relations/{pks}', [DocumentArchiveController::class, 'showRelations'])->name('archive.relations.show');
     Route::get('/archive/export', [DocumentArchiveController::class, 'export'])->name('archive.export');
+});
+
+// PDF Print Routes
+Route::middleware(['auth'])->group(function () {
+    // Invoice PDF
+    Route::get('/pdf/invoice/{invoice}', [PdfController::class, 'invoice'])->name('pdf.invoice');
+    Route::get('/pdf/invoice/{invoice}/stream', [PdfController::class, 'invoiceStream'])->name('pdf.invoice.stream');
+    
+    // PKS PDF
+    Route::get('/pdf/pks/{suratPerjanjian}', [PdfController::class, 'pks'])->name('pdf.pks');
+    Route::get('/pdf/pks/{suratPerjanjian}/stream', [PdfController::class, 'pksStream'])->name('pdf.pks.stream');
+    
+    // Kuitansi PDF
+    Route::get('/pdf/kuitansi/{kuitansi}', [PdfController::class, 'kuitansi'])->name('pdf.kuitansi');
+    Route::get('/pdf/kuitansi/{kuitansi}/stream', [PdfController::class, 'kuitansiStream'])->name('pdf.kuitansi.stream');
 });
 
 require __DIR__.'/auth.php';

@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Invoice extends Model
 {
     protected $fillable = [
-        'invoice_number',
+        'no_invoice',
         'no_kontrak',
         'tanggal_invoice',
         'nama_pelanggan',
@@ -22,7 +22,20 @@ class Invoice extends Model
         'keterangan',
         'id_sales',
         'id_pks',
+        'bukti_pks',
     ];
+
+    /**
+     * Get the invoice number or generate one from ID
+     */
+    public function getNoInvoiceDisplayAttribute(): string
+    {
+        if ($this->no_invoice) {
+            return $this->no_invoice;
+        }
+        $date = $this->tanggal_invoice ? $this->tanggal_invoice->format('Ym') : date('Ym');
+        return 'INV-' . $date . '-' . str_pad($this->id, 4, '0', STR_PAD_LEFT);
+    }
 
     protected $casts = [
         'tanggal_invoice' => 'date',
