@@ -1,8 +1,6 @@
-@extends('layouts.app')
+<x-layout.app>
+    @section('title', 'Detail Kuitansi')
 
-@section('title', 'Detail Kuitansi')
-
-@section('content')
 <div class="space-y-6">
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -281,7 +279,6 @@
         </div>
     </div>
 </div>
-@endsection
 
 @push('scripts')
 <script>
@@ -357,3 +354,4 @@
     }
 </script>
 @endpush
+</x-layout.app>

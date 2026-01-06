@@ -7,7 +7,7 @@
     <style>
         @page {
             size: A4;
-            margin: 1.5cm;
+            margin: 2cm 2cm 2cm 2cm;
         }
         * {
             margin: 0;
@@ -16,8 +16,8 @@
         }
         body {
             font-family: 'Times New Roman', Times, serif;
-            font-size: 11pt;
-            line-height: 1.4;
+            font-size: 10pt;
+            line-height: 1.3;
             color: #000;
             background: #fff;
         }
@@ -25,24 +25,40 @@
             max-width: 100%;
         }
         .header {
-            text-align: center;
+            display: table;
+            width: 100%;
             margin-bottom: 15px;
-            padding-bottom: 10px;
+            padding-bottom: 8px;
             border-bottom: 3px double #000;
+        }
+        .logo-cell {
+            display: table-cell;
+            width: 80px;
+            vertical-align: middle;
+        }
+        .logo-cell img {
+            width: 70px;
+            height: auto;
+        }
+        .company-cell {
+            display: table-cell;
+            vertical-align: middle;
+            padding-left: 15px;
         }
         .company-name {
             font-size: 16pt;
             font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 2px;
+            color: #1e3a8a;
+            letter-spacing: 1px;
         }
         .company-address {
-            font-size: 10pt;
-            margin-top: 3px;
+            font-size: 9pt;
+            color: #333;
+            margin-top: 2px;
         }
         .document-title {
             text-align: center;
-            margin: 15px 0;
+            margin: 15px 0 12px 0;
         }
         .document-title h1 {
             font-size: 14pt;
@@ -52,47 +68,43 @@
             letter-spacing: 2px;
         }
         .document-number {
-            font-size: 11pt;
-            margin-top: 5px;
+            font-size: 10pt;
+            margin-top: 3px;
         }
         .info-section {
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
         .info-table {
             width: 100%;
         }
         .info-table td {
-            padding: 3px 0;
+            padding: 2px 0;
             vertical-align: top;
+            font-size: 10pt;
         }
         .info-left {
-            width: 50%;
+            width: 55%;
         }
         .info-right {
-            width: 50%;
-            text-align: right;
-        }
-        .info-label {
-            display: inline-block;
-            width: 100px;
+            width: 45%;
         }
         .items-table {
             width: 100%;
             border-collapse: collapse;
-            margin: 15px 0;
+            margin: 12px 0;
         }
         .items-table th {
-            background: #f0f0f0;
+            background: #e5e7eb;
             border: 1px solid #000;
-            padding: 8px;
+            padding: 6px;
             text-align: center;
             font-weight: bold;
-            font-size: 10pt;
+            font-size: 9pt;
         }
         .items-table td {
             border: 1px solid #000;
-            padding: 8px;
-            font-size: 10pt;
+            padding: 5px 6px;
+            font-size: 9pt;
         }
         .items-table .text-center {
             text-align: center;
@@ -101,14 +113,15 @@
             text-align: right;
         }
         .total-section {
-            margin: 15px 0;
+            margin: 10px 0;
         }
         .total-table {
-            width: 300px;
+            width: 250px;
             margin-left: auto;
         }
         .total-table td {
-            padding: 5px;
+            padding: 3px 5px;
+            font-size: 10pt;
         }
         .total-table td:last-child {
             text-align: right;
@@ -116,24 +129,26 @@
         }
         .total-table .grand-total {
             border-top: 2px solid #000;
-            font-size: 12pt;
+            font-size: 11pt;
         }
         .terbilang {
             background: #f5f5f5;
             border: 1px solid #000;
-            padding: 10px;
-            margin: 15px 0;
+            padding: 8px;
+            margin: 10px 0;
             font-style: italic;
+            font-size: 9pt;
         }
         .notes {
-            margin: 15px 0;
+            margin: 10px 0;
+            font-size: 9pt;
         }
         .notes-title {
             font-weight: bold;
-            margin-bottom: 5px;
+            margin-bottom: 3px;
         }
         .signature-section {
-            margin-top: 25px;
+            margin-top: 20px;
         }
         .signature-table {
             width: 100%;
@@ -142,35 +157,42 @@
             width: 33%;
             text-align: center;
             vertical-align: top;
-            padding: 10px;
+            padding: 8px;
+            font-size: 9pt;
         }
         .signature-space {
-            height: 50px;
+            height: 45px;
         }
         .signature-name {
             font-weight: bold;
             border-top: 1px solid #000;
-            padding-top: 5px;
+            padding-top: 4px;
             display: inline-block;
-            min-width: 120px;
+            min-width: 100px;
+            font-size: 9pt;
         }
         .status-badge {
             display: inline-block;
-            padding: 3px 10px;
+            padding: 2px 8px;
             border: 1px solid #000;
-            font-size: 9pt;
+            font-size: 8pt;
             font-weight: bold;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
+        <!-- Header with Logo -->
         <div class="header">
-            <div class="company-name">PT. BIMASADA GELORA MEDIA</div>
-            <div class="company-address">
-                Jl. Contoh Alamat No. 123, Jakarta, Indonesia<br>
-                Telp: (021) 123-4567 | Email: info@bimasada.com
+            <div class="logo-cell">
+                <img src="{{ public_path('assets/bimasadalogo.png') }}" alt="Bimasada Logo">
+            </div>
+            <div class="company-cell">
+                <div class="company-name">PT. BIMASADA JAYA PERSADA</div>
+                <div class="company-address">
+                    Pergudangan Mutiara Citra Sejati Blok D10, Jl. Raya Manukan Kulon 60, Tandes, Surabaya - Jawa Timur<br>
+                    Telp: (031) 7421 500 | WA: 081 1310 0081 | Email: heli@bimasada.com
+                </div>
             </div>
         </div>
 
@@ -188,14 +210,13 @@
                         <strong>Kepada Yth:</strong><br>
                         <strong>{{ $invoice->nama_pelanggan }}</strong><br>
                         {{ $invoice->alamat ?? '-' }}<br>
-                        Telp: {{ $invoice->no_telp ?? '-' }}<br>
-                        Email: {{ $invoice->email ?? '-' }}
+                        Telp: {{ $invoice->no_telp ?? '-' }} | Email: {{ $invoice->email ?? '-' }}
                     </td>
                     <td class="info-right">
-                        <table style="margin-left: auto;">
+                        <table style="margin-left: auto; font-size: 9pt;">
                             <tr>
-                                <td>Tanggal</td>
-                                <td>:</td>
+                                <td style="width:80px">Tanggal</td>
+                                <td style="width:10px">:</td>
                                 <td><strong>{{ $invoice->tanggal_invoice->translatedFormat('d F Y') }}</strong></td>
                             </tr>
                             <tr>
@@ -225,11 +246,11 @@
         <table class="items-table">
             <thead>
                 <tr>
-                    <th style="width: 40px;">No</th>
+                    <th style="width: 30px;">No</th>
                     <th>Uraian</th>
-                    <th style="width: 60px;">Qty</th>
-                    <th style="width: 120px;">Harga Satuan</th>
-                    <th style="width: 120px;">Jumlah</th>
+                    <th style="width: 50px;">Qty</th>
+                    <th style="width: 100px;">Harga Satuan</th>
+                    <th style="width: 100px;">Jumlah</th>
                 </tr>
             </thead>
             <tbody>

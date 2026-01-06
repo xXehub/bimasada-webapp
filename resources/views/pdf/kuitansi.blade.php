@@ -7,7 +7,7 @@
     <style>
         @page {
             size: A4;
-            margin: 1.5cm;
+            margin: 2cm 2cm 2cm 2cm;
         }
         * {
             margin: 0;
@@ -16,8 +16,8 @@
         }
         body {
             font-family: 'Times New Roman', Times, serif;
-            font-size: 11pt;
-            line-height: 1.4;
+            font-size: 10pt;
+            line-height: 1.3;
             color: #000;
             background: #fff;
         }
@@ -25,24 +25,40 @@
             max-width: 100%;
         }
         .header {
-            text-align: center;
+            display: table;
+            width: 100%;
             margin-bottom: 15px;
-            padding-bottom: 10px;
+            padding-bottom: 8px;
             border-bottom: 3px double #000;
+        }
+        .logo-cell {
+            display: table-cell;
+            width: 80px;
+            vertical-align: middle;
+        }
+        .logo-cell img {
+            width: 70px;
+            height: auto;
+        }
+        .company-cell {
+            display: table-cell;
+            vertical-align: middle;
+            padding-left: 15px;
         }
         .company-name {
             font-size: 16pt;
             font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 2px;
+            color: #1e3a8a;
+            letter-spacing: 1px;
         }
         .company-address {
-            font-size: 10pt;
-            margin-top: 3px;
+            font-size: 9pt;
+            color: #333;
+            margin-top: 2px;
         }
         .document-title {
             text-align: center;
-            margin: 15px 0;
+            margin: 15px 0 12px 0;
         }
         .document-title h1 {
             font-size: 14pt;
@@ -52,70 +68,68 @@
             letter-spacing: 2px;
         }
         .document-number {
-            font-size: 11pt;
-            margin-top: 5px;
+            font-size: 10pt;
+            margin-top: 3px;
         }
         .receipt-content {
-            margin: 20px 0;
-        }
-        .info-row {
-            margin-bottom: 10px;
+            margin: 15px 0;
         }
         .info-row table {
             width: 100%;
         }
         .info-row td {
-            padding: 5px 0;
+            padding: 4px 0;
             vertical-align: top;
+            font-size: 10pt;
         }
         .info-row td:first-child {
-            width: 180px;
+            width: 150px;
         }
         .info-row td:nth-child(2) {
-            width: 15px;
+            width: 12px;
             text-align: center;
         }
         .amount-box {
             background: #f5f5f5;
             border: 2px solid #000;
-            padding: 15px;
-            margin: 20px 0;
+            padding: 12px;
+            margin: 15px 0;
             text-align: center;
         }
         .amount-label {
-            font-size: 10pt;
+            font-size: 9pt;
             text-transform: uppercase;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
         }
         .amount-value {
-            font-size: 18pt;
+            font-size: 16pt;
             font-weight: bold;
             letter-spacing: 1px;
         }
         .amount-words {
-            font-size: 11pt;
+            font-size: 10pt;
             font-style: italic;
-            margin-top: 10px;
-            padding-top: 10px;
+            margin-top: 8px;
+            padding-top: 8px;
             border-top: 1px dashed #000;
         }
         .details-table {
             width: 100%;
             border-collapse: collapse;
-            margin: 15px 0;
+            margin: 12px 0;
         }
         .details-table th {
-            background: #f0f0f0;
+            background: #e5e7eb;
             border: 1px solid #000;
-            padding: 8px;
+            padding: 6px;
             text-align: center;
             font-weight: bold;
-            font-size: 10pt;
+            font-size: 9pt;
         }
         .details-table td {
             border: 1px solid #000;
-            padding: 8px;
-            font-size: 10pt;
+            padding: 5px 6px;
+            font-size: 9pt;
         }
         .details-table .text-center {
             text-align: center;
@@ -124,7 +138,7 @@
             text-align: right;
         }
         .payment-info {
-            margin: 15px 0;
+            margin: 12px 0;
             padding: 10px;
             border: 1px solid #000;
         }
@@ -132,23 +146,25 @@
             width: 100%;
         }
         .payment-info td {
-            padding: 5px;
+            padding: 3px;
+            font-size: 10pt;
         }
         .payment-info td:first-child {
-            width: 150px;
+            width: 140px;
         }
         .notes {
-            margin: 15px 0;
-            padding: 10px;
+            margin: 10px 0;
+            padding: 8px;
             background: #fffacd;
             border: 1px solid #000;
+            font-size: 9pt;
         }
         .notes-title {
             font-weight: bold;
-            margin-bottom: 5px;
+            margin-bottom: 3px;
         }
         .signature-section {
-            margin-top: 30px;
+            margin-top: 25px;
         }
         .signature-table {
             width: 100%;
@@ -157,41 +173,49 @@
             width: 50%;
             text-align: center;
             vertical-align: top;
-            padding: 10px;
+            padding: 8px;
+            font-size: 10pt;
         }
         .signature-space {
-            height: 60px;
+            height: 50px;
         }
         .signature-name {
             font-weight: bold;
             border-top: 1px solid #000;
-            padding-top: 5px;
+            padding-top: 4px;
             display: inline-block;
-            min-width: 150px;
+            min-width: 130px;
+            font-size: 9pt;
         }
         .status-badge {
             display: inline-block;
-            padding: 3px 10px;
+            padding: 2px 8px;
             border: 1px solid #000;
-            font-size: 9pt;
+            font-size: 8pt;
             font-weight: bold;
         }
         .invoice-ref {
             background: #f0f8ff;
             border: 1px solid #000;
-            padding: 10px;
-            margin: 15px 0;
+            padding: 8px;
+            margin: 10px 0;
+            font-size: 9pt;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
+        <!-- Header with Logo -->
         <div class="header">
-            <div class="company-name">PT. BIMASADA GELORA MEDIA</div>
-            <div class="company-address">
-                Jl. Contoh Alamat No. 123, Jakarta, Indonesia<br>
-                Telp: (021) 123-4567 | Email: info@bimasada.com
+            <div class="logo-cell">
+                <img src="{{ public_path('assets/bimasadalogo.png') }}" alt="Bimasada Logo">
+            </div>
+            <div class="company-cell">
+                <div class="company-name">PT. BIMASADA JAYA PERSADA</div>
+                <div class="company-address">
+                    Pergudangan Mutiara Citra Sejati Blok D10, Jl. Raya Manukan Kulon 60, Tandes, Surabaya - Jawa Timur<br>
+                    Telp: (031) 7421 500 | WA: 081 1310 0081 | Email: heli@bimasada.com
+                </div>
             </div>
         </div>
 
@@ -238,9 +262,9 @@
         <table class="details-table">
             <thead>
                 <tr>
-                    <th style="width: 40px;">No</th>
+                    <th style="width: 30px;">No</th>
                     <th>Keterangan</th>
-                    <th style="width: 120px;">Jumlah</th>
+                    <th style="width: 110px;">Jumlah</th>
                 </tr>
             </thead>
             <tbody>
@@ -280,7 +304,7 @@
         @if($kuitansi->invoice)
         <div class="invoice-ref">
             <strong>Referensi Invoice:</strong> {{ $kuitansi->invoice->no_invoice ?? 'INV-' . str_pad($kuitansi->invoice->id, 4, '0', STR_PAD_LEFT) }}
-            <br>
+            &nbsp;|&nbsp;
             <small>Tanggal Invoice: {{ $kuitansi->invoice->tanggal_invoice->translatedFormat('d F Y') }}</small>
         </div>
         @endif
@@ -306,7 +330,7 @@
                         Jakarta, {{ $kuitansi->tanggal_bayar ? \Carbon\Carbon::parse($kuitansi->tanggal_bayar)->translatedFormat('d F Y') : now()->translatedFormat('d F Y') }}<br>
                         Penerima,
                         <div class="signature-space"></div>
-                        <div class="signature-name">{{ $kuitansi->nama_penerima ?? 'PT. BIMASADA GELORA MEDIA' }}</div>
+                        <div class="signature-name">PT. BIMASADA JAYA PERSADA</div>
                     </td>
                 </tr>
             </table>

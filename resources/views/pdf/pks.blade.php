@@ -7,7 +7,7 @@
     <style>
         @page {
             size: A4;
-            margin: 2cm;
+            margin: 2cm 2cm 2cm 2cm;
         }
         * {
             margin: 0;
@@ -16,8 +16,8 @@
         }
         body {
             font-family: 'Times New Roman', Times, serif;
-            font-size: 12pt;
-            line-height: 1.5;
+            font-size: 11pt;
+            line-height: 1.4;
             color: #000;
             background: #fff;
         }
@@ -25,99 +25,150 @@
             max-width: 100%;
         }
         .header {
-            text-align: center;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
+            display: table;
+            width: 100%;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
             border-bottom: 3px double #000;
         }
-        .header h1 {
-            font-size: 14pt;
+        .logo-cell {
+            display: table-cell;
+            width: 80px;
+            vertical-align: middle;
+        }
+        .logo-cell img {
+            width: 70px;
+            height: auto;
+        }
+        .company-cell {
+            display: table-cell;
+            vertical-align: middle;
+            padding-left: 15px;
+        }
+        .company-name {
+            font-size: 16pt;
+            font-weight: bold;
+            color: #1e3a8a;
+            letter-spacing: 1px;
+        }
+        .company-address {
+            font-size: 9pt;
+            color: #333;
+            margin-top: 2px;
+        }
+        .document-title {
+            text-align: center;
+            margin: 20px 0 15px 0;
+        }
+        .document-title h1 {
+            font-size: 13pt;
             text-transform: uppercase;
             font-weight: bold;
             text-decoration: underline;
             letter-spacing: 2px;
         }
         .intro {
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             text-align: justify;
         }
         .party {
-            margin-bottom: 15px;
-        }
-        .party-label {
-            margin-bottom: 5px;
+            margin-bottom: 12px;
         }
         .party-details {
-            margin-left: 20px;
+            margin-left: 15px;
         }
         .party-details table {
             width: 100%;
         }
         .party-details td {
-            padding: 2px 0;
+            padding: 1px 0;
             vertical-align: top;
+            font-size: 10pt;
         }
         .party-details td:first-child {
-            width: 150px;
+            width: 120px;
         }
         .party-details td:nth-child(2) {
-            width: 15px;
+            width: 12px;
             text-align: center;
         }
         .party-role {
-            margin-top: 5px;
+            margin-top: 3px;
+            font-size: 10pt;
         }
         .agreement-text {
             text-align: justify;
-            margin: 15px 0;
+            margin: 12px 0;
+            font-size: 10pt;
         }
         .pasal {
-            margin-bottom: 12px;
+            margin-bottom: 8px;
         }
         .pasal-title {
             text-align: center;
             font-weight: bold;
-            margin-bottom: 5px;
+            margin-bottom: 3px;
+            font-size: 10pt;
         }
         .pasal-content {
             text-align: justify;
+            font-size: 10pt;
         }
         .closing {
             text-align: justify;
-            margin: 15px 0;
+            margin: 12px 0;
+            font-size: 10pt;
         }
         .signature-section {
-            margin-top: 30px;
+            margin-top: 20px;
         }
         .signature-date {
             text-align: right;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+            font-size: 10pt;
         }
         .signature-table {
             width: 100%;
         }
         .signature-box {
-            width: 45%;
+            width: 42%;
             text-align: center;
             vertical-align: top;
+            font-size: 10pt;
         }
         .signature-middle {
-            width: 10%;
+            width: 16%;
             text-align: center;
             vertical-align: top;
+            font-size: 9pt;
         }
         .signature-space {
-            height: 60px;
+            height: 50px;
         }
         .signature-name {
             font-weight: bold;
+            font-size: 10pt;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
+        <!-- Header with Logo -->
         <div class="header">
+            <div class="logo-cell">
+                <img src="{{ public_path('assets/bimasadalogo.png') }}" alt="Bimasada Logo">
+            </div>
+            <div class="company-cell">
+                <div class="company-name">PT. BIMASADA JAYA PERSADA</div>
+                <div class="company-address">
+                    Pergudangan Mutiara Citra Sejati Blok D10, Jl. Raya Manukan Kulon 60, Tandes, Surabaya - Jawa Timur<br>
+                    Telp: (031) 7421 500 | WA: 081 1310 0081 | Email: heli@bimasada.com
+                </div>
+            </div>
+        </div>
+
+        <!-- Document Title -->
+        <div class="document-title">
             <h1>Surat Perjanjian Kerjasama</h1>
         </div>
 
@@ -133,7 +184,7 @@
                     <tr>
                         <td>Nama</td>
                         <td>:</td>
-                        <td><strong>{{ $pks->nama_pihak_pertama ?? 'PT. BIMASADA GELORA MEDIA' }}</strong></td>
+                        <td><strong>{{ $pks->nama_pihak_pertama ?? 'PT. BIMASADA JAYA PERSADA' }}</strong></td>
                     </tr>
                     <tr>
                         <td>Alamat</td>
@@ -242,7 +293,7 @@
                     <td class="signature-box"><div class="signature-space"></div></td>
                 </tr>
                 <tr>
-                    <td class="signature-box"><span class="signature-name">{{ $pks->nama_pihak_pertama ?? 'PT. BIMASADA GELORA MEDIA' }}</span></td>
+                    <td class="signature-box"><span class="signature-name">{{ $pks->nama_pihak_pertama ?? 'PT. BIMASADA JAYA PERSADA' }}</span></td>
                     <td class="signature-middle"></td>
                     <td class="signature-box"><span class="signature-name">{{ $pks->nama_pihak_kedua ?? $pks->nama_pelanggan ?? '-' }}</span></td>
                 </tr>
