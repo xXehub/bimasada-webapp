@@ -49,6 +49,11 @@ class Invoice extends Model
         return $this->belongsTo(Sales::class, 'id_sales');
     }
 
+    public function salesUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'id_sales');
+    }
+
     public function pks(): BelongsTo
     {
         return $this->belongsTo(SuratPerjanjian::class, 'id_pks');

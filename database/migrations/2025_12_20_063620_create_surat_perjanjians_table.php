@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('status_surat'); // Draft/Aktif/Selesai
             $table->string('nama_pihak_pertama');
             $table->string('nama_pihak_kedua');
-            $table->foreignId('id_sales')->constrained('sales')->onDelete('cascade');
+            $table->foreignId('id_sales')->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });
     }

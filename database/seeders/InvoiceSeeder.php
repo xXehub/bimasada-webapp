@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\Sales;
+use App\Models\User;
 use App\Models\Invoice;
 use App\Models\DetailInvoice;
 use Carbon\Carbon;
@@ -15,20 +15,14 @@ class InvoiceSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create Sales (jika belum ada)
-        $sales1 = Sales::create([
-            'id_sales' => 'SLS001',
-            'nama_sales' => 'John Doe',
-            'username' => 'john.doe',
-            'password' => bcrypt('password123'),
-        ]);
+        // Get existing sales users from database (created by RolePermissionSeeder)
+        $sales1 = User::where('email', 'mamat@bimasada.com')->first();
+        $sales2 = User::where('email', 'nopal@bimasada.com')->first();
 
-        $sales2 = Sales::create([
-            'id_sales' => 'SLS002',
-            'nama_sales' => 'Jane Smith',
-            'username' => 'jane.smith',
-            'password' => bcrypt('password123'),
-        ]);
+        if (!$sales1 || !$sales2) {
+            $this->command->error('Sales users not found! Please run RolePermissionSeeder first.');
+            return;
+        }
 
         // Create Sample Invoices
         $invoices = [
@@ -63,7 +57,7 @@ class InvoiceSeeder extends Seeder
                 'no_telp' => '031-9876543',
                 'email' => 'contact@sumberrezeki.com',
                 'total_harga' => 9500000,
-                'status_pembayaran' => 'Cicilan',
+                'status_pembayaran' => 'Belum Lunas',
                 'jatuh_tempo' => Carbon::now()->addDays(20),
                 'keterangan' => 'Invoice untuk aplikasi mobile',
                 'id_sales' => $sales2->id,
@@ -110,6 +104,6 @@ class InvoiceSeeder extends Seeder
         }
 
         $this->command->info('Invoice seeder completed successfully!');
-        $this->command->info('Created: 2 Sales, 5 Invoices with details');
+        $this->command->info('Created: 5 Invoices with details using existing sales users');
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Sales;
+use App\Models\User;
 use App\Models\SuratPerjanjian;
 use Illuminate\Database\Seeder;
 
@@ -13,10 +13,11 @@ class SuratPerjanjianSeeder extends Seeder
      */
     public function run(): void
     {
-        $sales = Sales::all();
+        // Get sales users from User model with 'Sales' role
+        $salesUsers = User::role('Sales')->get();
         
-        if ($sales->isEmpty()) {
-            $this->command->warn('No sales found. Please run SalesSeeder first.');
+        if ($salesUsers->isEmpty()) {
+            $this->command->warn('No sales users found. Please run RolePermissionSeeder first.');
             return;
         }
 
@@ -34,7 +35,7 @@ class SuratPerjanjianSeeder extends Seeder
                 'status_surat' => 'Disetujui',
                 'nama_pihak_pertama' => 'PT. Bimasada',
                 'nama_pihak_kedua' => 'PT. Mitra Abadi',
-                'id_sales' => $sales->first()->id,
+                'id_sales' => $salesUsers->first()->id,
             ],
             [
                 'no_surat' => 'PKS-2025-01-0002',
@@ -49,7 +50,7 @@ class SuratPerjanjianSeeder extends Seeder
                 'status_surat' => 'Aktif',
                 'nama_pihak_pertama' => 'PT. Bimasada',
                 'nama_pihak_kedua' => 'CV. Sukses Mandiri',
-                'id_sales' => $sales->last()->id ?? $sales->first()->id,
+                'id_sales' => $salesUsers->last()->id ?? $salesUsers->first()->id,
             ],
             [
                 'no_surat' => 'PKS-2025-01-0003',
@@ -64,7 +65,7 @@ class SuratPerjanjianSeeder extends Seeder
                 'status_surat' => 'Draft',
                 'nama_pihak_pertama' => 'PT. Bimasada',
                 'nama_pihak_kedua' => 'PT. Global Tech Indonesia',
-                'id_sales' => $sales->first()->id,
+                'id_sales' => $salesUsers->first()->id,
             ],
             [
                 'no_surat' => 'PKS-2024-12-0001',
@@ -79,7 +80,7 @@ class SuratPerjanjianSeeder extends Seeder
                 'status_surat' => 'Kadaluarsa',
                 'nama_pihak_pertama' => 'PT. Bimasada',
                 'nama_pihak_kedua' => 'Toko Jaya Elektronik',
-                'id_sales' => $sales->last()->id ?? $sales->first()->id,
+                'id_sales' => $salesUsers->last()->id ?? $salesUsers->first()->id,
             ],
         ];
 

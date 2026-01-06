@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Invoice;
 use App\Models\Sales;
+use App\Models\User;
 use App\Models\SuratPerjanjian;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
@@ -15,8 +16,8 @@ class InvoiceController extends Controller
      */
     public function index(Request $request)
     {
-        // Get sales list for modal - only needed columns
-        $salesList = Sales::select('id', 'nama_sales')->get();
+        // Get real sales users from database with 'sales' role
+        $salesList = User::role('Sales')->select('id', 'name')->get();
         
         // OPTIMIZED: Get stats in single query using groupBy
         $statsRaw = Invoice::select('status_pembayaran', \DB::raw('COUNT(*) as count'))
@@ -28,7 +29,6 @@ class InvoiceController extends Controller
             'total' => array_sum($statsRaw),
             'paid' => $statsRaw['Lunas'] ?? 0,
             'pending' => $statsRaw['Belum Lunas'] ?? 0,
-            'installment' => $statsRaw['Cicilan'] ?? 0,
         ];
 
         return view('invoices.index', compact('salesList', 'stats'));
@@ -72,13 +72,12 @@ class InvoiceController extends Controller
                 ];
             })
             ->addColumn('sales_name', function ($invoice) {
-                return $invoice->sales->nama_sales ?? '-';
+                return $invoice->salesUser->name ?? '-';
             })
             ->addColumn('status_badge', function ($invoice) {
                 $variants = [
                     'Lunas' => 'success',
                     'Belum Lunas' => 'warning',
-                    'Cicilan' => 'info',
                     'Revisi' => 'danger'
                 ];
                 return [
@@ -98,7 +97,7 @@ class InvoiceController extends Controller
             })
             ->filterColumn('sales_name', function($query, $keyword) {
                 $query->whereHas('sales', function($q) use ($keyword) {
-                    $q->where('nama_sales', 'like', "%{$keyword}%");
+                    $q->where('name', 'like', "%{$keyword}%");
                 });
             })
             ->rawColumns(['actions'])
@@ -110,7 +109,8 @@ class InvoiceController extends Controller
      */
     public function create()
     {
-        $salesList = Sales::select('id', 'nama_sales')->get();
+        // Get real sales users from database with 'sales' role
+        $salesList = User::role('Sales')->select('id', 'name')->get();
         $pksList = SuratPerjanjian::select('id', 'no_surat', 'nama_pelanggan', 'nilai_kontrak', 'status_surat')
             ->where('status_surat', 'Disetujui')
             ->orderBy('created_at', 'desc')
@@ -132,10 +132,10 @@ class InvoiceController extends Controller
             'no_telp' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:255',
             'total_harga' => 'required|numeric|min:0',
-            'status_pembayaran' => 'required|in:Lunas,Belum Lunas,Cicilan',
+            'status_pembayaran' => 'required|in:Lunas,Belum Lunas',
             'jatuh_tempo' => 'required|date',
             'keterangan' => 'nullable|string',
-            'id_sales' => 'required|exists:sales,id',
+            'id_sales' => 'required|exists:users,id',
             'id_pks' => 'nullable|exists:surat_perjanjians,id',
             'bukti_pks' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
         ]);
@@ -172,7 +172,8 @@ class InvoiceController extends Controller
      */
     public function edit(Invoice $invoice)
     {
-        $salesList = Sales::select('id', 'nama_sales')->get();
+        // Get real sales users from database with 'sales' role
+        $salesList = User::role('Sales')->select('id', 'name')->get();
         $pksList = SuratPerjanjian::select('id', 'no_surat', 'nama_pelanggan', 'nilai_kontrak', 'status_surat')
             ->where('status_surat', 'Disetujui')
             ->orWhere('id', $invoice->id_pks)
@@ -194,10 +195,10 @@ class InvoiceController extends Controller
             'no_telp' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:255',
             'total_harga' => 'required|numeric|min:0',
-            'status_pembayaran' => 'required|in:Lunas,Belum Lunas,Cicilan,Revisi',
+            'status_pembayaran' => 'required|in:Lunas,Belum Lunas,Revisi',
             'jatuh_tempo' => 'required|date',
             'keterangan' => 'nullable|string',
-            'id_sales' => 'required|exists:sales,id',
+            'id_sales' => 'required|exists:users,id',
             'id_pks' => 'nullable|exists:surat_perjanjians,id',
             'bukti_pks' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
         ]);
@@ -237,7 +238,8 @@ class InvoiceController extends Controller
      */
     public function input()
     {
-        $salesList = Sales::all();
+        // Get real sales users from database with 'sales' role
+        $salesList = User::role('Sales')->select('id', 'name')->get();
         $pksList = SuratPerjanjian::select('id', 'no_surat', 'nama_pelanggan', 'nilai_kontrak', 'status_surat')
             ->where('status_surat', 'Disetujui')
             ->orderBy('created_at', 'desc')
@@ -262,7 +264,7 @@ class InvoiceController extends Controller
             'status_pembayaran' => 'required|in:Belum Lunas',
             'jatuh_tempo' => 'required|date',
             'keterangan' => 'nullable|string',
-            'id_sales' => 'required|exists:sales,id',
+            'id_sales' => 'required|exists:users,id',
             'id_pks' => 'nullable|exists:surat_perjanjians,id',
             'bukti_pks' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
             'items' => 'required|array|min:1',
@@ -361,9 +363,9 @@ class InvoiceController extends Controller
             'invoice_number' => 'required|string|max:50|unique:invoices,invoice_number',
             'no_kontrak' => 'nullable|string|max:50',
             'nama_pelanggan' => 'required|string|max:255',
-            'status_pembayaran' => 'required|in:Lunas,Belum Lunas,Cicilan',
+            'status_pembayaran' => 'required|in:Lunas,Belum Lunas',
             'tanggal_invoice' => 'required|date',
-            'id_sales' => 'required|exists:sales,id',
+            'id_sales' => 'required|exists:users,id',
         ]);
 
         // Create invoice with basic info
@@ -406,7 +408,8 @@ class InvoiceController extends Controller
                 ->with('error', 'Hanya PKS dengan status Disetujui yang dapat dibuat Invoice!');
         }
 
-        $salesList = Sales::all();
+        // Get real sales users from database with 'sales' role
+        $salesList = User::role('Sales')->select('id', 'name')->get();
         
         // Pre-fill data from PKS
         $prefillData = [
@@ -446,10 +449,10 @@ class InvoiceController extends Controller
             'no_telp' => 'nullable|string|max:50',
             'email' => 'nullable|email|max:255',
             'total_harga' => 'required|numeric|min:0',
-            'status_pembayaran' => 'required|in:Lunas,Belum Lunas,Cicilan',
+            'status_pembayaran' => 'required|in:Lunas,Belum Lunas',
             'jatuh_tempo' => 'required|date',
             'keterangan' => 'nullable|string',
-            'id_sales' => 'required|exists:sales,id',
+            'id_sales' => 'required|exists:users,id',
         ]);
 
         // Check if total doesn't exceed remaining contract value
@@ -496,7 +499,7 @@ class InvoiceController extends Controller
     public function getAvailablePks()
     {
         $pksList = SuratPerjanjian::where('status_surat', 'Disetujui')
-            ->with('sales')
+            ->with('salesUser')
             ->get()
             ->filter(function ($pks) {
                 return $pks->remaining_contract_value > 0;
@@ -509,7 +512,7 @@ class InvoiceController extends Controller
                     'nilai_kontrak' => $pks->nilai_kontrak,
                     'total_invoiced' => $pks->total_invoiced,
                     'remaining_value' => $pks->remaining_contract_value,
-                    'sales_name' => $pks->sales->nama_sales ?? '-',
+                    'sales_name' => $pks->salesUser->name ?? '-',
                 ];
             });
 
@@ -563,7 +566,7 @@ class InvoiceController extends Controller
     public function updateStatus(Request $request, Invoice $invoice)
     {
         $validated = $request->validate([
-            'status_pembayaran' => 'required|in:Lunas,Belum Lunas,Cicilan,Revisi',
+            'status_pembayaran' => 'required|in:Lunas,Belum Lunas,Revisi',
         ]);
 
         $invoice->update(['status_pembayaran' => $validated['status_pembayaran']]);

@@ -184,7 +184,7 @@
                         </div>
                         <div>
                             <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Sales</p>
-                            <p class="mt-1 text-base text-gray-900 dark:text-white">{{ $kuitansi->sales?->nama_sales ?? '-' }}</p>
+                            <p class="mt-1 text-base text-gray-900 dark:text-white">{{ $kuitansi->salesUser?->name ?? '-' }}</p>
                         </div>
                         <div class="md:col-span-2">
                             <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Alamat</p>

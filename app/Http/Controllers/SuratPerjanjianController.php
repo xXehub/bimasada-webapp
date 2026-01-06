@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\SuratPerjanjian;
-use App\Models\Sales;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -15,7 +15,7 @@ class SuratPerjanjianController extends Controller
     public function index(Request $request)
     {
         // Get sales list for modal - only needed columns
-        $salesList = Sales::select('id', 'nama_sales')->get();
+        $salesList = User::role('Sales')->select('id', 'name')->get();
         
         // OPTIMIZED: Get stats in single query using groupBy
         $statsRaw = SuratPerjanjian::select('status_surat', \DB::raw('COUNT(*) as count'))
@@ -39,7 +39,7 @@ class SuratPerjanjianController extends Controller
      */
     public function getData(Request $request)
     {
-        $query = SuratPerjanjian::with('sales');
+        $query = SuratPerjanjian::with('salesUser');
 
         // Apply status filter if provided
         if ($request->has('status') && !empty($request->status)) {
@@ -72,7 +72,7 @@ class SuratPerjanjianController extends Controller
                 ];
             })
             ->addColumn('sales_name', function ($surat) {
-                return $surat->sales->nama_sales ?? '-';
+                return $surat->salesUser->name ?? '-';
             })
             ->addColumn('status_badge', function ($surat) {
                 $variants = [
@@ -98,8 +98,8 @@ class SuratPerjanjianController extends Controller
                 });
             })
             ->filterColumn('sales_name', function($query, $keyword) {
-                $query->whereHas('sales', function($q) use ($keyword) {
-                    $q->where('nama_sales', 'like', "%{$keyword}%");
+                $query->whereHas('salesUser', function($q) use ($keyword) {
+                    $q->where('name', 'like', "%{$keyword}%");
                 });
             })
             ->rawColumns(['actions'])
@@ -111,7 +111,7 @@ class SuratPerjanjianController extends Controller
      */
     public function create()
     {
-        $salesList = Sales::select('id', 'nama_sales')->get();
+        $salesList = User::role('Sales')->select('id', 'name')->get();
         return view('surat-perjanjians.create', compact('salesList'));
     }
 
@@ -132,7 +132,7 @@ class SuratPerjanjianController extends Controller
             'status_surat' => 'required|in:Draft,Aktif,Disetujui,Kadaluarsa,Dibatalkan',
             'nama_pihak_pertama' => 'required|string|max:255',
             'nama_pihak_kedua' => 'required|string|max:255',
-            'id_sales' => 'required|exists:sales,id',
+            'id_sales' => 'required|exists:users,id',
         ]);
 
         $surat = SuratPerjanjian::create($validated);
@@ -146,7 +146,7 @@ class SuratPerjanjianController extends Controller
      */
     public function show(SuratPerjanjian $suratPerjanjian)
     {
-        $suratPerjanjian->load('sales', 'detailSurats', 'invoices');
+        $suratPerjanjian->load('salesUser', 'detailSurats', 'invoices');
         return view('surat-perjanjians.show', compact('suratPerjanjian'));
     }
 
@@ -155,7 +155,7 @@ class SuratPerjanjianController extends Controller
      */
     public function edit(SuratPerjanjian $suratPerjanjian)
     {
-        $salesList = Sales::select('id', 'nama_sales')->get();
+        $salesList = User::role('Sales')->select('id', 'name')->get();
         return view('surat-perjanjians.edit', compact('suratPerjanjian', 'salesList'));
     }
 
@@ -176,7 +176,7 @@ class SuratPerjanjianController extends Controller
             'status_surat' => 'required|in:Draft,Aktif,Disetujui,Kadaluarsa,Dibatalkan',
             'nama_pihak_pertama' => 'required|string|max:255',
             'nama_pihak_kedua' => 'required|string|max:255',
-            'id_sales' => 'required|exists:sales,id',
+            'id_sales' => 'required|exists:users,id',
         ]);
 
         $suratPerjanjian->update($validated);
@@ -237,7 +237,7 @@ class SuratPerjanjianController extends Controller
             'tanggal_surat' => 'required|date',
             'tanggal_selesai' => 'required|date|after_or_equal:tanggal_surat',
             'nilai_kontrak' => 'required|numeric|min:0',
-            'id_sales' => 'required|exists:sales,id',
+            'id_sales' => 'required|exists:users,id',
         ]);
 
         // Create PKS with basic info

@@ -62,7 +62,6 @@
                     $statusConfig = match($invoice->status_pembayaran) {
                         'Lunas' => ['bg' => 'bg-emerald-100 dark:bg-emerald-900/30', 'text' => 'text-emerald-700 dark:text-emerald-400', 'dot' => 'bg-emerald-500'],
                         'Belum Lunas' => ['bg' => 'bg-amber-100 dark:bg-amber-900/30', 'text' => 'text-amber-700 dark:text-amber-400', 'dot' => 'bg-amber-500'],
-                        'Cicilan' => ['bg' => 'bg-blue-100 dark:bg-blue-900/30', 'text' => 'text-blue-700 dark:text-blue-400', 'dot' => 'bg-blue-500'],
                         default => ['bg' => 'bg-gray-100 dark:bg-gray-800', 'text' => 'text-gray-700 dark:text-gray-300', 'dot' => 'bg-gray-500'],
                     };
                 @endphp
@@ -157,7 +156,6 @@
                             <option value="">Select Status</option>
                             <option value="Lunas" {{ old('status_pembayaran', $invoice->status_pembayaran) == 'Lunas' ? 'selected' : '' }}>Lunas</option>
                             <option value="Belum Lunas" {{ old('status_pembayaran', $invoice->status_pembayaran) == 'Belum Lunas' ? 'selected' : '' }}>Belum Lunas</option>
-                            <option value="Cicilan" {{ old('status_pembayaran', $invoice->status_pembayaran) == 'Cicilan' ? 'selected' : '' }}>Cicilan</option>
                         </select>
                     </div>
 
@@ -174,7 +172,7 @@
                             <option value="">Select Sales Person</option>
                             @foreach($salesList as $s)
                                 <option value="{{ $s->id }}" {{ old('id_sales', $invoice->id_sales) == $s->id ? 'selected' : '' }}>
-                                    {{ $s->id_sales }} - {{ $s->nama_sales }}
+                                    {{ $s->name }}
                                 </option>
                             @endforeach
                         </select>

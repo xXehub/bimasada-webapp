@@ -405,20 +405,6 @@
                     </div>
                 </div>
             </x-ui.card>
-            
-            <x-ui.card class="!p-4">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-md bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                        <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Installment</p>
-                        <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ $stats['installment'] }}</p>
-                    </div>
-                </div>
-            </x-ui.card>
         </div>
 
         <!-- Filters & Search -->
@@ -454,7 +440,6 @@
                         <option value="">All Status</option>
                         <option value="Lunas">Lunas</option>
                         <option value="Belum Lunas">Belum Lunas</option>
-                        <option value="Cicilan">Cicilan</option>
                         <option value="Revisi">Revisi</option>
                     </select>
                 </div>

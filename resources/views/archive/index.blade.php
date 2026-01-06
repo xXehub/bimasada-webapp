@@ -506,7 +506,7 @@
                                 class="w-full px-4 py-2.5 bg-white dark:bg-dark-hover border border-gray-300 dark:border-dark-border rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors">
                             <option value="">Semua Sales</option>
                             @foreach($salesList as $sales)
-                                <option value="{{ $sales->id }}">{{ $sales->nama_sales }}</option>
+                                <option value="{{ $sales->id }}">{{ $sales->name }}</option>
                             @endforeach
                         </select>
                     </div>

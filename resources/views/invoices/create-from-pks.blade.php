@@ -184,7 +184,6 @@
                             class="w-full px-4 py-2.5 bg-white dark:bg-dark-hover border border-gray-300 dark:border-dark-border rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
                         >
                             <option value="Belum Lunas" {{ old('status_pembayaran', 'Belum Lunas') == 'Belum Lunas' ? 'selected' : '' }}>Belum Lunas</option>
-                            <option value="Cicilan" {{ old('status_pembayaran') == 'Cicilan' ? 'selected' : '' }}>Cicilan</option>
                             <option value="Lunas" {{ old('status_pembayaran') == 'Lunas' ? 'selected' : '' }}>Lunas</option>
                         </select>
                     </div>
@@ -202,7 +201,7 @@
                             <option value="">Pilih Sales</option>
                             @foreach($salesList as $s)
                                 <option value="{{ $s->id }}" {{ old('id_sales', $prefillData['id_sales'] ?? '') == $s->id ? 'selected' : '' }}>
-                                    {{ $s->id_sales }} - {{ $s->nama_sales }}
+                                    {{ $s->name }}
                                 </option>
                             @endforeach
                         </select>

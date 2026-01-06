@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Invoice;
 use App\Models\Kuitansi;
 use App\Models\SuratPerjanjian;
-use App\Models\Sales;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -25,7 +25,7 @@ class DocumentArchiveController extends Controller
         
         // Get all sales for filter dropdown (Manager only)
         $salesList = $user->hasRole('Marketing Manager') 
-            ? Sales::orderBy('nama_sales')->get() 
+            ? User::role('Sales')->orderBy('name')->get() 
             : collect();
 
         // Get statistics with caching
@@ -131,7 +131,7 @@ class DocumentArchiveController extends Controller
 
         // Get PKS documents
         if ($type === 'all' || $type === 'pks') {
-            $pksQuery = SuratPerjanjian::with('sales');
+            $pksQuery = SuratPerjanjian::with('salesUser');
             
             if (!$isManager) {
                 $pksQuery->where('id_sales', $user->id);
@@ -170,7 +170,7 @@ class DocumentArchiveController extends Controller
                     'amount_formatted' => 'Rp ' . number_format($pks->nilai_kontrak ?? 0, 0, ',', '.'),
                     'status' => $pks->status_surat,
                     'status_badge' => $this->getPksStatusBadge($pks->status_surat),
-                    'sales' => $pks->sales->nama_sales ?? '-',
+                    'sales' => $pks->salesUser->name ?? '-',
                     'url' => route('surat-perjanjians.show', $pks->id),
                     'edit_url' => route('surat-perjanjians.edit', $pks->id),
                     'created_at' => $pks->created_at->format('Y-m-d H:i:s'),
@@ -182,7 +182,7 @@ class DocumentArchiveController extends Controller
 
         // Get Invoice documents
         if ($type === 'all' || $type === 'invoice') {
-            $invoiceQuery = Invoice::with('sales');
+            $invoiceQuery = Invoice::with('salesUser');
             
             if (!$isManager) {
                 $invoiceQuery->where('id_sales', $user->id);
@@ -221,7 +221,7 @@ class DocumentArchiveController extends Controller
                     'amount_formatted' => 'Rp ' . number_format($inv->total_harga ?? 0, 0, ',', '.'),
                     'status' => $inv->status_pembayaran,
                     'status_badge' => $this->getInvoiceStatusBadge($inv->status_pembayaran),
-                    'sales' => $inv->sales->nama_sales ?? '-',
+                    'sales' => $inv->salesUser->name ?? '-',
                     'url' => route('invoices.show', $inv->id),
                     'edit_url' => route('invoices.edit', $inv->id),
                     'created_at' => $inv->created_at->format('Y-m-d H:i:s'),
@@ -272,7 +272,7 @@ class DocumentArchiveController extends Controller
                     'amount_formatted' => 'Rp ' . number_format($k->total_bayar ?? 0, 0, ',', '.'),
                     'status' => $k->status_kuitansi,
                     'status_badge' => $this->getKuitansiStatusBadge($k->status_kuitansi),
-                    'sales' => $k->invoice->sales->nama_sales ?? '-',
+                    'sales' => $k->invoice->salesUser->name ?? '-',
                     'url' => route('kuitansis.show', $k->id),
                     'edit_url' => route('kuitansis.edit', $k->id),
                     'created_at' => $k->created_at->format('Y-m-d H:i:s'),
@@ -442,7 +442,7 @@ class DocumentArchiveController extends Controller
 
         // Build export data based on type
         if ($type === 'all' || $type === 'pks') {
-            $query = SuratPerjanjian::with('sales');
+            $query = SuratPerjanjian::with('salesUser');
             if (!$isManager) $query->where('id_sales', $user->id);
             if ($salesId && $isManager) $query->where('id_sales', $salesId);
             if ($dateFrom) $query->whereDate('tanggal_surat', '>=', $dateFrom);
@@ -455,12 +455,12 @@ class DocumentArchiveController extends Controller
                 'Pelanggan' => $p->nama_pelanggan,
                 'Nilai' => $p->nilai_kontrak,
                 'Status' => $p->status_surat,
-                'Sales' => $p->sales->nama_sales ?? '-',
+                'Sales' => $p->salesUser->name ?? '-',
             ]));
         }
 
         if ($type === 'all' || $type === 'invoice') {
-            $query = Invoice::with('sales');
+            $query = Invoice::with('salesUser');
             if (!$isManager) $query->where('id_sales', $user->id);
             if ($salesId && $isManager) $query->where('id_sales', $salesId);
             if ($dateFrom) $query->whereDate('tanggal_invoice', '>=', $dateFrom);
@@ -473,7 +473,7 @@ class DocumentArchiveController extends Controller
                 'Pelanggan' => $i->nama_pelanggan,
                 'Nilai' => $i->total_harga,
                 'Status' => $i->status_pembayaran,
-                'Sales' => $i->sales->nama_sales ?? '-',
+                'Sales' => $i->salesUser->name ?? '-',
             ]));
         }
 
@@ -491,7 +491,7 @@ class DocumentArchiveController extends Controller
                 'Pelanggan' => $k->nama_pelanggan,
                 'Nilai' => $k->total_bayar,
                 'Status' => $k->status_kuitansi,
-                'Sales' => $k->invoice->sales->nama_sales ?? '-',
+                'Sales' => $k->invoice->salesUser->name ?? '-',
             ]));
         }
 

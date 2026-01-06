@@ -33,6 +33,11 @@ class Kuitansi extends Model
         return $this->belongsTo(Sales::class, 'id_sales');
     }
 
+    public function salesUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'id_sales');
+    }
+
     public function invoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class, 'id_invoice');

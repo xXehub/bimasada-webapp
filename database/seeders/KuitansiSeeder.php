@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Kuitansi;
 use App\Models\Invoice;
-use App\Models\Sales;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class KuitansiSeeder extends Seeder
@@ -14,11 +14,12 @@ class KuitansiSeeder extends Seeder
      */
     public function run(): void
     {
-        $sales = Sales::all();
+        // Get sales users from User model with 'Sales' role
+        $salesUsers = User::role('Sales')->get();
         $invoices = Invoice::all();
         
-        if ($sales->isEmpty()) {
-            $this->command->warn('No sales found. Please run SalesSeeder first.');
+        if ($salesUsers->isEmpty()) {
+            $this->command->warn('No sales users found. Please run RolePermissionSeeder first.');
             return;
         }
 
@@ -33,7 +34,7 @@ class KuitansiSeeder extends Seeder
                 'invoice_pembayaran' => 'Transfer',
                 'keterangan' => 'Pembayaran tahap 1 (30%)',
                 'status_kuitansi' => 'Lunas',
-                'id_sales' => $sales->first()->id,
+                'id_sales' => $salesUsers->first()->id,
                 'id_invoice' => $invoices->first()?->id,
             ],
             [
@@ -46,7 +47,7 @@ class KuitansiSeeder extends Seeder
                 'invoice_pembayaran' => 'Cash',
                 'keterangan' => 'Pembayaran lunas',
                 'status_kuitansi' => 'Lunas',
-                'id_sales' => $sales->last()->id ?? $sales->first()->id,
+                'id_sales' => $salesUsers->last()->id ?? $salesUsers->first()->id,
                 'id_invoice' => null,
             ],
             [
@@ -59,7 +60,7 @@ class KuitansiSeeder extends Seeder
                 'invoice_pembayaran' => 'Transfer',
                 'keterangan' => 'DP Kontrak',
                 'status_kuitansi' => 'Terkirim',
-                'id_sales' => $sales->first()->id,
+                'id_sales' => $salesUsers->first()->id,
                 'id_invoice' => null,
             ],
             [
@@ -72,7 +73,7 @@ class KuitansiSeeder extends Seeder
                 'invoice_pembayaran' => 'Ciro',
                 'keterangan' => null,
                 'status_kuitansi' => 'Draft',
-                'id_sales' => $sales->last()->id ?? $sales->first()->id,
+                'id_sales' => $salesUsers->last()->id ?? $salesUsers->first()->id,
                 'id_invoice' => null,
             ],
         ];

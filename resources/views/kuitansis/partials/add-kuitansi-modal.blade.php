@@ -82,10 +82,10 @@
                         required>
                         <option value="">Pilih Sales</option>
                         @php
-                            $salesList = \App\Models\Sales::orderBy('nama_sales')->get();
+                            $salesList = \App\Models\User::role('Sales')->orderBy('name')->get();
                         @endphp
                         @foreach($salesList as $sales)
-                            <option value="{{ $sales->id }}">{{ $sales->nama_sales }}</option>
+                            <option value="{{ $sales->id }}">{{ $sales->name }}</option>
                         @endforeach
                     </select>
                 </div>

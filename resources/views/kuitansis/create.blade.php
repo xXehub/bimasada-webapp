@@ -131,7 +131,7 @@
                             <option value="">Pilih Sales</option>
                             @foreach($salesList as $sales)
                                 <option value="{{ $sales->id }}" {{ old('id_sales', $selectedInvoice?->id_sales) == $sales->id ? 'selected' : '' }}>
-                                    {{ $sales->id_sales ?? '' }} - {{ $sales->nama_sales }}
+                                    {{ $sales->name }}
                                 </option>
                             @endforeach
                         </select>

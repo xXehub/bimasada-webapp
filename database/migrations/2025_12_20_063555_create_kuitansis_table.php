@@ -20,7 +20,7 @@ return new class extends Migration
             $table->decimal('total_bayar', 15, 2);
             $table->string('invoice_pembayaran'); // Cash/Transfer/Ciro
             $table->text('keterangan')->nullable();
-            $table->integer('id_sales');
+            $table->foreignId('id_sales')->constrained('users')->onDelete('cascade');
             $table->foreignId('id_invoice')->nullable()->constrained('invoices')->onDelete('set null');
             $table->timestamps();
         });

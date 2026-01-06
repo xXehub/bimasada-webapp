@@ -134,7 +134,7 @@
                             </div>
                             <div>
                                 <p class="text-sm text-gray-500 dark:text-gray-400">Sales Person</p>
-                                <p class="font-semibold text-gray-900 dark:text-white mt-1">{{ $suratPerjanjian->sales->nama_sales ?? '-' }}</p>
+                                <p class="font-semibold text-gray-900 dark:text-white mt-1">{{ $suratPerjanjian->salesUser->name ?? '-' }}</p>
                             </div>
                             <div>
                                 <p class="text-sm text-gray-500 dark:text-gray-400">Durasi Kontrak</p>

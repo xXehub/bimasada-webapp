@@ -111,7 +111,6 @@
                         $statusColors = [
                             'Lunas' => 'from-emerald-500 to-emerald-600',
                             'Belum Lunas' => 'from-amber-500 to-amber-600',
-                            'Cicilan' => 'from-blue-500 to-blue-600',
                             'Revisi' => 'from-orange-500 to-orange-600'
                         ];
                         $statusBg = $statusColors[$invoice->status_pembayaran] ?? 'from-gray-500 to-gray-600';
@@ -153,7 +152,7 @@
                             </div>
                             <div>
                                 <p class="text-sm text-gray-500 dark:text-gray-400">Sales Person</p>
-                                <p class="font-semibold text-gray-900 dark:text-white mt-1">{{ $invoice->sales->nama_sales ?? '-' }}</p>
+                                <p class="font-semibold text-gray-900 dark:text-white mt-1">{{ $invoice->salesUser->name ?? '-' }}</p>
                             </div>
                             @if($invoice->no_kontrak)
                             <div>
@@ -255,8 +254,7 @@
                             @php
                                 $badgeVariants = [
                                     'Lunas' => 'success',
-                                    'Belum Lunas' => 'warning',
-                                    'Cicilan' => 'info'
+                                    'Belum Lunas' => 'warning'
                                 ];
                             @endphp
                             <x-ui.badge :variant="$badgeVariants[$invoice->status_pembayaran] ?? 'secondary'" :dot="true" size="lg">

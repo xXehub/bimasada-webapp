@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Kuitansi;
 use App\Models\DetailKuitansi;
 use App\Models\Invoice;
-use App\Models\Sales;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -43,7 +43,7 @@ class KuitansiController extends Controller
      */
     public function getData(Request $request)
     {
-        $query = Kuitansi::with(['sales', 'invoice'])->select('kuitansis.*');
+        $query = Kuitansi::with(['salesUser', 'invoice'])->select('kuitansis.*');
 
         // Apply filters
         if ($request->filled('status')) {
@@ -109,7 +109,7 @@ class KuitansiController extends Controller
                        e($kuitansi->status_kuitansi) . '</span>';
             })
             ->addColumn('sales_name', function ($kuitansi) {
-                return $kuitansi->sales ? $kuitansi->sales->nama_sales : '-';
+                return $kuitansi->salesUser ? $kuitansi->salesUser->name : '-';
             })
             ->addColumn('actions', function ($kuitansi) {
                 $actions = '<div class="flex items-center gap-2">';
@@ -206,7 +206,7 @@ class KuitansiController extends Controller
      */
     public function create(Request $request)
     {
-        $salesList = Sales::select('id', 'id_sales', 'nama_sales')->orderBy('nama_sales')->get();
+        $salesList = User::role('Sales')->select('id', 'name')->orderBy('name')->get();
         
         // Limit invoices to recent 100 for performance - include all fields needed for auto-fill
         $invoices = Invoice::select('id', 'no_invoice', 'nama_pelanggan', 'alamat', 'no_telp', 'total_harga', 'id_sales', 'status_pembayaran', 'created_at')
@@ -259,7 +259,7 @@ class KuitansiController extends Controller
             'invoice_pembayaran' => 'required|in:Cash,Transfer,Ciro',
             'keterangan' => 'nullable|string',
             'status_kuitansi' => 'nullable|in:Draft,Terkirim,Lunas,Batal',
-            'id_sales' => 'required|exists:sales,id',
+            'id_sales' => 'required|exists:users,id',
             'id_invoice' => 'nullable|exists:invoices,id',
             // Detail items
             'items' => 'nullable|array',
@@ -333,7 +333,7 @@ class KuitansiController extends Controller
             'nama_pelanggan' => 'required|string|max:255',
             'total_bayar' => 'required|numeric|min:0',
             'invoice_pembayaran' => 'required|in:Cash,Transfer,Ciro',
-            'id_sales' => 'required|exists:sales,id',
+            'id_sales' => 'required|exists:users,id',
             'id_invoice' => 'nullable|exists:invoices,id',
         ]);
 
@@ -379,7 +379,7 @@ class KuitansiController extends Controller
      */
     public function show(Kuitansi $kuitansi)
     {
-        $kuitansi->load(['sales', 'invoice', 'detailKuitansis']);
+        $kuitansi->load(['salesUser', 'invoice', 'detailKuitansis']);
         
         return view('kuitansis.show', compact('kuitansi'));
     }
@@ -389,8 +389,8 @@ class KuitansiController extends Controller
      */
     public function edit(Kuitansi $kuitansi)
     {
-        $kuitansi->load(['sales', 'invoice', 'detailKuitansis']);
-        $salesList = Sales::select('id', 'id_sales', 'nama_sales')->orderBy('nama_sales')->get();
+        $kuitansi->load(['salesUser', 'invoice', 'detailKuitansis']);
+        $salesList = User::role('Sales')->select('id', 'name')->orderBy('name')->get();
         // Load invoices with fields needed for auto-fill
         $invoices = Invoice::select('id', 'no_invoice', 'nama_pelanggan', 'alamat', 'no_telp', 'total_harga', 'id_sales', 'created_at')
             ->orderBy('created_at', 'desc')
@@ -415,7 +415,7 @@ class KuitansiController extends Controller
             'invoice_pembayaran' => 'required|in:Cash,Transfer,Ciro',
             'keterangan' => 'nullable|string',
             'status_kuitansi' => 'nullable|in:Draft,Terkirim,Lunas,Batal',
-            'id_sales' => 'required|exists:sales,id',
+            'id_sales' => 'required|exists:users,id',
             'id_invoice' => 'nullable|exists:invoices,id',
             // Detail items
             'items' => 'nullable|array',
@@ -583,7 +583,7 @@ class KuitansiController extends Controller
         // Load invoice with details
         $invoice->load('detailInvoices');
 
-        $salesList = Sales::orderBy('nama_sales')->get();
+        $salesList = User::role('Sales')->orderBy('name')->get();
         
         // Pre-fill data from Invoice
         $prefillData = [
@@ -639,7 +639,7 @@ class KuitansiController extends Controller
             'invoice_pembayaran' => 'required|in:Cash,Transfer,Ciro',
             'keterangan' => 'nullable|string',
             'status_kuitansi' => 'nullable|in:Draft,Terkirim,Lunas,Batal',
-            'id_sales' => 'required|exists:sales,id',
+            'id_sales' => 'required|exists:users,id',
         ]);
 
         // Check if payment amount doesn't exceed remaining
@@ -732,7 +732,7 @@ class KuitansiController extends Controller
                     'total_harga' => $invoice->total_harga,
                     'total_paid' => $invoice->total_paid,
                     'remaining_amount' => $invoice->remaining_amount,
-                    'sales_name' => $invoice->sales->nama_sales ?? '-',
+                    'sales_name' => $invoice->salesUser->name ?? '-',
                 ];
             });
 

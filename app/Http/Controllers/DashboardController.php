@@ -395,7 +395,7 @@ class DashboardController extends Controller
 
         // Non-cached data - real time with select() for speed
         $pendingPks = SuratPerjanjian::where('status_surat', 'Aktif')
-            ->with('sales:id,name')
+            ->with('salesUser:id,name')
             ->select('id', 'no_surat', 'nama_pelanggan', 'id_sales', 'created_at')
             ->latest()
             ->take(10)

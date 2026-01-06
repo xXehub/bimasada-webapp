@@ -5,8 +5,6 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
-use App\Models\User;
-use Illuminate\Support\Facades\Hash;
 
 class RolePermissionSeeder extends Seeder
 {
@@ -105,32 +103,7 @@ class RolePermissionSeeder extends Seeder
             $createdPermissions['export-kuitansi'],
         ]);
 
-        // Create default users (only if not exists)
-        $manager = User::firstOrCreate(
-            ['email' => 'manager@bimasada.com'],
-            [
-                'name' => 'Manager Bimasada',
-                'password' => Hash::make('manager123'),
-            ]
-        );
-        if (!$manager->hasRole('Marketing Manager')) {
-            $manager->assignRole('Marketing Manager');
-        }
-
-        $salesUser = User::firstOrCreate(
-            ['email' => 'sales@bimasada.com'],
-            [
-                'name' => 'Sales Bimasada',
-                'password' => Hash::make('sales123'),
-            ]
-        );
-        if (!$salesUser->hasRole('Sales')) {
-            $salesUser->assignRole('Sales');
-        }
-
-        $this->command->info('Roles and permissions seeded successfully!');
-        $this->command->info('Marketing Manager: manager@bimasada.com / manager123');
-        $this->command->info('Sales: sales@bimasada.com / sales123');
+        $this->command->info('✅ Roles and permissions seeded successfully!');
     }
 }
 

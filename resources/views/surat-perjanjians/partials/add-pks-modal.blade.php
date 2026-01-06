@@ -59,7 +59,7 @@
                             >
                                 <option value="">Pilih Sales</option>
                                 @foreach($salesList ?? [] as $s)
-                                    <option value="{{ $s->id }}">{{ $s->nama_sales }}</option>
+                                    <option value="{{ $s->id }}">{{ $s->name }}</option>
                                 @endforeach
                             </select>
                         </div>

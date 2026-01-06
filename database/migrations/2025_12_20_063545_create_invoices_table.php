@@ -19,10 +19,10 @@ return new class extends Migration
             $table->string('no_telp')->nullable();
             $table->string('email')->nullable();
             $table->decimal('total_harga', 15, 2);
-            $table->string('status_pembayaran'); // Lunas/Belum Lunas/Cicilan
+            $table->string('status_pembayaran'); // Lunas/Belum Lunas
             $table->date('jatuh_tempo');
             $table->text('keterangan')->nullable();
-            $table->foreignId('id_sales')->constrained('sales')->onDelete('cascade');
+            $table->foreignId('id_sales')->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });
     }

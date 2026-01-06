@@ -343,7 +343,7 @@
                     <td class="signature-box">
                         Hormat Kami,
                         <div class="signature-space"></div>
-                        <div class="signature-name">{{ $invoice->sales->nama_sales ?? 'Sales' }}</div>
+                        <div class="signature-name">{{ $invoice->salesUser->name ?? 'Sales' }}</div>
                     </td>
                 </tr>
             </table>

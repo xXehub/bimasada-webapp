@@ -36,6 +36,11 @@ class SuratPerjanjian extends Model
         return $this->belongsTo(Sales::class, 'id_sales');
     }
 
+    public function salesUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'id_sales');
+    }
+
     public function detailSurats(): HasMany
     {
         return $this->hasMany(DetailSurat::class, 'id_surat');

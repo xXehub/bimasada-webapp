@@ -174,7 +174,7 @@
                                         {{ $pks->nama_client }}
                                     </p>
                                     <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                                        oleh {{ $pks->sales->name ?? 'Unknown' }}
+                                        oleh {{ $pks->salesUser->name ?? 'Unknown' }}
                                     </p>
                                 </div>
                                 <span class="text-xs text-gray-400 dark:text-gray-500">
