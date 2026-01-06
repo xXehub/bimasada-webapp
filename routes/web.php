@@ -54,6 +54,11 @@ Route::middleware(['auth'])->group(function () {
     // DataTables server-side endpoint
     Route::get('/invoices/data', [InvoiceController::class, 'getData'])->middleware('permission:view-invoices')->name('invoices.data');
     
+    // Review workflow (Marketing Manager)
+    Route::post('/invoices/{invoice}/request-revision', [InvoiceController::class, 'requestRevision'])->middleware('permission:review-invoices')->name('invoices.requestRevision');
+    Route::post('/invoices/{invoice}/approve', [InvoiceController::class, 'approveInvoice'])->middleware('permission:review-invoices')->name('invoices.approve');
+    Route::patch('/invoices/{invoice}/status', [InvoiceController::class, 'updateStatus'])->middleware('permission:edit-invoices')->name('invoices.updateStatus');
+    
     Route::get('/invoices', [InvoiceController::class, 'index'])->middleware('permission:view-invoices')->name('invoices.index');
     Route::get('/invoices/create', [InvoiceController::class, 'create'])->middleware('permission:create-invoices')->name('invoices.create');
     Route::post('/invoices', [InvoiceController::class, 'store'])->middleware('permission:create-invoices')->name('invoices.store');

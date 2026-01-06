@@ -3,7 +3,7 @@
     <!-- Welcome Section -->
     <div class="mb-8">
         <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            Selamat Datang, {{ Auth::user()->name }}! 👋
+            Selamat Datang, {{ Auth::user()->name }}!
         </h2>
         <p class="text-gray-500 dark:text-gray-400">
             Berikut adalah ringkasan aktivitas Anda hari ini.
@@ -161,37 +161,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-        
-        <!-- Quick Actions -->
-        <div class="rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-sm border border-gray-100 dark:border-gray-700">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Quick Actions</h3>
-            <div class="space-y-3">
-                <a href="{{ route('surat-perjanjians.create') }}" class="flex items-center gap-3 p-3 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition-colors">
-                    <div class="w-10 h-10 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                        </svg>
-                    </div>
-                    <span class="font-medium">Buat PKS Baru</span>
-                </a>
-                <a href="{{ route('invoices.input') }}" class="flex items-center gap-3 p-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors">
-                    <div class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                        </svg>
-                    </div>
-                    <span class="font-medium">Buat Invoice Baru</span>
-                </a>
-                <a href="{{ route('kuitansis.create') }}" class="flex items-center gap-3 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors">
-                    <div class="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                        </svg>
-                    </div>
-                    <span class="font-medium">Buat Kuitansi</span>
-                </a>
             </div>
         </div>
     </div>

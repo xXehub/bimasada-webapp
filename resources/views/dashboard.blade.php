@@ -176,51 +176,8 @@
             </x-ui.card>
         </div>
         
-        <!-- Quick Actions & Activity -->
+        <!-- Activity Section -->
         <div class="space-y-6">
-            
-            <!-- Quick Actions -->
-            <x-ui.card>
-                <h3 class="text-lg font-semibold text-secondary-900 dark:text-white mb-4">Aksi Cepat</h3>
-                
-                <div class="space-y-3">
-                    <a href="{{ route('invoices.create') }}" class="flex items-center gap-3 p-3 rounded-xl bg-primary/5 dark:bg-primary/10 hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors group">
-                        <div class="w-10 h-10 rounded-xl bg-primary/10 dark:bg-primary/20 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
-                            <svg class="w-5 h-5 text-primary group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="font-medium text-secondary-900 dark:text-white">Buat Invoice Baru</p>
-                            <p class="text-xs text-secondary-500 dark:text-secondary-400">Input invoice baru</p>
-                        </div>
-                    </a>
-                    
-                    <a href="{{ route('invoices.index') }}" class="flex items-center gap-3 p-3 rounded-xl bg-secondary-50 dark:bg-dark-hover hover:bg-secondary-100 dark:hover:bg-secondary-800 transition-colors group">
-                        <div class="w-10 h-10 rounded-xl bg-secondary-100 dark:bg-secondary-800 flex items-center justify-center">
-                            <svg class="w-5 h-5 text-secondary-600 dark:text-secondary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="font-medium text-secondary-900 dark:text-white">Lihat Semua Invoice</p>
-                            <p class="text-xs text-secondary-500 dark:text-secondary-400">Kelola invoice</p>
-                        </div>
-                    </a>
-                    
-                    <a href="#" class="flex items-center gap-3 p-3 rounded-xl bg-secondary-50 dark:bg-dark-hover hover:bg-secondary-100 dark:hover:bg-secondary-800 transition-colors group">
-                        <div class="w-10 h-10 rounded-xl bg-secondary-100 dark:bg-secondary-800 flex items-center justify-center">
-                            <svg class="w-5 h-5 text-secondary-600 dark:text-secondary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="font-medium text-secondary-900 dark:text-white">Data Pelanggan</p>
-                            <p class="text-xs text-secondary-500 dark:text-secondary-400">Kelola pelanggan</p>
-                        </div>
-                    </a>
-                </div>
-            </x-ui.card>
             
             <!-- Recent Activity -->
             <x-ui.card>

@@ -455,6 +455,7 @@
                         <option value="Lunas">Lunas</option>
                         <option value="Belum Lunas">Belum Lunas</option>
                         <option value="Cicilan">Cicilan</option>
+                        <option value="Revisi">Revisi</option>
                     </select>
                 </div>
 
@@ -617,6 +618,7 @@
                                         'success': 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400',
                                         'warning': 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400',
                                         'info': 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400',
+                                        'danger': 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400',
                                         'secondary': 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
                                     };
                                     const variantClass = variants[data.variant] || variants.secondary;

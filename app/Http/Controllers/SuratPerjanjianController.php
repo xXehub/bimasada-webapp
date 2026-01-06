@@ -14,18 +14,21 @@ class SuratPerjanjianController extends Controller
      */
     public function index(Request $request)
     {
-        // Get sales list for modal
-        $salesList = Sales::all();
+        // Get sales list for modal - only needed columns
+        $salesList = Sales::select('id', 'nama_sales')->get();
         
-        // Get stats for cards
-        $statsQuery = SuratPerjanjian::query();
+        // OPTIMIZED: Get stats in single query using groupBy
+        $statsRaw = SuratPerjanjian::select('status_surat', \DB::raw('COUNT(*) as count'))
+            ->groupBy('status_surat')
+            ->pluck('count', 'status_surat')
+            ->toArray();
         
         $stats = [
-            'total' => $statsQuery->count(),
-            'draft' => (clone $statsQuery)->where('status_surat', 'Draft')->count(),
-            'active' => (clone $statsQuery)->where('status_surat', 'Aktif')->count(),
-            'approved' => (clone $statsQuery)->where('status_surat', 'Disetujui')->count(),
-            'expired' => (clone $statsQuery)->where('status_surat', 'Kadaluarsa')->count(),
+            'total' => array_sum($statsRaw),
+            'draft' => $statsRaw['Draft'] ?? 0,
+            'active' => $statsRaw['Aktif'] ?? 0,
+            'approved' => $statsRaw['Disetujui'] ?? 0,
+            'expired' => $statsRaw['Kadaluarsa'] ?? 0,
         ];
 
         return view('surat-perjanjians.index', compact('salesList', 'stats'));
@@ -108,7 +111,7 @@ class SuratPerjanjianController extends Controller
      */
     public function create()
     {
-        $salesList = Sales::all();
+        $salesList = Sales::select('id', 'nama_sales')->get();
         return view('surat-perjanjians.create', compact('salesList'));
     }
 
@@ -152,7 +155,7 @@ class SuratPerjanjianController extends Controller
      */
     public function edit(SuratPerjanjian $suratPerjanjian)
     {
-        $salesList = Sales::all();
+        $salesList = Sales::select('id', 'nama_sales')->get();
         return view('surat-perjanjians.edit', compact('suratPerjanjian', 'salesList'));
     }
 
@@ -307,6 +310,7 @@ class SuratPerjanjianController extends Controller
 
     /**
      * Reject PKS (Marketing Manager only).
+     * Returns PKS to Draft status for Sales to revise.
      */
     public function reject(SuratPerjanjian $suratPerjanjian)
     {
@@ -317,11 +321,12 @@ class SuratPerjanjianController extends Controller
             ], 400);
         }
 
-        $suratPerjanjian->update(['status_surat' => 'Dibatalkan']);
+        // Return to Draft so Sales can revise
+        $suratPerjanjian->update(['status_surat' => 'Draft']);
 
         return response()->json([
             'success' => true,
-            'message' => 'Surat Perjanjian Kerjasama telah ditolak!'
+            'message' => 'Surat Perjanjian Kerjasama telah ditolak dan dikembalikan ke Sales untuk diperbaiki.'
         ]);
     }
 }

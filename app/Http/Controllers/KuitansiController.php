@@ -16,13 +16,23 @@ class KuitansiController extends Controller
      */
     public function index()
     {
-        // Get statistics for dashboard cards
+        // OPTIMIZED: Get statistics in single query
+        $statsRaw = \DB::table('kuitansis')
+            ->select(
+                \DB::raw('COUNT(*) as total'),
+                \DB::raw('COALESCE(SUM(total_bayar), 0) as total_nilai'),
+                \DB::raw("SUM(CASE WHEN status_kuitansi = 'Draft' THEN 1 ELSE 0 END) as draft"),
+                \DB::raw("SUM(CASE WHEN status_kuitansi = 'Terkirim' THEN 1 ELSE 0 END) as terkirim"),
+                \DB::raw("SUM(CASE WHEN status_kuitansi = 'Lunas' THEN 1 ELSE 0 END) as lunas")
+            )
+            ->first();
+        
         $stats = [
-            'total' => Kuitansi::count(),
-            'draft' => Kuitansi::where('status_kuitansi', 'Draft')->count(),
-            'terkirim' => Kuitansi::where('status_kuitansi', 'Terkirim')->count(),
-            'lunas' => Kuitansi::where('status_kuitansi', 'Lunas')->count(),
-            'total_nilai' => Kuitansi::sum('total_bayar'),
+            'total' => $statsRaw->total ?? 0,
+            'draft' => $statsRaw->draft ?? 0,
+            'terkirim' => $statsRaw->terkirim ?? 0,
+            'lunas' => $statsRaw->lunas ?? 0,
+            'total_nilai' => $statsRaw->total_nilai ?? 0,
         ];
 
         return view('kuitansis.index', compact('stats'));
@@ -193,10 +203,13 @@ class KuitansiController extends Controller
      */
     public function create(Request $request)
     {
-        $salesList = Sales::orderBy('nama_sales')->get();
-        $invoices = Invoice::whereDoesntHave('kuitansi')
-            ->orWhere('status_invoice', 'Lunas')
+        $salesList = Sales::select('id', 'nama_sales')->orderBy('nama_sales')->get();
+        
+        // Limit invoices to recent 100 for performance
+        $invoices = Invoice::select('id', 'no_invoice', 'nama_pelanggan', 'status_pembayaran', 'created_at')
+            ->where('status_pembayaran', '!=', 'Lunas')
             ->orderBy('created_at', 'desc')
+            ->take(100)
             ->get();
         
         // Pre-fill from invoice if specified
@@ -205,13 +218,16 @@ class KuitansiController extends Controller
             $selectedInvoice = Invoice::find($request->invoice_id);
         }
 
-        // Generate kuitansi number
+        // Generate kuitansi number - optimized with single query
         $year = date('Y');
         $month = date('m');
-        $lastKuitansi = Kuitansi::whereYear('created_at', $year)
+        $prefix = 'KTN-' . $year . '-' . $month . '-';
+        $lastKuitansi = Kuitansi::select('no_kuitansi')
+            ->whereYear('created_at', $year)
             ->whereMonth('created_at', $month)
             ->whereNotNull('no_kuitansi')
-            ->orderBy('no_kuitansi', 'desc')
+            ->where('no_kuitansi', 'like', $prefix . '%')
+            ->orderByRaw("CAST(SUBSTRING(no_kuitansi, ?) AS INTEGER) DESC", [strlen($prefix) + 1])
             ->first();
 
         if ($lastKuitansi && preg_match('/KTN-' . $year . '-' . $month . '-(\d+)/', $lastKuitansi->no_kuitansi, $matches)) {
@@ -219,7 +235,7 @@ class KuitansiController extends Controller
         } else {
             $nextNumber = 1;
         }
-        $noKuitansi = 'KTN-' . $year . '-' . $month . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+        $noKuitansi = $prefix . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
 
         return view('kuitansis.create', compact('salesList', 'invoices', 'selectedInvoice', 'noKuitansi'));
     }
@@ -370,8 +386,12 @@ class KuitansiController extends Controller
     public function edit(Kuitansi $kuitansi)
     {
         $kuitansi->load(['sales', 'invoice', 'detailKuitansis']);
-        $salesList = Sales::orderBy('nama_sales')->get();
-        $invoices = Invoice::orderBy('created_at', 'desc')->get();
+        $salesList = Sales::select('id', 'nama_sales')->orderBy('nama_sales')->get();
+        // Only load recent invoices for dropdown, not all
+        $invoices = Invoice::select('id', 'no_invoice', 'nama_pelanggan', 'created_at')
+            ->orderBy('created_at', 'desc')
+            ->take(100)
+            ->get();
         
         return view('kuitansis.edit', compact('kuitansi', 'salesList', 'invoices'));
     }

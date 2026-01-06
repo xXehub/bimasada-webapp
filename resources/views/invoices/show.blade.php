@@ -14,7 +14,21 @@
                     <p class="text-gray-500 dark:text-gray-400 mt-1">{{ $invoice->invoice_number ?? 'INV-' . str_pad($invoice->id, 4, '0', STR_PAD_LEFT) }}</p>
                 </div>
             </div>
-            <div class="flex gap-3">
+            <div class="flex gap-3 flex-wrap">
+                {{-- Marketing Manager: Review Actions --}}
+                @can('review-invoices')
+                    @if($invoice->status_pembayaran !== 'Lunas' && $invoice->status_pembayaran !== 'Revisi')
+                        <x-ui.button variant="warning" onclick="requestRevision()">
+                            <x-slot name="icon">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                </svg>
+                            </x-slot>
+                            Minta Revisi
+                        </x-ui.button>
+                    @endif
+                @endcan
+
                 @can('edit-invoices')
                     <x-ui.button variant="primary" href="{{ route('invoices.edit', $invoice->id) }}">
                         <x-slot name="icon">
@@ -25,7 +39,22 @@
                         Edit Invoice
                     </x-ui.button>
                 @endcan
-                <x-ui.button variant="outline">
+                
+                {{-- Sales: Create Kuitansi when invoice is not fully paid --}}
+                @if($invoice->status_pembayaran !== 'Lunas' && $invoice->remaining_amount > 0)
+                    @can('create-kuitansi')
+                        <x-ui.button variant="success" href="{{ route('kuitansis.createFromInvoice', $invoice->id) }}">
+                            <x-slot name="icon">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                </svg>
+                            </x-slot>
+                            Buat Kuitansi
+                        </x-ui.button>
+                    @endcan
+                @endif
+                
+                <x-ui.button variant="outline" onclick="printInvoice()">
                     <x-slot name="icon">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
@@ -35,6 +64,32 @@
                 </x-ui.button>
             </div>
         </div>
+
+        {{-- Revision Alert Banner --}}
+        @if($invoice->status_pembayaran === 'Revisi')
+        <div class="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-xl p-4">
+            <div class="flex items-start gap-3">
+                <div class="flex-shrink-0">
+                    <svg class="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-sm font-semibold text-orange-800 dark:text-orange-200">Invoice Memerlukan Revisi</h3>
+                    <p class="text-sm text-orange-700 dark:text-orange-300 mt-1">
+                        Marketing Manager telah meminta revisi untuk invoice ini. Silakan periksa dan perbaiki data invoice, kemudian update kembali.
+                    </p>
+                </div>
+                @can('edit-invoices')
+                <a href="{{ route('invoices.edit', $invoice->id) }}" class="flex-shrink-0">
+                    <x-ui.button variant="warning" size="sm">
+                        Edit Invoice
+                    </x-ui.button>
+                </a>
+                @endcan
+            </div>
+        </div>
+        @endif
 
         <!-- Invoice Summary Card -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -47,7 +102,8 @@
                         $statusColors = [
                             'Lunas' => 'from-emerald-500 to-emerald-600',
                             'Belum Lunas' => 'from-amber-500 to-amber-600',
-                            'Cicilan' => 'from-blue-500 to-blue-600'
+                            'Cicilan' => 'from-blue-500 to-blue-600',
+                            'Revisi' => 'from-orange-500 to-orange-600'
                         ];
                         $statusBg = $statusColors[$invoice->status_pembayaran] ?? 'from-gray-500 to-gray-600';
                     @endphp
@@ -423,4 +479,37 @@
             </div>
         </div>
     </div>
+
+    @push('scripts')
+    <script>
+        function printInvoice() {
+            window.print();
+        }
+
+        function requestRevision() {
+            if (confirm('Apakah Anda yakin ingin meminta revisi invoice ini? Invoice akan dikembalikan ke Sales untuk diperbaiki.')) {
+                fetch('{{ route("invoices.requestRevision", $invoice->id) }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.reload();
+                    } else {
+                        alert(data.message || 'Gagal meminta revisi');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Terjadi kesalahan saat memproses permintaan');
+                });
+            }
+        }
+    </script>
+    @endpush
 </x-layout.app>

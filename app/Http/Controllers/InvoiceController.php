@@ -15,17 +15,20 @@ class InvoiceController extends Controller
      */
     public function index(Request $request)
     {
-        // Get sales list for modal
-        $salesList = Sales::all();
+        // Get sales list for modal - only needed columns
+        $salesList = Sales::select('id', 'nama_sales')->get();
         
-        // Get stats for cards (all time or filtered)
-        $statsQuery = Invoice::query();
+        // OPTIMIZED: Get stats in single query using groupBy
+        $statsRaw = Invoice::select('status_pembayaran', \DB::raw('COUNT(*) as count'))
+            ->groupBy('status_pembayaran')
+            ->pluck('count', 'status_pembayaran')
+            ->toArray();
         
         $stats = [
-            'total' => $statsQuery->count(),
-            'paid' => (clone $statsQuery)->where('status_pembayaran', 'Lunas')->count(),
-            'pending' => (clone $statsQuery)->where('status_pembayaran', 'Belum Lunas')->count(),
-            'installment' => (clone $statsQuery)->where('status_pembayaran', 'Cicilan')->count(),
+            'total' => array_sum($statsRaw),
+            'paid' => $statsRaw['Lunas'] ?? 0,
+            'pending' => $statsRaw['Belum Lunas'] ?? 0,
+            'installment' => $statsRaw['Cicilan'] ?? 0,
         ];
 
         return view('invoices.index', compact('salesList', 'stats'));
@@ -75,7 +78,8 @@ class InvoiceController extends Controller
                 $variants = [
                     'Lunas' => 'success',
                     'Belum Lunas' => 'warning',
-                    'Cicilan' => 'info'
+                    'Cicilan' => 'info',
+                    'Revisi' => 'danger'
                 ];
                 return [
                     'status' => $invoice->status_pembayaran,
@@ -106,7 +110,7 @@ class InvoiceController extends Controller
      */
     public function create()
     {
-        $salesList = Sales::all();
+        $salesList = Sales::select('id', 'nama_sales')->get();
         return view('invoices.create', compact('salesList'));
     }
 
@@ -148,7 +152,7 @@ class InvoiceController extends Controller
      */
     public function edit(Invoice $invoice)
     {
-        $salesList = Sales::all();
+        $salesList = Sales::select('id', 'nama_sales')->get();
         return view('invoices.edit', compact('invoice', 'salesList'));
     }
 
@@ -448,5 +452,64 @@ class InvoiceController extends Controller
             });
 
         return response()->json($pksList->values());
+    }
+
+    /**
+     * Request revision for invoice (Marketing Manager only).
+     * Returns invoice to Sales for revision.
+     */
+    public function requestRevision(Request $request, Invoice $invoice)
+    {
+        $validated = $request->validate([
+            'keterangan' => 'nullable|string|max:500',
+        ]);
+
+        // Add revision note to keterangan
+        $revisionNote = $validated['keterangan'] ?? 'Perlu revisi oleh Marketing Manager';
+        $existingNote = $invoice->keterangan ? $invoice->keterangan . "\n\n" : '';
+        $newNote = $existingNote . "[REVISI " . now()->format('d/m/Y H:i') . "]: " . $revisionNote;
+
+        $invoice->update([
+            'status_pembayaran' => 'Revisi',
+            'keterangan' => $newNote,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Invoice telah dikembalikan ke Sales untuk direvisi.',
+        ]);
+    }
+
+    /**
+     * Approve invoice (Marketing Manager only).
+     */
+    public function approveInvoice(Invoice $invoice)
+    {
+        $invoice->update([
+            'status_pembayaran' => 'Belum Lunas',
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Invoice telah disetujui dan siap dikirim ke client.',
+        ]);
+    }
+
+    /**
+     * Update invoice status.
+     */
+    public function updateStatus(Request $request, Invoice $invoice)
+    {
+        $validated = $request->validate([
+            'status_pembayaran' => 'required|in:Lunas,Belum Lunas,Cicilan,Revisi',
+        ]);
+
+        $invoice->update(['status_pembayaran' => $validated['status_pembayaran']]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Status invoice berhasil diperbarui menjadi ' . $validated['status_pembayaran'],
+            'new_status' => $validated['status_pembayaran']
+        ]);
     }
 }

@@ -26,6 +26,7 @@ class RolePermissionSeeder extends Seeder
             'edit-invoices',
             'delete-invoices',
             'export-invoices',
+            'review-invoices', // Marketing Manager can review and request revision
             
             // PKS (Surat Perjanjian) Permissions
             'view-pks',
@@ -66,6 +67,7 @@ class RolePermissionSeeder extends Seeder
             $createdPermissions['edit-invoices'],
             $createdPermissions['delete-invoices'],
             $createdPermissions['export-invoices'],
+            $createdPermissions['review-invoices'],
             // PKS
             $createdPermissions['view-pks'],
             $createdPermissions['create-pks'],

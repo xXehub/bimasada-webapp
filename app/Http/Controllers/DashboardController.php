@@ -32,7 +32,7 @@ class DashboardController extends Controller
     }
 
     /**
-     * Dashboard untuk Sales
+     * Dashboard untuk Sales - OPTIMIZED
      */
     private function salesDashboard()
     {
@@ -40,60 +40,70 @@ class DashboardController extends Controller
         $cacheKey = "dashboard_sales_{$user->id}";
         
         $data = Cache::remember($cacheKey, self::CACHE_TTL, function () use ($user) {
-            // PKS Statistics (milik Sales ini) - using correct column: status_surat
+            // OPTIMIZED: Single query for PKS stats using groupBy
+            $pksStatRaw = DB::table('surat_perjanjians')
+                ->select('status_surat', DB::raw('COUNT(*) as count'))
+                ->where('id_sales', $user->id)
+                ->groupBy('status_surat')
+                ->pluck('count', 'status_surat')
+                ->toArray();
+
             $pksStats = [
-                'total' => SuratPerjanjian::where('id_sales', $user->id)->count(),
-                'draft' => SuratPerjanjian::where('id_sales', $user->id)->where('status_surat', 'Draft')->count(),
-                'pending' => SuratPerjanjian::where('id_sales', $user->id)->where('status_surat', 'Menunggu Persetujuan')->count(),
-                'approved' => SuratPerjanjian::where('id_sales', $user->id)->where('status_surat', 'Disetujui')->count(),
-                'active' => SuratPerjanjian::where('id_sales', $user->id)->where('status_surat', 'Aktif')->count(),
-                'completed' => SuratPerjanjian::where('id_sales', $user->id)->where('status_surat', 'Selesai')->count(),
+                'total' => array_sum($pksStatRaw),
+                'draft' => $pksStatRaw['Draft'] ?? 0,
+                'pending' => $pksStatRaw['Aktif'] ?? 0,
+                'approved' => $pksStatRaw['Disetujui'] ?? 0,
+                'active' => $pksStatRaw['Disetujui'] ?? 0,
+                'completed' => $pksStatRaw['Selesai'] ?? 0,
             ];
 
-            // Invoice Statistics (milik Sales ini) - using correct column: status_pembayaran
+            // OPTIMIZED: Single query for Invoice stats
+            $invoiceStatRaw = DB::table('invoices')
+                ->select('status_pembayaran', DB::raw('COUNT(*) as count'))
+                ->where('id_sales', $user->id)
+                ->groupBy('status_pembayaran')
+                ->pluck('count', 'status_pembayaran')
+                ->toArray();
+
             $invoiceStats = [
-                'total' => Invoice::where('id_sales', $user->id)->count(),
-                'draft' => Invoice::where('id_sales', $user->id)->where('status_pembayaran', 'Draft')->count(),
-                'sent' => Invoice::where('id_sales', $user->id)->where('status_pembayaran', 'Terkirim')->count(),
-                'partial' => Invoice::where('id_sales', $user->id)->where('status_pembayaran', 'Dibayar Sebagian')->count(),
-                'paid' => Invoice::where('id_sales', $user->id)->where('status_pembayaran', 'Lunas')->count(),
-                'overdue' => Invoice::where('id_sales', $user->id)->where('status_pembayaran', 'Jatuh Tempo')->count(),
+                'total' => array_sum($invoiceStatRaw),
+                'draft' => $invoiceStatRaw['Draft'] ?? 0,
+                'sent' => $invoiceStatRaw['Terkirim'] ?? 0,
+                'partial' => $invoiceStatRaw['Dibayar Sebagian'] ?? 0,
+                'paid' => $invoiceStatRaw['Lunas'] ?? 0,
+                'overdue' => $invoiceStatRaw['Jatuh Tempo'] ?? 0,
             ];
 
-            // Kuitansi Statistics - optimized with direct join
-            $kuitansiTotal = DB::table('kuitansis')
+            // OPTIMIZED: Single query for Kuitansi stats
+            $kuitansiData = DB::table('kuitansis')
                 ->join('invoices', 'kuitansis.id_invoice', '=', 'invoices.id')
                 ->where('invoices.id_sales', $user->id)
-                ->count();
-                
-            $kuitansiThisMonth = DB::table('kuitansis')
-                ->join('invoices', 'kuitansis.id_invoice', '=', 'invoices.id')
-                ->where('invoices.id_sales', $user->id)
-                ->whereMonth('kuitansis.tanggal_kuitansi', Carbon::now()->month)
-                ->whereYear('kuitansis.tanggal_kuitansi', Carbon::now()->year)
-                ->count();
+                ->select(
+                    DB::raw('COUNT(*) as total'),
+                    DB::raw('SUM(CASE WHEN EXTRACT(MONTH FROM kuitansis.tanggal_kuitansi) = ? AND EXTRACT(YEAR FROM kuitansis.tanggal_kuitansi) = ? THEN 1 ELSE 0 END) as this_month')
+                )
+                ->setBindings([Carbon::now()->month, Carbon::now()->year])
+                ->first();
 
             $kuitansiStats = [
-                'total' => $kuitansiTotal,
-                'this_month' => $kuitansiThisMonth,
+                'total' => $kuitansiData->total ?? 0,
+                'this_month' => $kuitansiData->this_month ?? 0,
             ];
 
-            // Revenue calculations - using correct column: total_harga
-            $totalRevenue = Invoice::where('id_sales', $user->id)
+            // OPTIMIZED: Revenue in single query
+            $revenueData = DB::table('invoices')
+                ->where('id_sales', $user->id)
                 ->where('status_pembayaran', 'Lunas')
-                ->sum('total_harga');
+                ->select(
+                    DB::raw('COALESCE(SUM(total_harga), 0) as total_revenue'),
+                    DB::raw('COALESCE(SUM(CASE WHEN EXTRACT(MONTH FROM updated_at) = ' . Carbon::now()->month . ' AND EXTRACT(YEAR FROM updated_at) = ' . Carbon::now()->year . ' THEN total_harga ELSE 0 END), 0) as this_month'),
+                    DB::raw('COALESCE(SUM(CASE WHEN EXTRACT(MONTH FROM updated_at) = ' . Carbon::now()->subMonth()->month . ' AND EXTRACT(YEAR FROM updated_at) = ' . Carbon::now()->subMonth()->year . ' THEN total_harga ELSE 0 END), 0) as last_month')
+                )
+                ->first();
 
-            $thisMonthRevenue = Invoice::where('id_sales', $user->id)
-                ->where('status_pembayaran', 'Lunas')
-                ->whereMonth('updated_at', Carbon::now()->month)
-                ->whereYear('updated_at', Carbon::now()->year)
-                ->sum('total_harga');
-
-            $lastMonthRevenue = Invoice::where('id_sales', $user->id)
-                ->where('status_pembayaran', 'Lunas')
-                ->whereMonth('updated_at', Carbon::now()->subMonth()->month)
-                ->whereYear('updated_at', Carbon::now()->subMonth()->year)
-                ->sum('total_harga');
+            $totalRevenue = $revenueData->total_revenue ?? 0;
+            $thisMonthRevenue = $revenueData->this_month ?? 0;
+            $lastMonthRevenue = $revenueData->last_month ?? 0;
 
             $revenueGrowth = $lastMonthRevenue > 0 
                 ? round((($thisMonthRevenue - $lastMonthRevenue) / $lastMonthRevenue) * 100, 1)
@@ -109,71 +119,75 @@ class DashboardController extends Controller
             );
         });
 
-        // Non-cached data (real-time)
+        // Non-cached data (real-time) - OPTIMIZED with select()
         $recentPks = SuratPerjanjian::where('id_sales', $user->id)
+            ->select('id', 'no_surat', 'nama_pelanggan', 'status_surat', 'created_at')
             ->latest()
             ->take(5)
             ->get();
 
         $recentInvoices = Invoice::where('id_sales', $user->id)
+            ->select('id', 'nama_pelanggan', 'status_pembayaran', 'jatuh_tempo', 'created_at')
             ->latest()
             ->take(5)
             ->get();
 
-        // Pending Actions - real-time
+        // Pending Actions - OPTIMIZED: single query per type with select
         $pendingActions = collect();
         
-        // PKS yang perlu disubmit
-        $draftPks = SuratPerjanjian::where('id_sales', $user->id)
+        // PKS Draft
+        SuratPerjanjian::where('id_sales', $user->id)
             ->where('status_surat', 'Draft')
+            ->select('id', 'no_surat', 'created_at')
             ->take(5)
-            ->get();
-        foreach ($draftPks as $pks) {
-            $pendingActions->push([
-                'type' => 'pks_draft',
-                'title' => 'PKS Draft: ' . $pks->no_surat,
-                'description' => 'Kirim untuk persetujuan',
-                'url' => route('surat-perjanjians.show', $pks->id),
-                'priority' => 'medium',
-                'date' => $pks->created_at,
-            ]);
-        }
+            ->get()
+            ->each(function ($pks) use ($pendingActions) {
+                $pendingActions->push([
+                    'type' => 'pks_draft',
+                    'title' => 'PKS Draft: ' . $pks->no_surat,
+                    'description' => 'Kirim untuk persetujuan',
+                    'url' => route('surat-perjanjians.show', $pks->id),
+                    'priority' => 'medium',
+                    'date' => $pks->created_at,
+                ]);
+            });
 
-        // Invoice yang belum dikirim
-        $draftInvoices = Invoice::where('id_sales', $user->id)
+        // Invoice Draft
+        Invoice::where('id_sales', $user->id)
             ->where('status_pembayaran', 'Draft')
+            ->select('id', 'created_at')
             ->take(5)
-            ->get();
-        foreach ($draftInvoices as $inv) {
-            $pendingActions->push([
-                'type' => 'invoice_draft',
-                'title' => 'Invoice Draft: ' . $inv->invoice_number,
-                'description' => 'Kirim ke client',
-                'url' => route('invoices.show', $inv->id),
-                'priority' => 'medium',
-                'date' => $inv->created_at,
-            ]);
-        }
+            ->get()
+            ->each(function ($inv) use ($pendingActions) {
+                $pendingActions->push([
+                    'type' => 'invoice_draft',
+                    'title' => 'Invoice Draft: INV-' . str_pad($inv->id, 4, '0', STR_PAD_LEFT),
+                    'description' => 'Kirim ke client',
+                    'url' => route('invoices.show', $inv->id),
+                    'priority' => 'medium',
+                    'date' => $inv->created_at,
+                ]);
+            });
 
-        // Invoice jatuh tempo
-        $overdueInvoices = Invoice::where('id_sales', $user->id)
+        // Invoice Jatuh Tempo
+        Invoice::where('id_sales', $user->id)
             ->where('status_pembayaran', 'Jatuh Tempo')
+            ->select('id', 'jatuh_tempo')
             ->take(5)
-            ->get();
-        foreach ($overdueInvoices as $inv) {
-            $pendingActions->push([
-                'type' => 'invoice_overdue',
-                'title' => 'Invoice Jatuh Tempo: ' . $inv->invoice_number,
-                'description' => 'Follow up pembayaran',
-                'url' => route('invoices.show', $inv->id),
-                'priority' => 'high',
-                'date' => $inv->jatuh_tempo,
-            ]);
-        }
+            ->get()
+            ->each(function ($inv) use ($pendingActions) {
+                $pendingActions->push([
+                    'type' => 'invoice_overdue',
+                    'title' => 'Invoice Jatuh Tempo: INV-' . str_pad($inv->id, 4, '0', STR_PAD_LEFT),
+                    'description' => 'Follow up pembayaran',
+                    'url' => route('invoices.show', $inv->id),
+                    'priority' => 'high',
+                    'date' => $inv->jatuh_tempo,
+                ]);
+            });
 
         $pendingActions = $pendingActions->sortByDesc('priority')->take(10);
 
-        // Merge cached and non-cached data
         return view('dashboard.sales', array_merge($data, compact(
             'recentPks',
             'recentInvoices',
@@ -182,78 +196,135 @@ class DashboardController extends Controller
     }
 
     /**
-     * Dashboard untuk Marketing Manager
+     * Dashboard untuk Marketing Manager - OPTIMIZED
      */
     private function managerDashboard()
     {
         $cacheKey = "dashboard_manager";
         
         $data = Cache::remember($cacheKey, self::CACHE_TTL, function () {
-            // Overall Statistics - using correct column: status_surat
+            // OPTIMIZED: Single query for PKS stats
+            $pksStatRaw = DB::table('surat_perjanjians')
+                ->select('status_surat', DB::raw('COUNT(*) as count'))
+                ->groupBy('status_surat')
+                ->pluck('count', 'status_surat')
+                ->toArray();
+
             $pksStats = [
-                'total' => SuratPerjanjian::count(),
-                'pending_approval' => SuratPerjanjian::where('status_surat', 'Menunggu Persetujuan')->count(),
-                'approved' => SuratPerjanjian::where('status_surat', 'Disetujui')->count(),
-                'active' => SuratPerjanjian::where('status_surat', 'Aktif')->count(),
-                'completed' => SuratPerjanjian::where('status_surat', 'Selesai')->count(),
-                'cancelled' => SuratPerjanjian::where('status_surat', 'Dibatalkan')->count(),
+                'total' => array_sum($pksStatRaw),
+                'pending_approval' => $pksStatRaw['Aktif'] ?? 0,
+                'approved' => $pksStatRaw['Disetujui'] ?? 0,
+                'active' => $pksStatRaw['Disetujui'] ?? 0,
+                'completed' => $pksStatRaw['Selesai'] ?? 0,
+                'cancelled' => $pksStatRaw['Dibatalkan'] ?? 0,
             ];
 
-            // Invoice Statistics - using correct column: status_pembayaran
+            // OPTIMIZED: Single query for Invoice stats
+            $invoiceStatRaw = DB::table('invoices')
+                ->select('status_pembayaran', DB::raw('COUNT(*) as count'))
+                ->groupBy('status_pembayaran')
+                ->pluck('count', 'status_pembayaran')
+                ->toArray();
+
             $invoiceStats = [
-                'total' => Invoice::count(),
-                'draft' => Invoice::where('status_pembayaran', 'Draft')->count(),
-                'sent' => Invoice::where('status_pembayaran', 'Terkirim')->count(),
-                'partial' => Invoice::where('status_pembayaran', 'Dibayar Sebagian')->count(),
-                'paid' => Invoice::where('status_pembayaran', 'Lunas')->count(),
-                'overdue' => Invoice::where('status_pembayaran', 'Jatuh Tempo')->count(),
+                'total' => array_sum($invoiceStatRaw),
+                'draft' => $invoiceStatRaw['Draft'] ?? 0,
+                'sent' => $invoiceStatRaw['Terkirim'] ?? 0,
+                'partial' => $invoiceStatRaw['Dibayar Sebagian'] ?? 0,
+                'paid' => $invoiceStatRaw['Lunas'] ?? 0,
+                'overdue' => $invoiceStatRaw['Jatuh Tempo'] ?? 0,
             ];
 
-            // Kuitansi Statistics - using correct column: total_bayar, tanggal_kuitansi
+            // OPTIMIZED: Single query for Kuitansi stats
+            $now = Carbon::now();
+            $kuitansiData = DB::table('kuitansis')
+                ->select(
+                    DB::raw('COUNT(*) as total'),
+                    DB::raw('COALESCE(SUM(total_bayar), 0) as total_amount'),
+                    DB::raw('SUM(CASE WHEN EXTRACT(MONTH FROM tanggal_kuitansi) = ' . $now->month . ' AND EXTRACT(YEAR FROM tanggal_kuitansi) = ' . $now->year . ' THEN 1 ELSE 0 END) as this_month')
+                )
+                ->first();
+
             $kuitansiStats = [
-                'total' => Kuitansi::count(),
-                'this_month' => Kuitansi::whereMonth('tanggal_kuitansi', Carbon::now()->month)
-                    ->whereYear('tanggal_kuitansi', Carbon::now()->year)
-                    ->count(),
-                'total_amount' => Kuitansi::sum('total_bayar'),
+                'total' => $kuitansiData->total ?? 0,
+                'this_month' => $kuitansiData->this_month ?? 0,
+                'total_amount' => $kuitansiData->total_amount ?? 0,
             ];
 
-            // Revenue calculations - using correct columns
-            $totalRevenue = Invoice::where('status_pembayaran', 'Lunas')->sum('total_harga');
-            $pendingRevenue = Invoice::whereIn('status_pembayaran', ['Terkirim', 'Dibayar Sebagian'])->sum('total_harga');
+            // OPTIMIZED: Revenue in single query
+            $totalRevenue = DB::table('invoices')
+                ->where('status_pembayaran', 'Lunas')
+                ->sum('total_harga') ?? 0;
+                
+            $pendingRevenue = DB::table('invoices')
+                ->whereIn('status_pembayaran', ['Terkirim', 'Dibayar Sebagian'])
+                ->sum('total_harga') ?? 0;
 
-            $thisMonthRevenue = Kuitansi::whereMonth('tanggal_kuitansi', Carbon::now()->month)
-                ->whereYear('tanggal_kuitansi', Carbon::now()->year)
-                ->sum('total_bayar');
+            $thisMonth = Carbon::now();
+            $lastMonth = Carbon::now()->subMonth();
 
-            $lastMonthRevenue = Kuitansi::whereMonth('tanggal_kuitansi', Carbon::now()->subMonth()->month)
-                ->whereYear('tanggal_kuitansi', Carbon::now()->subMonth()->year)
-                ->sum('total_bayar');
+            $revenueByMonth = DB::table('kuitansis')
+                ->select(
+                    DB::raw('COALESCE(SUM(CASE WHEN EXTRACT(MONTH FROM tanggal_kuitansi) = ' . $thisMonth->month . ' AND EXTRACT(YEAR FROM tanggal_kuitansi) = ' . $thisMonth->year . ' THEN total_bayar ELSE 0 END), 0) as this_month'),
+                    DB::raw('COALESCE(SUM(CASE WHEN EXTRACT(MONTH FROM tanggal_kuitansi) = ' . $lastMonth->month . ' AND EXTRACT(YEAR FROM tanggal_kuitansi) = ' . $lastMonth->year . ' THEN total_bayar ELSE 0 END), 0) as last_month')
+                )
+                ->first();
+
+            $thisMonthRevenue = $revenueByMonth->this_month ?? 0;
+            $lastMonthRevenue = $revenueByMonth->last_month ?? 0;
 
             $revenueGrowth = $lastMonthRevenue > 0 
                 ? round((($thisMonthRevenue - $lastMonthRevenue) / $lastMonthRevenue) * 100, 1)
                 : ($thisMonthRevenue > 0 ? 100 : 0);
 
-            // Monthly trend (last 6 months)
+            // OPTIMIZED: Monthly trend in SINGLE query instead of 18 queries
+            $sixMonthsAgo = Carbon::now()->subMonths(5)->startOfMonth();
+            
+            $monthlyPks = DB::table('surat_perjanjians')
+                ->select(
+                    DB::raw("TO_CHAR(created_at, 'YYYY-MM') as month_key"),
+                    DB::raw('COUNT(*) as count')
+                )
+                ->where('created_at', '>=', $sixMonthsAgo)
+                ->groupBy(DB::raw("TO_CHAR(created_at, 'YYYY-MM')"))
+                ->pluck('count', 'month_key')
+                ->toArray();
+
+            $monthlyInvoices = DB::table('invoices')
+                ->select(
+                    DB::raw("TO_CHAR(created_at, 'YYYY-MM') as month_key"),
+                    DB::raw('COUNT(*) as count')
+                )
+                ->where('created_at', '>=', $sixMonthsAgo)
+                ->groupBy(DB::raw("TO_CHAR(created_at, 'YYYY-MM')"))
+                ->pluck('count', 'month_key')
+                ->toArray();
+
+            $monthlyRevenue = DB::table('kuitansis')
+                ->select(
+                    DB::raw("TO_CHAR(tanggal_kuitansi, 'YYYY-MM') as month_key"),
+                    DB::raw('COALESCE(SUM(total_bayar), 0) as total')
+                )
+                ->where('tanggal_kuitansi', '>=', $sixMonthsAgo)
+                ->groupBy(DB::raw("TO_CHAR(tanggal_kuitansi, 'YYYY-MM')"))
+                ->pluck('total', 'month_key')
+                ->toArray();
+
             $monthlyTrend = collect();
             for ($i = 5; $i >= 0; $i--) {
                 $month = Carbon::now()->subMonths($i);
+                $key = $month->format('Y-m');
                 $monthlyTrend->push([
                     'month' => $month->format('M Y'),
-                    'pks' => SuratPerjanjian::whereMonth('created_at', $month->month)
-                        ->whereYear('created_at', $month->year)
-                        ->count(),
-                    'invoices' => Invoice::whereMonth('created_at', $month->month)
-                        ->whereYear('created_at', $month->year)
-                        ->count(),
-                    'revenue' => Kuitansi::whereMonth('tanggal_kuitansi', $month->month)
-                        ->whereYear('tanggal_kuitansi', $month->year)
-                        ->sum('total_bayar'),
+                    'pks' => $monthlyPks[$key] ?? 0,
+                    'invoices' => $monthlyInvoices[$key] ?? 0,
+                    'revenue' => $monthlyRevenue[$key] ?? 0,
                 ]);
             }
 
-            // Sales Performance - using correct columns
+            // OPTIMIZED: Sales Performance with single query
             $salesPerformance = User::role('Sales')
+                ->select('users.id', 'users.name')
                 ->withCount([
                     'suratPerjanjians as pks_count',
                     'suratPerjanjians as pks_approved_count' => fn($q) => $q->where('status_surat', 'Disetujui'),
@@ -276,17 +347,17 @@ class DashboardController extends Controller
             );
         });
 
-        // Non-cached data - real time
-        $pendingPks = SuratPerjanjian::where('status_surat', 'Menunggu Persetujuan')
+        // Non-cached data - real time with select() for speed
+        $pendingPks = SuratPerjanjian::where('status_surat', 'Aktif')
+            ->with('sales:id,name')
+            ->select('id', 'no_surat', 'nama_pelanggan', 'id_sales', 'created_at')
             ->latest()
             ->take(10)
             ->get();
 
-        // Recent Activity - real time
-        $recentActivity = collect();
-
-        // Recent PKS
-        $recentPksActivity = SuratPerjanjian::latest()
+        // Recent Activity - OPTIMIZED with select()
+        $recentPksActivity = SuratPerjanjian::select('id', 'no_surat', 'nama_pelanggan', 'status_surat', 'created_at')
+            ->latest()
             ->take(5)
             ->get()
             ->map(fn($pks) => [
@@ -298,21 +369,20 @@ class DashboardController extends Controller
                 'date' => $pks->created_at,
             ]);
 
-        // Recent Invoices
-        $recentInvoiceActivity = Invoice::latest()
+        $recentInvoiceActivity = Invoice::select('id', 'nama_pelanggan', 'status_pembayaran', 'created_at')
+            ->latest()
             ->take(5)
             ->get()
             ->map(fn($inv) => [
                 'type' => 'invoice',
-                'title' => 'Invoice: ' . $inv->invoice_number,
+                'title' => 'Invoice: INV-' . str_pad($inv->id, 4, '0', STR_PAD_LEFT),
                 'description' => 'Client: ' . ($inv->nama_pelanggan ?? 'Unknown'),
                 'status' => $inv->status_pembayaran,
                 'url' => route('invoices.show', $inv->id),
                 'date' => $inv->created_at,
             ]);
 
-        // Recent Kuitansi
-        $recentKuitansiActivity = Kuitansi::with('invoice')
+        $recentKuitansiActivity = Kuitansi::select('id', 'no_kuitansi', 'total_bayar', 'status_kuitansi', 'created_at')
             ->latest()
             ->take(5)
             ->get()

@@ -14,7 +14,43 @@
                     <p class="text-gray-500 dark:text-gray-400 mt-1">{{ $suratPerjanjian->no_surat ?? 'PKS-' . str_pad($suratPerjanjian->id, 4, '0', STR_PAD_LEFT) }}</p>
                 </div>
             </div>
-            <div class="flex gap-3">
+            <div class="flex gap-3 flex-wrap">
+                {{-- Sales: Submit for Approval when PKS is Draft --}}
+                @if($suratPerjanjian->status_surat === 'Draft')
+                    @can('edit-pks')
+                        <x-ui.button variant="success" onclick="submitForApproval()">
+                            <x-slot name="icon">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </x-slot>
+                            Kirim untuk Persetujuan
+                        </x-ui.button>
+                    @endcan
+                @endif
+
+                {{-- Marketing Manager: Approve/Reject when PKS is Aktif (pending approval) --}}
+                @if($suratPerjanjian->status_surat === 'Aktif')
+                    @can('approve-pks')
+                        <x-ui.button variant="success" onclick="approvePKS()">
+                            <x-slot name="icon">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                            </x-slot>
+                            Setujui PKS
+                        </x-ui.button>
+                        <x-ui.button variant="danger" onclick="rejectPKS()">
+                            <x-slot name="icon">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </x-slot>
+                            Tolak
+                        </x-ui.button>
+                    @endcan
+                @endif
+
                 @can('edit-pks')
                     <x-ui.button variant="primary" href="{{ route('surat-perjanjians.edit', $suratPerjanjian->id) }}">
                         <x-slot name="icon">
@@ -25,7 +61,7 @@
                         Edit PKS
                     </x-ui.button>
                 @endcan
-                <x-ui.button variant="outline">
+                <x-ui.button variant="outline" onclick="printPKS()">
                     <x-slot name="icon">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
@@ -490,6 +526,40 @@
 
     @push('scripts')
     <script>
+        function submitForApproval() {
+            Modal.confirm({
+                title: 'Kirim untuk Persetujuan',
+                message: 'Apakah Anda yakin ingin mengirim PKS "{{ $suratPerjanjian->no_surat ?? 'PKS-' . str_pad($suratPerjanjian->id, 4, '0', STR_PAD_LEFT) }}" untuk persetujuan Marketing Manager?',
+                confirmText: 'Ya, Kirim',
+                cancelText: 'Batal',
+                variant: 'primary',
+                onConfirm: () => {
+                    fetch('{{ route('surat-perjanjians.updateStatus', $suratPerjanjian) }}', {
+                        method: 'PATCH',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ status_surat: 'Aktif' })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Notification.success('Berhasil!', 'PKS berhasil dikirim untuk persetujuan');
+                            setTimeout(() => window.location.reload(), 1500);
+                        } else {
+                            Notification.error('Gagal!', data.message || 'Gagal mengirim PKS');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Notification.error('Error!', 'Terjadi kesalahan');
+                    });
+                }
+            });
+        }
+
         function approvePKS() {
             Modal.confirm({
                 title: 'Setujui PKS',
@@ -521,6 +591,43 @@
                     });
                 }
             });
+        }
+
+        function rejectPKS() {
+            Modal.confirm({
+                title: 'Tolak PKS',
+                message: 'Apakah Anda yakin ingin menolak PKS "{{ $suratPerjanjian->no_surat ?? 'PKS-' . str_pad($suratPerjanjian->id, 4, '0', STR_PAD_LEFT) }}"? PKS akan dikembalikan ke Sales untuk diperbaiki.',
+                confirmText: 'Ya, Tolak',
+                cancelText: 'Batal',
+                variant: 'danger',
+                onConfirm: () => {
+                    fetch('{{ route('surat-perjanjians.reject', $suratPerjanjian) }}', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Notification.warning('Ditolak!', data.message || 'PKS telah ditolak');
+                            setTimeout(() => window.location.reload(), 1500);
+                        } else {
+                            Notification.error('Gagal!', data.message || 'Gagal menolak PKS');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Notification.error('Error!', 'Terjadi kesalahan saat menolak PKS');
+                    });
+                }
+            });
+        }
+
+        function printPKS() {
+            window.open('{{ route('surat-perjanjians.show', $suratPerjanjian->id) }}?print=1', '_blank');
         }
     </script>
     @endpush
