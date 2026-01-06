@@ -224,7 +224,7 @@
             <p>Saya yang bertanda tangan di bawah ini :</p>
         </div>
 
-        <!-- Pihak Pertama -->
+        <!-- Pihak Pertama (PT. BIMASADA JAYA PERSADA - info tetap) -->
         <div class="party">
             <div class="party-details">
                 <table>
@@ -236,19 +236,19 @@
                     <tr>
                         <td>Alamat</td>
                         <td>:</td>
-                        <td>{{ $pks->alamat_pihak_pertama ?? ($pks->alamat ?? '-') }}</td>
+                        <td>Pergudangan Mutiara Citra Sejati Blok D10, Jl. Raya Manukan Kulon 60, Tandes, Surabaya - Jawa Timur</td>
                     </tr>
                     <tr>
                         <td>No. Telepon</td>
                         <td>:</td>
-                        <td>{{ $pks->telepon_pihak_pertama ?? ($pks->no_telp ?? '-') }}</td>
+                        <td>(031) 7421 500 / 081 1310 0081</td>
                     </tr>
                 </table>
             </div>
             <div class="party-role">Yang mana selanjutnya akan disebut sebagai <strong>Pihak Pertama</strong>.</div>
         </div>
 
-        <!-- Pihak Kedua -->
+        <!-- Pihak Kedua (Pelanggan - dari database) -->
         <div class="party">
             <div class="party-details">
                 <table>
@@ -260,12 +260,12 @@
                     <tr>
                         <td>Alamat</td>
                         <td>:</td>
-                        <td>{{ $pks->alamat_pihak_kedua ?? '-' }}</td>
+                        <td>{{ $pks->alamat_pelanggan ?? '-' }}</td>
                     </tr>
                     <tr>
                         <td>No. Telepon</td>
                         <td>:</td>
-                        <td>{{ $pks->telepon_pihak_kedua ?? '-' }}</td>
+                        <td>{{ $pks->no_telp_pelanggan ?? '-' }}</td>
                     </tr>
                 </table>
             </div>
@@ -294,7 +294,7 @@
             <div class="pasal-title">PASAL 2</div>
             <div class="pasal-content">
                 Jangka waktu perjanjian ini berlaku sejak tanggal
-                <strong>{{ $pks->tanggal_mulai ? \Carbon\Carbon::parse($pks->tanggal_mulai)->translatedFormat('d F Y') : '-' }}</strong>
+                <strong>{{ $pks->tanggal_surat ? \Carbon\Carbon::parse($pks->tanggal_surat)->translatedFormat('d F Y') : '-' }}</strong>
                 sampai dengan tanggal
                 <strong>{{ $pks->tanggal_selesai ? \Carbon\Carbon::parse($pks->tanggal_selesai)->translatedFormat('d F Y') : '-' }}</strong>.
             </div>
