@@ -5,200 +5,182 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kuitansi {{ $kuitansi->no_kuitansi }}</title>
     <style>
+        @page {
+            size: A4;
+            margin: 1.5cm;
+        }
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
         body {
-            font-family: 'DejaVu Sans', sans-serif;
-            font-size: 12px;
-            line-height: 1.5;
-            color: #333;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 11pt;
+            line-height: 1.4;
+            color: #000;
             background: #fff;
         }
         .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 30px;
+            max-width: 100%;
         }
         .header {
-            display: table;
-            width: 100%;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #10b981;
+            text-align: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 3px double #000;
         }
-        .company-info {
-            display: table-cell;
-            width: 60%;
-            vertical-align: middle;
-        }
-        .company-info h1 {
-            font-size: 22px;
-            color: #10b981;
-            margin-bottom: 5px;
-        }
-        .company-info p {
-            font-size: 10px;
-            color: #666;
-        }
-        .receipt-title {
-            display: table-cell;
-            width: 40%;
-            text-align: right;
-            vertical-align: middle;
-        }
-        .receipt-title h2 {
-            font-size: 28px;
-            color: #333;
+        .company-name {
+            font-size: 16pt;
+            font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 2px;
         }
-        .receipt-title .receipt-number {
-            font-size: 14px;
-            color: #10b981;
+        .company-address {
+            font-size: 10pt;
+            margin-top: 3px;
+        }
+        .document-title {
+            text-align: center;
+            margin: 15px 0;
+        }
+        .document-title h1 {
+            font-size: 14pt;
+            text-transform: uppercase;
             font-weight: bold;
+            text-decoration: underline;
+            letter-spacing: 2px;
+        }
+        .document-number {
+            font-size: 11pt;
             margin-top: 5px;
         }
-        .receipt-info {
-            display: table;
-            width: 100%;
-            margin-bottom: 30px;
-            background: #f8fafc;
-            padding: 20px;
-            border-radius: 8px;
+        .receipt-content {
+            margin: 20px 0;
         }
-        .info-left, .info-right {
-            display: table-cell;
-            width: 50%;
-            vertical-align: top;
-        }
-        .info-block {
-            margin-bottom: 12px;
-        }
-        .info-block label {
-            font-size: 10px;
-            text-transform: uppercase;
-            color: #999;
-            display: block;
-            margin-bottom: 3px;
-        }
-        .info-block span {
-            font-size: 12px;
-            color: #333;
-            font-weight: bold;
-        }
-        .amount-section {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-            padding: 30px;
-            text-align: center;
-            border-radius: 10px;
-            margin-bottom: 30px;
-        }
-        .amount-section label {
-            font-size: 12px;
-            text-transform: uppercase;
-            opacity: 0.9;
-            display: block;
+        .info-row {
             margin-bottom: 10px;
         }
-        .amount-section .amount {
-            font-size: 32px;
+        .info-row table {
+            width: 100%;
+        }
+        .info-row td {
+            padding: 5px 0;
+            vertical-align: top;
+        }
+        .info-row td:first-child {
+            width: 180px;
+        }
+        .info-row td:nth-child(2) {
+            width: 15px;
+            text-align: center;
+        }
+        .amount-box {
+            background: #f5f5f5;
+            border: 2px solid #000;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .amount-label {
+            font-size: 10pt;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+        .amount-value {
+            font-size: 18pt;
             font-weight: bold;
             letter-spacing: 1px;
         }
-        .amount-section .amount-words {
-            font-size: 11px;
+        .amount-words {
+            font-size: 11pt;
             font-style: italic;
-            opacity: 0.9;
             margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed #000;
         }
         .details-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 30px;
+            margin: 15px 0;
         }
         .details-table th {
-            background: #10b981;
-            color: white;
-            padding: 12px 15px;
-            text-align: left;
-            font-size: 11px;
-            text-transform: uppercase;
+            background: #f0f0f0;
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 10pt;
         }
         .details-table td {
-            padding: 12px 15px;
-            border-bottom: 1px solid #eee;
+            border: 1px solid #000;
+            padding: 8px;
+            font-size: 10pt;
         }
-        .payment-method {
-            display: inline-block;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 11px;
+        .details-table .text-center {
+            text-align: center;
+        }
+        .details-table .text-right {
+            text-align: right;
+        }
+        .payment-info {
+            margin: 15px 0;
+            padding: 10px;
+            border: 1px solid #000;
+        }
+        .payment-info table {
+            width: 100%;
+        }
+        .payment-info td {
+            padding: 5px;
+        }
+        .payment-info td:first-child {
+            width: 150px;
+        }
+        .notes {
+            margin: 15px 0;
+            padding: 10px;
+            background: #fffacd;
+            border: 1px solid #000;
+        }
+        .notes-title {
             font-weight: bold;
-            text-transform: uppercase;
-            background: #dbeafe;
-            color: #1e40af;
+            margin-bottom: 5px;
+        }
+        .signature-section {
+            margin-top: 30px;
+        }
+        .signature-table {
+            width: 100%;
+        }
+        .signature-box {
+            width: 50%;
+            text-align: center;
+            vertical-align: top;
+            padding: 10px;
+        }
+        .signature-space {
+            height: 60px;
+        }
+        .signature-name {
+            font-weight: bold;
+            border-top: 1px solid #000;
+            padding-top: 5px;
+            display: inline-block;
+            min-width: 150px;
         }
         .status-badge {
             display: inline-block;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 11px;
+            padding: 3px 10px;
+            border: 1px solid #000;
+            font-size: 9pt;
             font-weight: bold;
-            text-transform: uppercase;
-        }
-        .status-lunas { background: #dcfce7; color: #166534; }
-        .status-draft { background: #f3f4f6; color: #374151; }
-        .notes {
-            background: #fffbeb;
-            border-left: 4px solid #f59e0b;
-            padding: 15px;
-            margin-bottom: 30px;
-        }
-        .notes h4 {
-            font-size: 11px;
-            text-transform: uppercase;
-            color: #b45309;
-            margin-bottom: 8px;
-        }
-        .signature-section {
-            display: table;
-            width: 100%;
-            margin-top: 50px;
-        }
-        .signature-box {
-            display: table-cell;
-            width: 50%;
-            text-align: center;
-            padding: 20px;
-        }
-        .signature-line {
-            border-top: 1px solid #333;
-            margin-top: 70px;
-            padding-top: 10px;
-        }
-        .footer {
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-            text-align: center;
-            color: #999;
-            font-size: 10px;
         }
         .invoice-ref {
-            background: #f0f9ff;
-            border: 1px solid #bae6fd;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-        .invoice-ref h4 {
-            font-size: 11px;
-            color: #0369a1;
-            margin-bottom: 5px;
+            background: #f0f8ff;
+            border: 1px solid #000;
+            padding: 10px;
+            margin: 15px 0;
         }
     </style>
 </head>
@@ -206,126 +188,128 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <div class="company-info">
-                <h1>PT BIMASADA</h1>
-                <p>Jl. Contoh Alamat No. 123</p>
-                <p>Jakarta, Indonesia 12345</p>
-                <p>Telp: (021) 123-4567 | Email: info@bimasada.com</p>
-            </div>
-            <div class="receipt-title">
-                <h2>Kuitansi</h2>
-                <div class="receipt-number">{{ $kuitansi->no_kuitansi }}</div>
-                <div style="margin-top: 10px;">
-                    <span class="status-badge status-{{ strtolower($kuitansi->status_kuitansi) }}">
-                        {{ $kuitansi->status_kuitansi }}
-                    </span>
-                </div>
+            <div class="company-name">PT. BIMASADA GELORA MEDIA</div>
+            <div class="company-address">
+                Jl. Contoh Alamat No. 123, Jakarta, Indonesia<br>
+                Telp: (021) 123-4567 | Email: info@bimasada.com
             </div>
         </div>
 
-        <!-- Receipt Info -->
-        <div class="receipt-info">
-            <div class="info-left">
-                <div class="info-block">
-                    <label>Diterima Dari</label>
-                    <span>{{ $kuitansi->nama_pelanggan }}</span>
-                </div>
-                <div class="info-block">
-                    <label>Alamat</label>
-                    <span>{{ $kuitansi->alamat ?? '-' }}</span>
-                </div>
-                <div class="info-block">
-                    <label>Telepon</label>
-                    <span>{{ $kuitansi->no_telp ?? '-' }}</span>
-                </div>
-            </div>
-            <div class="info-right">
-                <div class="info-block">
-                    <label>Tanggal</label>
-                    <span>{{ $kuitansi->tanggal_kuitansi->format('d F Y') }}</span>
-                </div>
-                <div class="info-block">
-                    <label>Metode Pembayaran</label>
-                    <span class="payment-method">{{ $kuitansi->invoice_pembayaran }}</span>
-                </div>
-                <div class="info-block">
-                    <label>Sales</label>
-                    <span>{{ $kuitansi->sales->nama_sales ?? '-' }}</span>
-                </div>
+        <!-- Document Title -->
+        <div class="document-title">
+            <h1>Kuitansi</h1>
+            <div class="document-number">No: {{ $kuitansi->no_kuitansi }}</div>
+        </div>
+
+        <!-- Receipt Content -->
+        <div class="receipt-content">
+            <div class="info-row">
+                <table>
+                    <tr>
+                        <td>Sudah Terima Dari</td>
+                        <td>:</td>
+                        <td><strong>{{ $kuitansi->nama_penyetor ?? $kuitansi->invoice->nama_pelanggan ?? '-' }}</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Alamat</td>
+                        <td>:</td>
+                        <td>{{ $kuitansi->alamat_penyetor ?? $kuitansi->invoice->alamat ?? '-' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Untuk Pembayaran</td>
+                        <td>:</td>
+                        <td>{{ $kuitansi->keterangan ?? 'Pembayaran Invoice ' . ($kuitansi->invoice->no_invoice ?? '-') }}</td>
+                    </tr>
+                </table>
             </div>
         </div>
 
-        <!-- Invoice Reference -->
-        @if($kuitansi->invoice)
-        <div class="invoice-ref">
-            <h4>Referensi Invoice</h4>
-            <p>
-                <strong>{{ $kuitansi->invoice->no_invoice ?? 'INV-' . str_pad($kuitansi->invoice->id, 4, '0', STR_PAD_LEFT) }}</strong>
-                - {{ $kuitansi->invoice->nama_pelanggan }}
-            </p>
-        </div>
-        @endif
-
-        <!-- Amount Section -->
-        <div class="amount-section">
-            <label>Jumlah Pembayaran</label>
-            <div class="amount">Rp {{ number_format($kuitansi->total_bayar, 0, ',', '.') }}</div>
+        <!-- Amount Box -->
+        <div class="amount-box">
+            <div class="amount-label">Jumlah Uang</div>
+            <div class="amount-value">Rp {{ number_format($kuitansi->jumlah_bayar ?? 0, 0, ',', '.') }}</div>
             <div class="amount-words">
-                {{ ucwords(\App\Helpers\Terbilang::convert($kuitansi->total_bayar)) }} Rupiah
+                <strong>Terbilang:</strong> {{ ucwords(App\Helpers\Terbilang::convert($kuitansi->jumlah_bayar ?? 0)) }} Rupiah
             </div>
         </div>
 
-        <!-- Payment Details -->
+        <!-- Details Table -->
         @if($kuitansi->detailKuitansis && $kuitansi->detailKuitansis->count() > 0)
         <table class="details-table">
             <thead>
                 <tr>
                     <th style="width: 40px;">No</th>
                     <th>Keterangan</th>
-                    <th style="width: 120px; text-align: right;">Jumlah</th>
+                    <th style="width: 120px;">Jumlah</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach($kuitansi->detailKuitansis as $index => $item)
+                @foreach($kuitansi->detailKuitansis as $index => $detail)
                 <tr>
-                    <td>{{ $index + 1 }}</td>
-                    <td>{{ $item->keterangan ?? '-' }}</td>
-                    <td style="text-align: right;">Rp {{ number_format($item->jumlah ?? 0, 0, ',', '.') }}</td>
+                    <td class="text-center">{{ $index + 1 }}</td>
+                    <td>{{ $detail->keterangan ?? 'Pembayaran' }}</td>
+                    <td class="text-right">Rp {{ number_format($detail->jumlah ?? 0, 0, ',', '.') }}</td>
                 </tr>
                 @endforeach
             </tbody>
         </table>
         @endif
 
+        <!-- Payment Info -->
+        <div class="payment-info">
+            <table>
+                <tr>
+                    <td>Tanggal Pembayaran</td>
+                    <td>:</td>
+                    <td><strong>{{ $kuitansi->tanggal_bayar ? \Carbon\Carbon::parse($kuitansi->tanggal_bayar)->translatedFormat('d F Y') : now()->translatedFormat('d F Y') }}</strong></td>
+                </tr>
+                <tr>
+                    <td>Metode Pembayaran</td>
+                    <td>:</td>
+                    <td><strong>{{ $kuitansi->metode_pembayaran ?? 'Tunai' }}</strong></td>
+                </tr>
+                <tr>
+                    <td>Status</td>
+                    <td>:</td>
+                    <td><span class="status-badge">{{ $kuitansi->status_kuitansi ?? 'Lunas' }}</span></td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Invoice Reference -->
+        @if($kuitansi->invoice)
+        <div class="invoice-ref">
+            <strong>Referensi Invoice:</strong> {{ $kuitansi->invoice->no_invoice ?? 'INV-' . str_pad($kuitansi->invoice->id, 4, '0', STR_PAD_LEFT) }}
+            <br>
+            <small>Tanggal Invoice: {{ $kuitansi->invoice->tanggal_invoice->translatedFormat('d F Y') }}</small>
+        </div>
+        @endif
+
         <!-- Notes -->
-        @if($kuitansi->keterangan)
+        @if($kuitansi->catatan)
         <div class="notes">
-            <h4>Keterangan</h4>
-            <p>{{ $kuitansi->keterangan }}</p>
+            <div class="notes-title">Catatan:</div>
+            <p>{{ $kuitansi->catatan }}</p>
         </div>
         @endif
 
         <!-- Signature Section -->
         <div class="signature-section">
-            <div class="signature-box">
-                <p>Penerima,</p>
-                <div class="signature-line">
-                    <p>{{ $kuitansi->nama_pelanggan }}</p>
-                </div>
-            </div>
-            <div class="signature-box">
-                <p>Kasir/Petugas,</p>
-                <div class="signature-line">
-                    <p>{{ $kuitansi->sales->nama_sales ?? '-' }}</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Footer -->
-        <div class="footer">
-            <p>Kuitansi ini sebagai bukti pembayaran yang sah</p>
-            <p>Dokumen ini dicetak pada {{ now()->format('d F Y, H:i') }}</p>
-            <p>PT BIMASADA - Receipt Management System</p>
+            <table class="signature-table">
+                <tr>
+                    <td class="signature-box">
+                        Penyetor,
+                        <div class="signature-space"></div>
+                        <div class="signature-name">{{ $kuitansi->nama_penyetor ?? $kuitansi->invoice->nama_pelanggan ?? '...................' }}</div>
+                    </td>
+                    <td class="signature-box">
+                        Jakarta, {{ $kuitansi->tanggal_bayar ? \Carbon\Carbon::parse($kuitansi->tanggal_bayar)->translatedFormat('d F Y') : now()->translatedFormat('d F Y') }}<br>
+                        Penerima,
+                        <div class="signature-space"></div>
+                        <div class="signature-name">{{ $kuitansi->nama_penerima ?? 'PT. BIMASADA GELORA MEDIA' }}</div>
+                    </td>
+                </tr>
+            </table>
         </div>
     </div>
 </body>

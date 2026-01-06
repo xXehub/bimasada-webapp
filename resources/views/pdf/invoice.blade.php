@@ -5,172 +5,161 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invoice {{ $invoice->no_invoice ?? 'INV-' . str_pad($invoice->id, 4, '0', STR_PAD_LEFT) }}</title>
     <style>
+        @page {
+            size: A4;
+            margin: 1.5cm;
+        }
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
         body {
-            font-family: 'DejaVu Sans', sans-serif;
-            font-size: 12px;
-            line-height: 1.5;
-            color: #333;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 11pt;
+            line-height: 1.4;
+            color: #000;
             background: #fff;
         }
         .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
+            max-width: 100%;
         }
         .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #3b82f6;
+            text-align: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 3px double #000;
         }
-        .company-info h1 {
-            font-size: 24px;
-            color: #3b82f6;
-            margin-bottom: 5px;
-        }
-        .company-info p {
-            font-size: 11px;
-            color: #666;
-        }
-        .invoice-title {
-            text-align: right;
-        }
-        .invoice-title h2 {
-            font-size: 28px;
-            color: #333;
+        .company-name {
+            font-size: 16pt;
+            font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 2px;
         }
-        .invoice-title .invoice-number {
-            font-size: 14px;
-            color: #3b82f6;
+        .company-address {
+            font-size: 10pt;
+            margin-top: 3px;
+        }
+        .document-title {
+            text-align: center;
+            margin: 15px 0;
+        }
+        .document-title h1 {
+            font-size: 14pt;
+            text-transform: uppercase;
             font-weight: bold;
+            text-decoration: underline;
+            letter-spacing: 2px;
+        }
+        .document-number {
+            font-size: 11pt;
             margin-top: 5px;
         }
-        .invoice-info {
-            display: table;
-            width: 100%;
-            margin-bottom: 30px;
-        }
-        .info-left, .info-right {
-            display: table-cell;
-            width: 50%;
-            vertical-align: top;
-        }
-        .info-right {
-            text-align: right;
-        }
-        .info-block {
+        .info-section {
             margin-bottom: 15px;
         }
-        .info-block label {
-            font-size: 10px;
-            text-transform: uppercase;
-            color: #999;
-            display: block;
-            margin-bottom: 3px;
-        }
-        .info-block span {
-            font-size: 12px;
-            color: #333;
-        }
-        table.items {
+        .info-table {
             width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 30px;
         }
-        table.items th {
-            background: #3b82f6;
-            color: white;
-            padding: 12px 15px;
-            text-align: left;
-            font-size: 11px;
-            text-transform: uppercase;
+        .info-table td {
+            padding: 3px 0;
+            vertical-align: top;
         }
-        table.items th:last-child,
-        table.items td:last-child {
+        .info-left {
+            width: 50%;
+        }
+        .info-right {
+            width: 50%;
             text-align: right;
         }
-        table.items td {
-            padding: 12px 15px;
-            border-bottom: 1px solid #eee;
+        .info-label {
+            display: inline-block;
+            width: 100px;
         }
-        table.items tr:nth-child(even) {
-            background: #f8fafc;
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
         }
-        .totals {
+        .items-table th {
+            background: #f0f0f0;
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 10pt;
+        }
+        .items-table td {
+            border: 1px solid #000;
+            padding: 8px;
+            font-size: 10pt;
+        }
+        .items-table .text-center {
+            text-align: center;
+        }
+        .items-table .text-right {
+            text-align: right;
+        }
+        .total-section {
+            margin: 15px 0;
+        }
+        .total-table {
             width: 300px;
             margin-left: auto;
         }
-        .totals table {
-            width: 100%;
+        .total-table td {
+            padding: 5px;
         }
-        .totals td {
-            padding: 8px 0;
-        }
-        .totals td:last-child {
+        .total-table td:last-child {
             text-align: right;
             font-weight: bold;
         }
-        .totals .grand-total {
-            font-size: 16px;
-            color: #3b82f6;
-            border-top: 2px solid #3b82f6;
-            padding-top: 10px;
+        .total-table .grand-total {
+            border-top: 2px solid #000;
+            font-size: 12pt;
         }
-        .status-badge {
-            display: inline-block;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-        .status-lunas { background: #dcfce7; color: #166534; }
-        .status-belum { background: #fef9c3; color: #854d0e; }
-        .status-cicilan { background: #dbeafe; color: #1e40af; }
-        .footer {
-            margin-top: 50px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-            text-align: center;
-            color: #999;
-            font-size: 10px;
+        .terbilang {
+            background: #f5f5f5;
+            border: 1px solid #000;
+            padding: 10px;
+            margin: 15px 0;
+            font-style: italic;
         }
         .notes {
-            background: #f8fafc;
-            padding: 15px;
-            border-radius: 5px;
-            margin-top: 20px;
+            margin: 15px 0;
         }
-        .notes h4 {
-            font-size: 11px;
-            text-transform: uppercase;
-            color: #666;
-            margin-bottom: 10px;
+        .notes-title {
+            font-weight: bold;
+            margin-bottom: 5px;
         }
         .signature-section {
-            margin-top: 50px;
-            display: table;
+            margin-top: 25px;
+        }
+        .signature-table {
             width: 100%;
         }
         .signature-box {
-            display: table-cell;
             width: 33%;
             text-align: center;
-            padding: 20px;
+            vertical-align: top;
+            padding: 10px;
         }
-        .signature-line {
-            border-top: 1px solid #333;
-            margin-top: 60px;
-            padding-top: 10px;
+        .signature-space {
+            height: 50px;
+        }
+        .signature-name {
+            font-weight: bold;
+            border-top: 1px solid #000;
+            padding-top: 5px;
+            display: inline-block;
+            min-width: 120px;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border: 1px solid #000;
+            font-size: 9pt;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -178,145 +167,152 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <div class="company-info">
-                <h1>PT BIMASADA</h1>
-                <p>Jl. Contoh Alamat No. 123</p>
-                <p>Jakarta, Indonesia 12345</p>
-                <p>Telp: (021) 123-4567 | Email: info@bimasada.com</p>
-            </div>
-            <div class="invoice-title">
-                <h2>Invoice</h2>
-                <div class="invoice-number">{{ $invoice->no_invoice ?? 'INV-' . str_pad($invoice->id, 4, '0', STR_PAD_LEFT) }}</div>
-                <div style="margin-top: 10px;">
-                    <span class="status-badge status-{{ strtolower(str_replace(' ', '-', $invoice->status_pembayaran)) == 'belum-lunas' ? 'belum' : strtolower($invoice->status_pembayaran) }}">
-                        {{ $invoice->status_pembayaran }}
-                    </span>
-                </div>
+            <div class="company-name">PT. BIMASADA GELORA MEDIA</div>
+            <div class="company-address">
+                Jl. Contoh Alamat No. 123, Jakarta, Indonesia<br>
+                Telp: (021) 123-4567 | Email: info@bimasada.com
             </div>
         </div>
 
-        <!-- Invoice Info -->
-        <div class="invoice-info">
-            <div class="info-left">
-                <div class="info-block">
-                    <label>Tagihan Kepada</label>
-                    <span style="font-size: 14px; font-weight: bold;">{{ $invoice->nama_pelanggan }}</span>
-                </div>
-                <div class="info-block">
-                    <label>Alamat</label>
-                    <span>{{ $invoice->alamat ?? '-' }}</span>
-                </div>
-                <div class="info-block">
-                    <label>Telepon / Email</label>
-                    <span>{{ $invoice->no_telp ?? '-' }} / {{ $invoice->email ?? '-' }}</span>
-                </div>
-            </div>
-            <div class="info-right">
-                <div class="info-block">
-                    <label>Tanggal Invoice</label>
-                    <span>{{ $invoice->tanggal_invoice->format('d F Y') }}</span>
-                </div>
-                <div class="info-block">
-                    <label>Jatuh Tempo</label>
-                    <span>{{ $invoice->jatuh_tempo->format('d F Y') }}</span>
-                </div>
-                <div class="info-block">
-                    <label>Sales</label>
-                    <span>{{ $invoice->sales->nama_sales ?? '-' }}</span>
-                </div>
-                @if($invoice->pks)
-                <div class="info-block">
-                    <label>No. Kontrak (PKS)</label>
-                    <span>{{ $invoice->pks->no_surat }}</span>
-                </div>
-                @endif
-            </div>
+        <!-- Document Title -->
+        <div class="document-title">
+            <h1>Invoice</h1>
+            <div class="document-number">No: {{ $invoice->no_invoice ?? 'INV-' . str_pad($invoice->id, 4, '0', STR_PAD_LEFT) }}</div>
+        </div>
+
+        <!-- Info Section -->
+        <div class="info-section">
+            <table class="info-table">
+                <tr>
+                    <td class="info-left">
+                        <strong>Kepada Yth:</strong><br>
+                        <strong>{{ $invoice->nama_pelanggan }}</strong><br>
+                        {{ $invoice->alamat ?? '-' }}<br>
+                        Telp: {{ $invoice->no_telp ?? '-' }}<br>
+                        Email: {{ $invoice->email ?? '-' }}
+                    </td>
+                    <td class="info-right">
+                        <table style="margin-left: auto;">
+                            <tr>
+                                <td>Tanggal</td>
+                                <td>:</td>
+                                <td><strong>{{ $invoice->tanggal_invoice->translatedFormat('d F Y') }}</strong></td>
+                            </tr>
+                            <tr>
+                                <td>Jatuh Tempo</td>
+                                <td>:</td>
+                                <td><strong>{{ $invoice->jatuh_tempo->translatedFormat('d F Y') }}</strong></td>
+                            </tr>
+                            <tr>
+                                <td>Status</td>
+                                <td>:</td>
+                                <td><span class="status-badge">{{ $invoice->status_pembayaran }}</span></td>
+                            </tr>
+                            @if($invoice->pks)
+                            <tr>
+                                <td>No. PKS</td>
+                                <td>:</td>
+                                <td>{{ $invoice->pks->no_surat ?? '-' }}</td>
+                            </tr>
+                            @endif
+                        </table>
+                    </td>
+                </tr>
+            </table>
         </div>
 
         <!-- Items Table -->
-        <table class="items">
+        <table class="items-table">
             <thead>
                 <tr>
-                    <th style="width: 50px;">No</th>
-                    <th>Deskripsi</th>
-                    <th style="width: 80px;">Qty</th>
+                    <th style="width: 40px;">No</th>
+                    <th>Uraian</th>
+                    <th style="width: 60px;">Qty</th>
                     <th style="width: 120px;">Harga Satuan</th>
-                    <th style="width: 120px;">Subtotal</th>
+                    <th style="width: 120px;">Jumlah</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($invoice->detailInvoices as $index => $item)
                 <tr>
-                    <td>{{ $index + 1 }}</td>
-                    <td>{{ $item->id_kuitansi ?? $item->deskripsi ?? 'Item ' . ($index + 1) }}</td>
-                    <td>{{ number_format($item->jumlah, 0) }}</td>
-                    <td>Rp {{ number_format($item->harga_satuan, 0, ',', '.') }}</td>
-                    <td>Rp {{ number_format($item->subtotal, 0, ',', '.') }}</td>
+                    <td class="text-center">{{ $index + 1 }}</td>
+                    <td>{{ $item->id_kuitansi ?? 'Item #' . ($index + 1) }}</td>
+                    <td class="text-center">{{ number_format($item->jumlah, 0) }}</td>
+                    <td class="text-right">Rp {{ number_format($item->harga_satuan, 0, ',', '.') }}</td>
+                    <td class="text-right">Rp {{ number_format($item->subtotal, 0, ',', '.') }}</td>
                 </tr>
                 @empty
                 <tr>
-                    <td>1</td>
-                    <td>{{ $invoice->keterangan ?? 'Layanan/Produk' }}</td>
-                    <td>1</td>
-                    <td>Rp {{ number_format($invoice->total_harga, 0, ',', '.') }}</td>
-                    <td>Rp {{ number_format($invoice->total_harga, 0, ',', '.') }}</td>
+                    <td class="text-center">1</td>
+                    <td>Jasa/Layanan sesuai kontrak</td>
+                    <td class="text-center">1</td>
+                    <td class="text-right">Rp {{ number_format($invoice->total_harga, 0, ',', '.') }}</td>
+                    <td class="text-right">Rp {{ number_format($invoice->total_harga, 0, ',', '.') }}</td>
                 </tr>
                 @endforelse
             </tbody>
         </table>
 
-        <!-- Totals -->
-        <div class="totals">
-            <table>
+        <!-- Total Section -->
+        <div class="total-section">
+            <table class="total-table">
+                @php
+                    $subtotal = $invoice->detailInvoices->sum('subtotal') ?: $invoice->total_harga;
+                    $ppn = $subtotal * 0.11;
+                    $grandTotal = $subtotal + $ppn;
+                @endphp
                 <tr>
                     <td>Subtotal</td>
-                    <td>Rp {{ number_format($invoice->total_harga, 0, ',', '.') }}</td>
+                    <td>:</td>
+                    <td>Rp {{ number_format($subtotal, 0, ',', '.') }}</td>
                 </tr>
-                @if($invoice->kuitansis->count() > 0)
                 <tr>
-                    <td>Telah Dibayar</td>
-                    <td>Rp {{ number_format($invoice->total_paid, 0, ',', '.') }}</td>
+                    <td>PPN (11%)</td>
+                    <td>:</td>
+                    <td>Rp {{ number_format($ppn, 0, ',', '.') }}</td>
                 </tr>
-                @endif
                 <tr class="grand-total">
-                    <td>TOTAL</td>
-                    <td>Rp {{ number_format($invoice->remaining_amount ?? $invoice->total_harga, 0, ',', '.') }}</td>
+                    <td><strong>Total</strong></td>
+                    <td>:</td>
+                    <td><strong>Rp {{ number_format($grandTotal, 0, ',', '.') }}</strong></td>
                 </tr>
             </table>
+        </div>
+
+        <!-- Terbilang -->
+        <div class="terbilang">
+            <strong>Terbilang:</strong> {{ ucwords(App\Helpers\Terbilang::convert($grandTotal)) }} Rupiah
         </div>
 
         <!-- Notes -->
         @if($invoice->keterangan)
         <div class="notes">
-            <h4>Catatan</h4>
+            <div class="notes-title">Keterangan:</div>
             <p>{{ $invoice->keterangan }}</p>
         </div>
         @endif
 
         <!-- Signature Section -->
         <div class="signature-section">
-            <div class="signature-box">
-                <div class="signature-line">
-                    <p>Penerima</p>
-                </div>
-            </div>
-            <div class="signature-box">
-                <div class="signature-line">
-                    <p>Sales</p>
-                    <p style="font-weight: bold;">{{ $invoice->sales->nama_sales ?? '-' }}</p>
-                </div>
-            </div>
-            <div class="signature-box">
-                <div class="signature-line">
-                    <p>Disetujui</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Footer -->
-        <div class="footer">
-            <p>Dokumen ini dicetak pada {{ now()->format('d F Y, H:i') }}</p>
-            <p>PT BIMASADA - Invoice Management System</p>
+            <table class="signature-table">
+                <tr>
+                    <td class="signature-box">
+                        Pelanggan,
+                        <div class="signature-space"></div>
+                        <div class="signature-name">{{ $invoice->nama_pelanggan }}</div>
+                    </td>
+                    <td class="signature-box">
+                        Mengetahui,
+                        <div class="signature-space"></div>
+                        <div class="signature-name">Manager</div>
+                    </td>
+                    <td class="signature-box">
+                        Hormat Kami,
+                        <div class="signature-space"></div>
+                        <div class="signature-name">{{ $invoice->sales->nama_sales ?? 'Sales' }}</div>
+                    </td>
+                </tr>
+            </table>
         </div>
     </div>
 </body>
