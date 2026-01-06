@@ -342,24 +342,15 @@
                 <p class="mt-1 text-gray-500 dark:text-gray-400">Kelola kuitansi pembayaran pelanggan</p>
             </div>
             <div class="flex items-center gap-3">
-                @can('create-kuitansi')
-                <x-ui.button variant="secondary" x-data @click="openAddKuitansiModal()">
+                {{-- Kuitansi hanya bisa dibuat dari halaman Invoice --}}
+                <x-ui.button variant="secondary" href="{{ route('invoices.index') }}">
                     <x-slot name="icon">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                         </svg>
                     </x-slot>
-                    Kuitansi Cepat
+                    Lihat Invoice
                 </x-ui.button>
-                <x-ui.button variant="primary" href="{{ route('kuitansis.create') }}">
-                    <x-slot name="icon">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                        </svg>
-                    </x-slot>
-                    Buat Kuitansi
-                </x-ui.button>
-                @endcan
             </div>
         </div>
     </div>
@@ -716,12 +707,12 @@
                                         </svg>
                                     </div>
                                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Belum ada Kuitansi</h3>
-                                    <p class="text-gray-500 dark:text-gray-400 mb-6 text-center max-w-sm">Mulai dengan membuat kuitansi pembayaran pertama Anda.</p>
-                                    <a href="{{ route('kuitansis.create') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-lg hover:from-primary-700 hover:to-primary-600 transition-all shadow-lg shadow-primary-600/25 font-medium">
+                                    <p class="text-gray-500 dark:text-gray-400 mb-6 text-center max-w-sm">Buat kuitansi dari halaman Invoice untuk mencatat pembayaran.</p>
+                                    <a href="{{ route('invoices.index') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-lg hover:from-primary-700 hover:to-primary-600 transition-all shadow-lg shadow-primary-600/25 font-medium">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                         </svg>
-                                        Buat Kuitansi
+                                        Lihat Invoice
                                     </a>
                                 </div>
                             `,

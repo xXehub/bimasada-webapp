@@ -141,9 +141,8 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/kuitansis/{kuitansi}/status', [KuitansiController::class, 'updateStatus'])->middleware('permission:edit-kuitansi')->name('kuitansis.updateStatus');
     
     // Resource routes with permissions
+    // Note: Create kuitansi hanya dari Invoice, tidak ada halaman create mandiri
     Route::get('/kuitansis', [KuitansiController::class, 'index'])->middleware('permission:view-kuitansi')->name('kuitansis.index');
-    Route::get('/kuitansis/create', [KuitansiController::class, 'create'])->middleware('permission:create-kuitansi')->name('kuitansis.create');
-    Route::post('/kuitansis', [KuitansiController::class, 'store'])->middleware('permission:create-kuitansi')->name('kuitansis.store');
     Route::get('/kuitansis/{kuitansi}', [KuitansiController::class, 'show'])->middleware('permission:view-kuitansi')->name('kuitansis.show');
     Route::get('/kuitansis/{kuitansi}/edit', [KuitansiController::class, 'edit'])->middleware('permission:edit-kuitansi')->name('kuitansis.edit');
     Route::put('/kuitansis/{kuitansi}', [KuitansiController::class, 'update'])->middleware('permission:edit-kuitansi')->name('kuitansis.update');

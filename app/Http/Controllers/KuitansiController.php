@@ -203,10 +203,11 @@ class KuitansiController extends Controller
      */
     public function create(Request $request)
     {
-        $salesList = Sales::select('id', 'nama_sales')->orderBy('nama_sales')->get();
+        $salesList = Sales::select('id', 'id_sales', 'nama_sales')->orderBy('nama_sales')->get();
         
-        // Limit invoices to recent 100 for performance
-        $invoices = Invoice::select('id', 'no_invoice', 'nama_pelanggan', 'status_pembayaran', 'created_at')
+        // Limit invoices to recent 100 for performance - include all fields needed for auto-fill
+        $invoices = Invoice::select('id', 'no_invoice', 'nama_pelanggan', 'alamat', 'no_telp', 'total_harga', 'id_sales', 'status_pembayaran', 'created_at')
+            ->with(['detailInvoices'])
             ->where('status_pembayaran', '!=', 'Lunas')
             ->orderBy('created_at', 'desc')
             ->take(100)
@@ -386,9 +387,9 @@ class KuitansiController extends Controller
     public function edit(Kuitansi $kuitansi)
     {
         $kuitansi->load(['sales', 'invoice', 'detailKuitansis']);
-        $salesList = Sales::select('id', 'nama_sales')->orderBy('nama_sales')->get();
-        // Only load recent invoices for dropdown, not all
-        $invoices = Invoice::select('id', 'no_invoice', 'nama_pelanggan', 'created_at')
+        $salesList = Sales::select('id', 'id_sales', 'nama_sales')->orderBy('nama_sales')->get();
+        // Load invoices with fields needed for auto-fill
+        $invoices = Invoice::select('id', 'no_invoice', 'nama_pelanggan', 'alamat', 'no_telp', 'total_harga', 'id_sales', 'created_at')
             ->orderBy('created_at', 'desc')
             ->take(100)
             ->get();
@@ -466,6 +467,9 @@ class KuitansiController extends Controller
             }
         }
 
+        // Auto-update invoice status based on total paid kuitansis
+        $this->updateInvoicePaymentStatus($kuitansi->id_invoice);
+
         return redirect()->route('kuitansis.show', $kuitansi->id)
             ->with('success', 'Kuitansi berhasil diperbarui.');
     }
@@ -481,10 +485,8 @@ class KuitansiController extends Controller
 
         $kuitansi->update(['status_kuitansi' => $validated['status_kuitansi']]);
 
-        // If marked as Lunas, also update the related invoice
-        if ($validated['status_kuitansi'] === 'Lunas' && $kuitansi->id_invoice) {
-            Invoice::where('id', $kuitansi->id_invoice)->update(['status_invoice' => 'Lunas']);
-        }
+        // Auto-update invoice status based on total paid kuitansis
+        $this->updateInvoicePaymentStatus($kuitansi->id_invoice);
 
         return response()->json([
             'success' => true,
@@ -499,10 +501,8 @@ class KuitansiController extends Controller
     {
         $kuitansi->update(['status_kuitansi' => 'Lunas']);
 
-        // Also update the related invoice if exists
-        if ($kuitansi->id_invoice) {
-            Invoice::where('id', $kuitansi->id_invoice)->update(['status_invoice' => 'Lunas']);
-        }
+        // Auto-update invoice status based on total paid kuitansis
+        $this->updateInvoicePaymentStatus($kuitansi->id_invoice);
 
         return response()->json([
             'success' => true,
@@ -515,16 +515,55 @@ class KuitansiController extends Controller
      */
     public function destroy(Kuitansi $kuitansi)
     {
+        // Store invoice id before deletion
+        $invoiceId = $kuitansi->id_invoice;
+        
         // Delete related detail items first
         $kuitansi->detailKuitansis()->delete();
         
         // Delete kuitansi
         $kuitansi->delete();
 
+        // Auto-update invoice status based on remaining kuitansis
+        $this->updateInvoicePaymentStatus($invoiceId);
+
         return response()->json([
             'success' => true,
             'message' => 'Kuitansi berhasil dihapus.',
         ]);
+    }
+
+    /**
+     * Update invoice payment status based on total paid kuitansis.
+     */
+    private function updateInvoicePaymentStatus($invoiceId)
+    {
+        if (!$invoiceId) {
+            return;
+        }
+
+        $invoice = Invoice::find($invoiceId);
+        if (!$invoice) {
+            return;
+        }
+
+        // Calculate total paid from Lunas kuitansis
+        $totalPaid = $invoice->kuitansis()
+            ->where('status_kuitansi', 'Lunas')
+            ->sum('total_bayar');
+        
+        $totalInvoice = $invoice->total_harga ?? 0;
+
+        if ($totalPaid >= $totalInvoice && $totalInvoice > 0) {
+            // Invoice fully paid
+            $invoice->update(['status_pembayaran' => 'Lunas']);
+        } elseif ($totalPaid > 0) {
+            // Partial payment (Cicilan)
+            $invoice->update(['status_pembayaran' => 'Cicilan']);
+        } else {
+            // No payment yet
+            $invoice->update(['status_pembayaran' => 'Belum Lunas']);
+        }
     }
 
     /**
@@ -639,13 +678,8 @@ class KuitansiController extends Controller
             'id_invoice' => $invoice->id,
         ]);
 
-        // Check if invoice is now fully paid and update status
-        $newRemainingAmount = $invoice->fresh()->remaining_amount;
-        if ($newRemainingAmount <= 0) {
-            $invoice->update(['status_pembayaran' => 'Lunas']);
-        } elseif ($invoice->kuitansis()->count() > 0) {
-            $invoice->update(['status_pembayaran' => 'Cicilan']);
-        }
+        // Auto-update invoice status based on total paid kuitansis
+        $this->updateInvoicePaymentStatus($invoice->id);
 
         if ($request->expectsJson()) {
             return response()->json([

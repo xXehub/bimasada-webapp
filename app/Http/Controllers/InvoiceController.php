@@ -258,7 +258,8 @@ class InvoiceController extends Controller
             'alamat' => 'nullable|string',
             'no_telp' => 'nullable|string|max:50',
             'email' => 'nullable|email|max:255',
-            'status_pembayaran' => 'required|in:Lunas,Belum Lunas,Cicilan',
+            // Note: Lunas tidak diperbolehkan saat create, status akan otomatis update dari kuitansi
+            'status_pembayaran' => 'required|in:Belum Lunas,Cicilan',
             'jatuh_tempo' => 'required|date',
             'keterangan' => 'nullable|string',
             'id_sales' => 'required|exists:sales,id',

@@ -237,7 +237,7 @@
                         name="nama_pihak_pertama" 
                         label="Pihak Pertama" 
                         placeholder="Nama pihak pertama (perusahaan Anda)" 
-                        :value="old('nama_pihak_pertama', 'PT. Bimasada')" 
+                        :value="old('nama_pihak_pertama', 'PT. BIMASADA JAYA PERSADA')" 
                         required 
                     >
                         <x-slot name="icon">

@@ -1,6 +1,18 @@
 <x-layout.app title="Input Invoice">
     <div x-data="invoiceInput()" class="space-y-6">
         
+        <!-- PKS Data for Alpine.js -->
+        @php
+            $pksData = $pksList->mapWithKeys(function($pks) {
+                return [$pks->id => [
+                    'nama_pelanggan' => $pks->nama_pelanggan,
+                    'alamat' => $pks->alamat_pelanggan,
+                    'no_telp' => $pks->no_telp_pelanggan,
+                    'email' => $pks->email_pelanggan,
+                ]];
+            })->toJson();
+        @endphp
+        
         <!-- Page Header -->
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
@@ -88,10 +100,10 @@
                             class="w-full px-4 py-2.5 bg-white dark:bg-dark-hover border border-gray-300 dark:border-dark-border rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
                         >
                             <option value="">Select Status</option>
-                            <option value="Lunas" {{ old('status_pembayaran') == 'Lunas' ? 'selected' : '' }}>Lunas</option>
-                            <option value="Belum Lunas" {{ old('status_pembayaran') == 'Belum Lunas' ? 'selected' : '' }}>Belum Lunas</option>
+                            <option value="Belum Lunas" {{ old('status_pembayaran', 'Belum Lunas') == 'Belum Lunas' ? 'selected' : '' }}>Belum Lunas</option>
                             <option value="Cicilan" {{ old('status_pembayaran') == 'Cicilan' ? 'selected' : '' }}>Cicilan</option>
                         </select>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Status akan otomatis "Lunas" saat pembayaran kuitansi terpenuhi</p>
                     </div>
 
                     <!-- Sales Person -->
@@ -120,6 +132,8 @@
                         </label>
                         <select 
                             name="id_pks" 
+                            x-model="selectedPks"
+                            @change="onPksChange()"
                             class="w-full px-4 py-2.5 bg-white dark:bg-dark-hover border border-gray-300 dark:border-dark-border rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
                         >
                             <option value="">-- Tanpa PKS --</option>
@@ -129,7 +143,7 @@
                                 </option>
                             @endforeach
                         </select>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Pilih jika invoice terkait dengan surat perjanjian</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Pilih jika invoice terkait dengan surat perjanjian. Customer info akan otomatis terisi.</p>
                     </div>
                 </div>
             </x-ui.card>
@@ -196,7 +210,15 @@
                         </div>
                         <div>
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Customer Information</h3>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Customer details and contact</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">
+                                Customer details and contact
+                                <span x-show="selectedPks" class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                    </svg>
+                                    Data dari PKS
+                                </span>
+                            </p>
                         </div>
                     </div>
                 </x-slot>
@@ -204,45 +226,52 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Customer Name -->
                     <div class="md:col-span-2">
-                        <x-ui.input 
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                            Customer Name <span class="text-red-500">*</span>
+                        </label>
+                        <input 
                             type="text" 
                             name="nama_pelanggan" 
-                            label="Customer Name" 
+                            x-model="customerName"
+                            :readonly="selectedPks !== ''"
+                            :class="selectedPks !== '' ? 'bg-gray-100 dark:bg-gray-700 cursor-not-allowed' : 'bg-white dark:bg-dark-hover'"
                             placeholder="Enter customer name" 
-                            :value="old('nama_pelanggan')" 
-                            required 
+                            required
+                            class="w-full px-4 py-2.5 border border-gray-300 dark:border-dark-border rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
                         />
                     </div>
 
                     <!-- Email -->
-                    <x-ui.input 
-                        type="email" 
-                        name="email" 
-                        label="Email Address" 
-                        placeholder="customer@example.com" 
-                        :value="old('email')" 
-                    >
-                        <x-slot name="icon">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                            </svg>
-                        </x-slot>
-                    </x-ui.input>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                            Email Address
+                        </label>
+                        <input 
+                            type="email" 
+                            name="email" 
+                            x-model="customerEmail"
+                            :readonly="selectedPks !== ''"
+                            :class="selectedPks !== '' ? 'bg-gray-100 dark:bg-gray-700 cursor-not-allowed' : 'bg-white dark:bg-dark-hover'"
+                            placeholder="customer@example.com" 
+                            class="w-full px-4 py-2.5 border border-gray-300 dark:border-dark-border rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                        />
+                    </div>
 
                     <!-- Phone -->
-                    <x-ui.input 
-                        type="text" 
-                        name="no_telp" 
-                        label="Phone Number" 
-                        placeholder="08xx-xxxx-xxxx" 
-                        :value="old('no_telp')" 
-                    >
-                        <x-slot name="icon">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
-                            </svg>
-                        </x-slot>
-                    </x-ui.input>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                            Phone Number
+                        </label>
+                        <input 
+                            type="text" 
+                            name="no_telp" 
+                            x-model="customerPhone"
+                            :readonly="selectedPks !== ''"
+                            :class="selectedPks !== '' ? 'bg-gray-100 dark:bg-gray-700 cursor-not-allowed' : 'bg-white dark:bg-dark-hover'"
+                            placeholder="08xx-xxxx-xxxx" 
+                            class="w-full px-4 py-2.5 border border-gray-300 dark:border-dark-border rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                        />
+                    </div>
 
                     <!-- Address -->
                     <div class="md:col-span-2">
@@ -250,9 +279,12 @@
                         <textarea 
                             name="alamat" 
                             rows="3" 
+                            x-model="customerAddress"
+                            :readonly="selectedPks !== ''"
+                            :class="selectedPks !== '' ? 'bg-gray-100 dark:bg-gray-700 cursor-not-allowed' : 'bg-white dark:bg-dark-hover'"
                             placeholder="Enter customer address" 
-                            class="w-full px-4 py-2.5 bg-white dark:bg-dark-hover border border-gray-300 dark:border-dark-border rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors resize-none"
-                        >{{ old('alamat') }}</textarea>
+                            class="w-full px-4 py-2.5 border border-gray-300 dark:border-dark-border rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors resize-none"
+                        ></textarea>
                     </div>
                 </div>
             </x-ui.card>
@@ -462,12 +494,46 @@
     <script>
         function invoiceInput() {
             return {
+                // PKS data from server
+                pksData: {!! $pksData !!},
+                selectedPks: '{{ old('id_pks', '') }}',
+                
+                // Customer fields
+                customerName: '{{ old('nama_pelanggan', '') }}',
+                customerEmail: '{{ old('email', '') }}',
+                customerPhone: '{{ old('no_telp', '') }}',
+                customerAddress: '{{ old('alamat', '') }}',
+                
+                // Invoice items
                 items: [{
                     id_kuitansi: '',
                     jumlah: 1,
                     harga_satuan: 0,
                     subtotal: 0
                 }],
+                
+                init() {
+                    // If PKS is pre-selected (from old input), load its data
+                    if (this.selectedPks) {
+                        this.onPksChange();
+                    }
+                },
+                
+                onPksChange() {
+                    if (this.selectedPks && this.pksData[this.selectedPks]) {
+                        const pks = this.pksData[this.selectedPks];
+                        this.customerName = pks.nama_pelanggan || '';
+                        this.customerAddress = pks.alamat || '';
+                        this.customerPhone = pks.no_telp || '';
+                        this.customerEmail = pks.email || '';
+                    } else {
+                        // Clear fields when "Tanpa PKS" is selected
+                        this.customerName = '';
+                        this.customerAddress = '';
+                        this.customerPhone = '';
+                        this.customerEmail = '';
+                    }
+                },
                 
                 get grandTotal() {
                     return this.items.reduce((sum, item) => sum + (item.subtotal || 0), 0);

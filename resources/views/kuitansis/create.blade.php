@@ -1,178 +1,265 @@
-@extends('layouts.app')
-
-@section('title', 'Buat Kuitansi Baru')
-
-@section('content')
-<div class="max-w-4xl mx-auto space-y-6">
-    <!-- Header -->
-    <div class="flex items-center gap-4">
-        <a href="{{ route('kuitansis.index') }}" class="inline-flex items-center justify-center w-10 h-10 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 transition-colors">
-            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-            </svg>
-        </a>
-        <div>
-            <h1 class="text-2xl font-bold text-gray-900">Buat Kuitansi Baru</h1>
-            <p class="mt-1 text-sm text-gray-500">Isi form di bawah untuk membuat kuitansi pembayaran baru</p>
-        </div>
-    </div>
-
-    <form action="{{ route('kuitansis.store') }}" method="POST" x-data="kuitansiForm()">
-        @csrf
-
-        <!-- Basic Info -->
-        <x-ui.card class="mb-6">
-            <div class="p-4 border-b border-gray-200">
-                <h3 class="text-lg font-semibold text-gray-900">Informasi Kuitansi</h3>
+<x-layout.app title="Buat Kuitansi Baru">
+    <div x-data="kuitansiForm()" class="space-y-6">
+        
+        <!-- Invoice Data for Alpine.js (with items) -->
+        @php
+            $invoiceData = $invoices->mapWithKeys(function($invoice) {
+                return [$invoice->id => [
+                    'nama_pelanggan' => $invoice->nama_pelanggan,
+                    'alamat' => $invoice->alamat ?? '',
+                    'no_telp' => $invoice->no_telp ?? '',
+                    'total' => $invoice->total_harga ?? 0,
+                    'id_sales' => $invoice->id_sales,
+                    'items' => $invoice->detailInvoices->map(function($item) {
+                        return [
+                            'nama_item' => $item->id_kuitansi ?? '',
+                            'jumlah' => $item->jumlah ?? 1,
+                            'harga_satuan' => $item->harga_satuan ?? 0,
+                            'subtotal' => $item->subtotal ?? 0,
+                        ];
+                    })->toArray(),
+                ]];
+            })->toJson();
+        @endphp
+        
+        <!-- Page Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/25">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Buat Kuitansi Baru</h1>
+                    <p class="text-gray-500 dark:text-gray-400 mt-0.5">Isi form untuk membuat kuitansi pembayaran baru</p>
+                </div>
             </div>
-            <div class="p-6 space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Kuitansi Number -->
-                    <div>
-                        <label for="no_kuitansi" class="block text-sm font-medium text-gray-700 mb-1">
-                            No. Kuitansi <span class="text-red-500">*</span>
-                        </label>
-                        <input type="text" id="no_kuitansi" name="no_kuitansi" value="{{ $noKuitansi }}"
-                            class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50"
-                            readonly>
+            <x-ui.button variant="secondary" href="{{ route('kuitansis.index') }}">
+                <x-slot name="icon">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    </svg>
+                </x-slot>
+                Kembali
+            </x-ui.button>
+        </div>
+
+        <!-- Error Summary -->
+        @if ($errors->any())
+            <x-ui.alert type="error" :autoDismiss="false">
+                <strong class="font-semibold">Perbaiki kesalahan berikut:</strong>
+                <ul class="mt-2 list-disc list-inside text-sm">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </x-ui.alert>
+        @endif
+
+        <form action="{{ route('kuitansis.store') }}" method="POST" class="space-y-6">
+            @csrf
+
+            <!-- Kuitansi Information Card -->
+            <x-ui.card>
+                <x-slot name="header">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Informasi Kuitansi</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Detail dasar kuitansi</p>
+                        </div>
                     </div>
+                </x-slot>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Kuitansi Number -->
+                    <x-ui.input 
+                        type="text" 
+                        name="no_kuitansi" 
+                        label="No. Kuitansi" 
+                        :value="$noKuitansi" 
+                        required 
+                        readonly
+                    />
 
                     <!-- Date -->
-                    <div>
-                        <label for="tanggal_kuitansi" class="block text-sm font-medium text-gray-700 mb-1">
-                            Tanggal Kuitansi <span class="text-red-500">*</span>
-                        </label>
-                        <input type="date" id="tanggal_kuitansi" name="tanggal_kuitansi" 
-                            value="{{ old('tanggal_kuitansi', date('Y-m-d')) }}"
-                            class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            required>
-                        @error('tanggal_kuitansi')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
+                    <x-ui.input 
+                        type="date" 
+                        name="tanggal_kuitansi" 
+                        label="Tanggal Kuitansi" 
+                        :value="old('tanggal_kuitansi', date('Y-m-d'))" 
+                        required 
+                    />
 
                     <!-- Related Invoice -->
                     <div>
-                        <label for="id_invoice" class="block text-sm font-medium text-gray-700 mb-1">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                             Invoice Terkait
                         </label>
-                        <select id="id_invoice" name="id_invoice" x-model="selectedInvoice" @change="loadInvoiceData()"
-                            class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                            <option value="">Pilih Invoice (Opsional)</option>
+                        <select 
+                            name="id_invoice" 
+                            x-model="selectedInvoice"
+                            @change="onInvoiceChange()"
+                            class="w-full px-4 py-2.5 bg-white dark:bg-dark-hover border border-gray-300 dark:border-dark-border rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                        >
+                            <option value="">-- Tanpa Invoice --</option>
                             @foreach($invoices as $invoice)
-                                <option value="{{ $invoice->id }}" 
-                                    data-customer="{{ $invoice->nama_pelanggan }}"
-                                    data-alamat="{{ $invoice->alamat }}"
-                                    data-telp="{{ $invoice->no_telp }}"
-                                    data-total="{{ $invoice->total }}"
-                                    {{ ($selectedInvoice && $selectedInvoice->id == $invoice->id) ? 'selected' : '' }}>
+                                <option value="{{ $invoice->id }}" {{ old('id_invoice', $selectedInvoice?->id) == $invoice->id ? 'selected' : '' }}>
                                     {{ $invoice->no_invoice ?? 'INV-' . str_pad($invoice->id, 4, '0', STR_PAD_LEFT) }} - {{ $invoice->nama_pelanggan }}
                                 </option>
                             @endforeach
                         </select>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Pilih invoice untuk auto-fill data pelanggan</p>
                     </div>
 
-                    <!-- Sales -->
+                    <!-- Sales Person -->
                     <div>
-                        <label for="id_sales" class="block text-sm font-medium text-gray-700 mb-1">
-                            Sales <span class="text-red-500">*</span>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                            Sales Person <span class="text-red-500">*</span>
                         </label>
-                        <select id="id_sales" name="id_sales"
-                            class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            required>
+                        <select 
+                            name="id_sales" 
+                            x-model="selectedSales"
+                            required
+                            class="w-full px-4 py-2.5 bg-white dark:bg-dark-hover border border-gray-300 dark:border-dark-border rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                        >
                             <option value="">Pilih Sales</option>
                             @foreach($salesList as $sales)
                                 <option value="{{ $sales->id }}" {{ old('id_sales', $selectedInvoice?->id_sales) == $sales->id ? 'selected' : '' }}>
-                                    {{ $sales->nama_sales }}
+                                    {{ $sales->id_sales ?? '' }} - {{ $sales->nama_sales }}
                                 </option>
                             @endforeach
                         </select>
-                        @error('id_sales')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
                     </div>
                 </div>
-            </div>
-        </x-ui.card>
+            </x-ui.card>
 
-        <!-- Customer Info -->
-        <x-ui.card class="mb-6">
-            <div class="p-4 border-b border-gray-200">
-                <h3 class="text-lg font-semibold text-gray-900">Informasi Pelanggan</h3>
-            </div>
-            <div class="p-6 space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Customer Information Card -->
+            <x-ui.card>
+                <x-slot name="header">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Informasi Pelanggan</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">
+                                Data pelanggan dan kontak
+                                <span x-show="selectedInvoice" class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                    </svg>
+                                    Data dari Invoice
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                </x-slot>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Customer Name -->
                     <div class="md:col-span-2">
-                        <label for="nama_pelanggan" class="block text-sm font-medium text-gray-700 mb-1">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                             Nama Pelanggan <span class="text-red-500">*</span>
                         </label>
-                        <input type="text" id="nama_pelanggan" name="nama_pelanggan" x-model="customerName"
-                            value="{{ old('nama_pelanggan', $selectedInvoice?->nama_pelanggan) }}"
-                            class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Masukkan nama pelanggan" required>
-                        @error('nama_pelanggan')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
+                        <input 
+                            type="text" 
+                            name="nama_pelanggan" 
+                            x-model="customerName"
+                            :readonly="selectedInvoice !== ''"
+                            :class="selectedInvoice !== '' ? 'bg-gray-100 dark:bg-gray-700 cursor-not-allowed' : 'bg-white dark:bg-dark-hover'"
+                            placeholder="Masukkan nama pelanggan" 
+                            required
+                            class="w-full px-4 py-2.5 border border-gray-300 dark:border-dark-border rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                        />
                     </div>
 
                     <!-- Address -->
                     <div class="md:col-span-2">
-                        <label for="alamat" class="block text-sm font-medium text-gray-700 mb-1">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                             Alamat
                         </label>
-                        <textarea id="alamat" name="alamat" rows="2" x-model="customerAddress"
-                            class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Masukkan alamat pelanggan">{{ old('alamat', $selectedInvoice?->alamat) }}</textarea>
+                        <textarea 
+                            name="alamat" 
+                            rows="3" 
+                            x-model="customerAddress"
+                            :readonly="selectedInvoice !== ''"
+                            :class="selectedInvoice !== '' ? 'bg-gray-100 dark:bg-gray-700 cursor-not-allowed' : 'bg-white dark:bg-dark-hover'"
+                            placeholder="Masukkan alamat pelanggan" 
+                            class="w-full px-4 py-2.5 border border-gray-300 dark:border-dark-border rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors resize-none"
+                        ></textarea>
                     </div>
 
                     <!-- Phone -->
                     <div>
-                        <label for="no_telp" class="block text-sm font-medium text-gray-700 mb-1">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                             No. Telepon
                         </label>
-                        <input type="text" id="no_telp" name="no_telp" x-model="customerPhone"
-                            value="{{ old('no_telp', $selectedInvoice?->no_telp) }}"
-                            class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Masukkan no. telepon">
+                        <input 
+                            type="text" 
+                            name="no_telp" 
+                            x-model="customerPhone"
+                            :readonly="selectedInvoice !== ''"
+                            :class="selectedInvoice !== '' ? 'bg-gray-100 dark:bg-gray-700 cursor-not-allowed' : 'bg-white dark:bg-dark-hover'"
+                            placeholder="08xx-xxxx-xxxx" 
+                            class="w-full px-4 py-2.5 border border-gray-300 dark:border-dark-border rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                        />
                     </div>
                 </div>
-            </div>
-        </x-ui.card>
+            </x-ui.card>
 
-        <!-- Payment Info -->
-        <x-ui.card class="mb-6">
-            <div class="p-4 border-b border-gray-200">
-                <h3 class="text-lg font-semibold text-gray-900">Informasi Pembayaran</h3>
-            </div>
-            <div class="p-6 space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Payment Information Card -->
+            <x-ui.card>
+                <x-slot name="header">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-rose-600 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Informasi Pembayaran</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Detail pembayaran dan status</p>
+                        </div>
+                    </div>
+                </x-slot>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <!-- Payment Method -->
                     <div>
-                        <label for="invoice_pembayaran" class="block text-sm font-medium text-gray-700 mb-1">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                             Metode Pembayaran <span class="text-red-500">*</span>
                         </label>
-                        <select id="invoice_pembayaran" name="invoice_pembayaran"
-                            class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            required>
+                        <select 
+                            name="invoice_pembayaran" 
+                            required
+                            class="w-full px-4 py-2.5 bg-white dark:bg-dark-hover border border-gray-300 dark:border-dark-border rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                        >
                             <option value="">Pilih Metode</option>
                             <option value="Cash" {{ old('invoice_pembayaran') == 'Cash' ? 'selected' : '' }}>Cash</option>
                             <option value="Transfer" {{ old('invoice_pembayaran') == 'Transfer' ? 'selected' : '' }}>Transfer</option>
                             <option value="Ciro" {{ old('invoice_pembayaran') == 'Ciro' ? 'selected' : '' }}>Ciro</option>
                         </select>
-                        @error('invoice_pembayaran')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
                     </div>
 
                     <!-- Status -->
                     <div>
-                        <label for="status_kuitansi" class="block text-sm font-medium text-gray-700 mb-1">
-                            Status
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                            Status <span class="text-red-500">*</span>
                         </label>
-                        <select id="status_kuitansi" name="status_kuitansi"
-                            class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                            <option value="Draft" {{ old('status_kuitansi') == 'Draft' ? 'selected' : '' }}>Draft</option>
+                        <select 
+                            name="status_kuitansi" 
+                            required
+                            class="w-full px-4 py-2.5 bg-white dark:bg-dark-hover border border-gray-300 dark:border-dark-border rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                        >
+                            <option value="Draft" {{ old('status_kuitansi', 'Draft') == 'Draft' ? 'selected' : '' }}>Draft</option>
                             <option value="Terkirim" {{ old('status_kuitansi') == 'Terkirim' ? 'selected' : '' }}>Terkirim</option>
                             <option value="Lunas" {{ old('status_kuitansi') == 'Lunas' ? 'selected' : '' }}>Lunas</option>
                         </select>
@@ -180,89 +267,119 @@
 
                     <!-- Total Amount -->
                     <div>
-                        <label for="total_bayar_display" class="block text-sm font-medium text-gray-700 mb-1">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                             Total Bayar <span class="text-red-500">*</span>
                         </label>
                         <div class="relative">
-                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">Rp</span>
-                            <input type="text" id="total_bayar_display" x-model="totalDisplay"
-                                @input="formatCurrency($event)" @blur="updateTotal()"
-                                class="w-full pl-10 border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                                placeholder="0" required>
+                            <div class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 font-semibold text-sm">Rp</div>
+                            <input 
+                                type="text" 
+                                x-model="totalDisplay"
+                                @input="formatCurrency($event)" 
+                                @blur="updateTotal()"
+                                placeholder="0" 
+                                required
+                                class="w-full pl-12 pr-4 py-2.5 bg-white dark:bg-dark-hover border border-gray-300 dark:border-dark-border rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                            />
                             <input type="hidden" name="total_bayar" x-model="totalBayar">
                         </div>
-                        @error('total_bayar')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
                     </div>
                 </div>
+            </x-ui.card>
 
-                <!-- Notes -->
+            <!-- Notes Card -->
+            <x-ui.card>
+                <x-slot name="header">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Keterangan</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Catatan atau informasi tambahan (opsional)</p>
+                        </div>
+                    </div>
+                </x-slot>
+                
                 <div>
-                    <label for="keterangan" class="block text-sm font-medium text-gray-700 mb-1">
-                        Keterangan
-                    </label>
-                    <textarea id="keterangan" name="keterangan" rows="3"
-                        class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="Tambahkan catatan atau keterangan (opsional)">{{ old('keterangan') }}</textarea>
+                    <textarea 
+                        name="keterangan" 
+                        rows="4" 
+                        placeholder="Tambahkan catatan atau keterangan (opsional)"
+                        class="w-full px-4 py-2.5 bg-white dark:bg-dark-hover border border-gray-300 dark:border-dark-border rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors resize-none"
+                    >{{ old('keterangan') }}</textarea>
                 </div>
-            </div>
-        </x-ui.card>
+            </x-ui.card>
 
-        <!-- Detail Items -->
-        <x-ui.card class="mb-6">
-            <div class="p-4 border-b border-gray-200 flex items-center justify-between">
-                <h3 class="text-lg font-semibold text-gray-900">Detail Item</h3>
-                <button type="button" @click="addItem()"
-                    class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
-                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                    </svg>
-                    Tambah Item
-                </button>
-            </div>
-            <div class="p-6">
+            <!-- Detail Items Card -->
+            <x-ui.card>
+                <x-slot name="header">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                                <svg class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Detail Item</h3>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Daftar item pembayaran (opsional)</p>
+                            </div>
+                        </div>
+                        <x-ui.button type="button" variant="success" size="sm" x-on:click="addItem">
+                            <x-slot name="icon">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                </svg>
+                            </x-slot>
+                            Tambah Item
+                        </x-ui.button>
+                    </div>
+                </x-slot>
+                
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-dark-border">
+                        <thead class="bg-gray-50 dark:bg-dark-hover">
                             <tr>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama Item</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jumlah</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Harga Satuan</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Subtotal</th>
-                                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Aksi</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Nama Item</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-24">Jumlah</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-40">Harga Satuan</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-36">Subtotal</th>
+                                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-16">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
+                        <tbody class="bg-white dark:bg-dark-card divide-y divide-gray-200 dark:divide-dark-border">
                             <template x-for="(item, index) in items" :key="index">
                                 <tr>
                                     <td class="px-4 py-3">
                                         <input type="text" :name="'items['+index+'][nama_item]'" x-model="item.nama_item"
-                                            class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm"
+                                            class="w-full px-3 py-2 bg-white dark:bg-dark-hover border border-gray-300 dark:border-dark-border rounded-lg text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                                             placeholder="Nama item">
                                     </td>
                                     <td class="px-4 py-3">
                                         <input type="number" :name="'items['+index+'][jumlah]'" x-model="item.jumlah"
                                             @input="calculateSubtotal(index)"
-                                            class="w-24 border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm"
+                                            class="w-full px-3 py-2 bg-white dark:bg-dark-hover border border-gray-300 dark:border-dark-border rounded-lg text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                                             min="1">
                                     </td>
                                     <td class="px-4 py-3">
                                         <div class="relative">
-                                            <span class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500 text-sm">Rp</span>
+                                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 text-sm">Rp</span>
                                             <input type="text" x-model="item.harga_display"
                                                 @input="formatItemPrice($event, index)" @blur="updateItemPrice(index)"
-                                                class="w-32 pl-8 border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm"
+                                                class="w-full pl-10 pr-3 py-2 bg-white dark:bg-dark-hover border border-gray-300 dark:border-dark-border rounded-lg text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                                                 placeholder="0">
                                             <input type="hidden" :name="'items['+index+'][harga_satuan]'" x-model="item.harga_satuan">
                                         </div>
                                     </td>
                                     <td class="px-4 py-3">
-                                        <span class="text-sm font-medium text-gray-900" x-text="'Rp ' + formatNumber(item.subtotal)"></span>
+                                        <span class="text-sm font-semibold text-gray-900 dark:text-white" x-text="'Rp ' + formatNumber(item.subtotal)"></span>
                                     </td>
                                     <td class="px-4 py-3 text-center">
                                         <button type="button" @click="removeItem(index)"
-                                            class="inline-flex items-center p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                                            class="inline-flex items-center p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                             </svg>
@@ -271,135 +388,191 @@
                                 </tr>
                             </template>
                             <tr x-show="items.length === 0">
-                                <td colspan="5" class="px-4 py-8 text-center text-gray-500">
+                                <td colspan="5" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
+                                    <svg class="w-12 h-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                    </svg>
                                     Belum ada item. Klik "Tambah Item" untuk menambahkan.
                                 </td>
                             </tr>
                         </tbody>
-                        <tfoot class="bg-gray-50" x-show="items.length > 0">
+                        <tfoot class="bg-gray-50 dark:bg-dark-hover" x-show="items.length > 0">
                             <tr>
-                                <td colspan="3" class="px-4 py-3 text-right font-semibold text-gray-900">Total:</td>
-                                <td class="px-4 py-3 font-bold text-gray-900" x-text="'Rp ' + formatNumber(calculateGrandTotal())"></td>
+                                <td colspan="3" class="px-4 py-3 text-right font-semibold text-gray-900 dark:text-white">Total:</td>
+                                <td class="px-4 py-3 font-bold text-primary-600 dark:text-primary-400 text-lg" x-text="'Rp ' + formatNumber(calculateGrandTotal())"></td>
                                 <td></td>
                             </tr>
                         </tfoot>
                     </table>
                 </div>
+            </x-ui.card>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row items-center justify-end gap-4 p-6 bg-white dark:bg-dark-card rounded-2xl border border-gray-200 dark:border-dark-border shadow-soft">
+                <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                    <x-ui.button variant="secondary" type="button" href="{{ route('kuitansis.index') }}">
+                        <x-slot name="icon">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </x-slot>
+                        Batal
+                    </x-ui.button>
+                    <x-ui.button variant="ghost" type="submit" name="action" value="draft">
+                        <x-slot name="icon">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
+                            </svg>
+                        </x-slot>
+                        Simpan Draft
+                    </x-ui.button>
+                    <x-ui.button variant="primary" type="submit" name="action" value="publish">
+                        <x-slot name="icon">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                        </x-slot>
+                        Simpan Kuitansi
+                    </x-ui.button>
+                </div>
             </div>
-        </x-ui.card>
+        </form>
+    </div>
 
-        <!-- Actions -->
-        <div class="flex items-center justify-end gap-3">
-            <a href="{{ route('kuitansis.index') }}" 
-                class="px-6 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                Batal
-            </a>
-            <button type="submit" name="action" value="draft"
-                class="px-6 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition-colors">
-                Simpan sebagai Draft
-            </button>
-            <button type="submit" name="action" value="publish"
-                class="px-6 py-2.5 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 transition-colors">
-                Simpan Kuitansi
-            </button>
-        </div>
-    </form>
-</div>
-@endsection
-
-@push('scripts')
-<script>
-    function kuitansiForm() {
-        return {
-            selectedInvoice: '{{ $selectedInvoice?->id ?? '' }}',
-            customerName: '{{ old('nama_pelanggan', $selectedInvoice?->nama_pelanggan ?? '') }}',
-            customerAddress: '{{ old('alamat', $selectedInvoice?->alamat ?? '') }}',
-            customerPhone: '{{ old('no_telp', $selectedInvoice?->no_telp ?? '') }}',
-            totalBayar: {{ old('total_bayar', $selectedInvoice?->total ?? 0) }},
-            totalDisplay: '{{ old('total_bayar', $selectedInvoice?->total ?? 0) > 0 ? number_format(old('total_bayar', $selectedInvoice?->total ?? 0), 0, ',', '.') : '' }}',
-            items: [],
-
-            loadInvoiceData() {
-                const select = document.getElementById('id_invoice');
-                const option = select.options[select.selectedIndex];
+    @push('scripts')
+    <script>
+        function kuitansiForm() {
+            return {
+                // Invoice data from server
+                invoiceData: {!! $invoiceData !!},
+                selectedInvoice: '{{ old('id_invoice', $selectedInvoice?->id ?? '') }}',
+                selectedSales: '{{ old('id_sales', $selectedInvoice?->id_sales ?? '') }}',
                 
-                if (option.value) {
-                    this.customerName = option.dataset.customer || '';
-                    this.customerAddress = option.dataset.alamat || '';
-                    this.customerPhone = option.dataset.telp || '';
-                    
-                    const total = parseFloat(option.dataset.total) || 0;
-                    this.totalBayar = total;
-                    this.totalDisplay = total > 0 ? this.formatNumber(total) : '';
+                // Customer fields
+                customerName: {!! json_encode(old('nama_pelanggan', $selectedInvoice?->nama_pelanggan ?? '')) !!},
+                customerAddress: {!! json_encode(old('alamat', $selectedInvoice?->alamat ?? '')) !!},
+                customerPhone: {!! json_encode(old('no_telp', $selectedInvoice?->no_telp ?? '')) !!},
+                
+                // Payment
+                totalBayar: {{ old('total_bayar', $selectedInvoice?->total_harga ?? 0) }},
+                totalDisplay: '',
+                
+                // Items
+                items: [],
+                
+                init() {
+                    // Format initial total display
+                    if (this.totalBayar > 0) {
+                        this.totalDisplay = this.formatNumber(this.totalBayar);
+                    }
+                    // If invoice is pre-selected (from old input), load its data
+                    if (this.selectedInvoice) {
+                        this.onInvoiceChange();
+                    }
+                },
+                
+                onInvoiceChange() {
+                    if (this.selectedInvoice && this.invoiceData[this.selectedInvoice]) {
+                        const invoice = this.invoiceData[this.selectedInvoice];
+                        this.customerName = invoice.nama_pelanggan || '';
+                        this.customerAddress = invoice.alamat || '';
+                        this.customerPhone = invoice.no_telp || '';
+                        this.selectedSales = invoice.id_sales || '';
+                        
+                        // Set total from invoice
+                        this.totalBayar = invoice.total || 0;
+                        this.totalDisplay = this.totalBayar > 0 ? this.formatNumber(this.totalBayar) : '';
+                        
+                        // Load items from invoice
+                        if (invoice.items && invoice.items.length > 0) {
+                            this.items = invoice.items.map(item => ({
+                                nama_item: item.nama_item || '',
+                                jumlah: item.jumlah || 1,
+                                harga_satuan: item.harga_satuan || 0,
+                                harga_display: item.harga_satuan ? parseInt(item.harga_satuan).toLocaleString('id-ID') : '',
+                                subtotal: item.subtotal || 0
+                            }));
+                        } else {
+                            this.items = [];
+                        }
+                    } else {
+                        // Clear fields when "Tanpa Invoice" is selected
+                        this.customerName = '';
+                        this.customerAddress = '';
+                        this.customerPhone = '';
+                        this.totalBayar = 0;
+                        this.totalDisplay = '';
+                        this.items = [];
+                    }
+                },
+
+                formatCurrency(event) {
+                    let value = event.target.value.replace(/[^\d]/g, '');
+                    if (value) {
+                        this.totalDisplay = parseInt(value).toLocaleString('id-ID');
+                    } else {
+                        this.totalDisplay = '';
+                    }
+                },
+
+                updateTotal() {
+                    let value = this.totalDisplay.replace(/[^\d]/g, '');
+                    this.totalBayar = value ? parseInt(value) : 0;
+                },
+
+                addItem() {
+                    this.items.push({
+                        nama_item: '',
+                        jumlah: 1,
+                        harga_satuan: 0,
+                        harga_display: '',
+                        subtotal: 0
+                    });
+                },
+
+                removeItem(index) {
+                    this.items.splice(index, 1);
+                    this.syncTotalFromItems();
+                },
+
+                formatItemPrice(event, index) {
+                    let value = event.target.value.replace(/[^\d]/g, '');
+                    if (value) {
+                        this.items[index].harga_display = parseInt(value).toLocaleString('id-ID');
+                    } else {
+                        this.items[index].harga_display = '';
+                    }
+                },
+
+                updateItemPrice(index) {
+                    let value = this.items[index].harga_display.replace(/[^\d]/g, '');
+                    this.items[index].harga_satuan = value ? parseInt(value) : 0;
+                    this.calculateSubtotal(index);
+                },
+
+                calculateSubtotal(index) {
+                    const item = this.items[index];
+                    item.subtotal = item.jumlah * item.harga_satuan;
+                    this.syncTotalFromItems();
+                },
+
+                calculateGrandTotal() {
+                    return this.items.reduce((sum, item) => sum + item.subtotal, 0);
+                },
+
+                syncTotalFromItems() {
+                    if (this.items.length > 0) {
+                        const total = this.calculateGrandTotal();
+                        this.totalBayar = total;
+                        this.totalDisplay = this.formatNumber(total);
+                    }
+                },
+
+                formatNumber(num) {
+                    return parseInt(num).toLocaleString('id-ID');
                 }
-            },
-
-            formatCurrency(event) {
-                let value = event.target.value.replace(/[^\d]/g, '');
-                if (value) {
-                    this.totalDisplay = parseInt(value).toLocaleString('id-ID');
-                } else {
-                    this.totalDisplay = '';
-                }
-            },
-
-            updateTotal() {
-                let value = this.totalDisplay.replace(/[^\d]/g, '');
-                this.totalBayar = value ? parseInt(value) : 0;
-            },
-
-            addItem() {
-                this.items.push({
-                    nama_item: '',
-                    jumlah: 1,
-                    harga_satuan: 0,
-                    harga_display: '',
-                    subtotal: 0
-                });
-            },
-
-            removeItem(index) {
-                this.items.splice(index, 1);
-                this.syncTotalFromItems();
-            },
-
-            formatItemPrice(event, index) {
-                let value = event.target.value.replace(/[^\d]/g, '');
-                if (value) {
-                    this.items[index].harga_display = parseInt(value).toLocaleString('id-ID');
-                } else {
-                    this.items[index].harga_display = '';
-                }
-            },
-
-            updateItemPrice(index) {
-                let value = this.items[index].harga_display.replace(/[^\d]/g, '');
-                this.items[index].harga_satuan = value ? parseInt(value) : 0;
-                this.calculateSubtotal(index);
-            },
-
-            calculateSubtotal(index) {
-                const item = this.items[index];
-                item.subtotal = item.jumlah * item.harga_satuan;
-                this.syncTotalFromItems();
-            },
-
-            calculateGrandTotal() {
-                return this.items.reduce((sum, item) => sum + item.subtotal, 0);
-            },
-
-            syncTotalFromItems() {
-                if (this.items.length > 0) {
-                    const total = this.calculateGrandTotal();
-                    this.totalBayar = total;
-                    this.totalDisplay = this.formatNumber(total);
-                }
-            },
-
-            formatNumber(num) {
-                return parseInt(num).toLocaleString('id-ID');
             }
         }
-    }
-</script>
-@endpush
+    </script>
+    @endpush
+</x-layout.app>
