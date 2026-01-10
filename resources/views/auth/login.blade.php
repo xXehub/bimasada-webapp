@@ -152,9 +152,9 @@
                 <h2 class="text-3xl font-bold text-white mb-4">Sistem Invoice Management</h2>
                 <p class="text-white/80 text-lg leading-relaxed">Kelola invoice perusahaan dengan mudah, cepat, dan efisien.</p>
                 <div class="flex flex-wrap justify-center gap-3 mt-8">
-                    <span class="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm font-medium">Manajemen Invoice</span>
-                    <span class="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm font-medium">Data Pelanggan</span>
-                    <span class="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm font-medium">Data Kendaraan</span>
+                    <span class="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm font-medium">PT. Bimasada Jaya Persada</span>
+                    {{-- <span class="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm font-medium">Data Pelanggan</span>
+                    <span class="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm font-medium">Data Kendaraan</span> --}}
                 </div>
             </div>
         </div>

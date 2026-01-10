@@ -25,8 +25,8 @@ class KuitansiSeeder extends Seeder
 
         $kuitansiData = [
             [
-                'no_kuitansi' => 'KTN-2025-01-0001',
-                'tanggal_kuitansi' => '2025-01-16',
+                'no_kuitansi' => 'KTN-2026-01-0001',
+                'tanggal_kuitansi' => '2026-01-04',
                 'nama_pelanggan' => 'PT. Mitra Abadi',
                 'alamat' => 'Jl. Sudirman No. 123, Jakarta Pusat',
                 'no_telp' => '021-5551234',
@@ -38,8 +38,8 @@ class KuitansiSeeder extends Seeder
                 'id_invoice' => $invoices->first()?->id,
             ],
             [
-                'no_kuitansi' => 'KTN-2025-01-0002',
-                'tanggal_kuitansi' => '2025-01-20',
+                'no_kuitansi' => 'KTN-2026-01-0002',
+                'tanggal_kuitansi' => '2026-01-05',
                 'nama_pelanggan' => 'CV. Sukses Mandiri',
                 'alamat' => 'Jl. Gatot Subroto No. 45, Bandung',
                 'no_telp' => '022-7771234',
@@ -51,8 +51,8 @@ class KuitansiSeeder extends Seeder
                 'id_invoice' => null,
             ],
             [
-                'no_kuitansi' => 'KTN-2025-01-0003',
-                'tanggal_kuitansi' => '2025-01-25',
+                'no_kuitansi' => 'KTN-2026-01-0003',
+                'tanggal_kuitansi' => '2026-01-06',
                 'nama_pelanggan' => 'PT. Global Tech Indonesia',
                 'alamat' => 'Jl. Thamrin No. 88, Jakarta Selatan',
                 'no_telp' => '021-3331234',
@@ -64,8 +64,8 @@ class KuitansiSeeder extends Seeder
                 'id_invoice' => null,
             ],
             [
-                'no_kuitansi' => 'KTN-2025-01-0004',
-                'tanggal_kuitansi' => '2025-01-28',
+                'no_kuitansi' => 'KTN-2025-12-0004',
+                'tanggal_kuitansi' => '2025-12-28',
                 'nama_pelanggan' => 'Toko Jaya Elektronik',
                 'alamat' => 'Jl. Pasar Baru No. 15, Surabaya',
                 'no_telp' => '031-5551234',
